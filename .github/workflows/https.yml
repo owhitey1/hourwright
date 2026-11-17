@@ -1,0 +1,43 @@
+name: HTTPS check and enforce
+# Reads the GitHub Pages settings and switches on "Enforce HTTPS" when GitHub
+# allows it. Runs in the cloud, so it no longer depends on Steve's computer.
+on:
+  schedule:
+    - cron: "23 7 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+jobs:
+  https:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Pages settings
+        id: pages
+        run: |
+          gh api "repos/$REPO/pages" | tee pages.json | jq '{cname, status, https_enforced, https_certificate, protected_domain_state, pending_domain_unverified_at}'
+          echo "enforced=$(jq -r .https_enforced pages.json)" >> "$GITHUB_OUTPUT"
+      - name: Domain health (needs admin rights; informational)
+        continue-on-error: true
+        run: gh api "repos/$REPO/pages/health" | jq . || true
+      - name: Try to enforce HTTPS
+        if: steps.pages.outputs.enforced != 'true'
+        continue-on-error: true
+        run: |
+          gh api -X PUT "repos/$REPO/pages" -F https_enforced=true -f cname=hourwright.co.uk && echo "Request accepted"
+          sleep 10
+          gh api "repos/$REPO/pages" | jq '{https_enforced, https_certificate}'
+      - name: What visitors get
+        run: |
+          for u in http://hourwright.co.uk/ http://www.hourwright.co.uk/ https://www.hourwright.co.uk/ https://hourwright.co.uk/; do
+            printf '%-32s ' "$u"; curl -s -o /dev/null -w '%{http_code} -> %{redirect_url}\n' "$u"
+          done
+          echo | openssl s_client -connect hourwright.co.uk:443 -servername hourwright.co.uk 2>/dev/null | openssl x509 -noout -subject -issuer -dates -ext subjectAltName
+      - name: Fail if HTTP is not redirected to HTTPS by the server
+        run: |
+          loc=$(curl -s -o /dev/null -w '%{redirect_url}' http://hourwright.co.uk/)
+          echo "http://hourwright.co.uk/ redirects to: ${loc:-nothing}"
+          case "$loc" in https://hourwright.co.uk/*) echo OK ;; *) echo "::error::Server does not redirect HTTP to HTTPS"; exit 1 ;; esac
