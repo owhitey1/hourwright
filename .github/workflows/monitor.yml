@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: "41 */6 * * *"   # every 6 hours
   workflow_dispatch:
+    inputs:
+      alert_test:
+        type: boolean
+        default: false
+        description: "Fail on purpose to check that GitHub's failure email reaches the owner"
 permissions:
   contents: read
 jobs:
@@ -10,6 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Alert test (deliberate failure)
+        if: inputs.alert_test
+        run: |
+          echo "::error::ALERT TEST - deliberate failure to confirm the failure email reaches the owner. The site is fine."
+          exit 1
       - name: Key pages load over HTTPS
         run: |
           set -e
