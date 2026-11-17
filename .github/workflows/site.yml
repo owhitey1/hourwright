@@ -48,7 +48,7 @@ jobs:
           git add data/products.json
           git diff --cached --quiet || git commit -m "Update retailer feed data"
           git push
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
       - name: Record feed result
