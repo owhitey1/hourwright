@@ -423,7 +423,7 @@ def build_product(p):
     crumbs = [("watches/index.html", "Watches")] + ([(f"brands/{b['slug']}.html", b["name"])] if b else []) + [("", p["name"])]
     page(f"watches/{p['slug']}.html", f"{p['brand']} {p['name']}",
          f"{p['brand']} {p['name']} at {p['retailer_name']}. Compare this watch across UK authorised retailers.",
-         body, jsonld=[ld], crumbs=crumbs, og_type="product")
+         body, jsonld=[ld], crumbs=crumbs, og_type="product", noindex=True)  # retailer copy: kept out of the index
 
 
 def build_brands():
