@@ -104,6 +104,8 @@ def normalise_row(row, retailer, cfg):
         return None
     if re.search(r"pre-?owned|ex-?display|refurbished|second[ -]?hand|vintage", brand + " " + name, re.I):
         return None  # Hourwright lists new watches only
+    if "clickref=" not in link:
+        link += "&clickref=hourwright"  # separates Hourwright clicks from other Worth Finding spaces in Awin reports
     was = to_price(row.get("rrp_price")) or to_price(row.get("product_price_old"))
     image = str(row.get("merchant_image_url") or row.get("aw_image_url") or "").strip()
     ref = str(row.get("mpn") or row.get("model_number") or "").strip()

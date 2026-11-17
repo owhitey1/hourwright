@@ -33,6 +33,7 @@ class FeedTests(unittest.TestCase):
         self.assertEqual(p["was_price"], 3900.0)
         self.assertTrue(p["in_stock"])
         self.assertTrue(p["link"].startswith("https://www.awin1.com/"))
+        self.assertTrue(p["link"].endswith("&clickref=hourwright"))
         self.assertEqual(p["reference"], "TB-1000-A")
         self.assertEqual(p["group"], "ean:5012345678900")
 

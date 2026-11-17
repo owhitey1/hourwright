@@ -86,5 +86,6 @@
       "service"
     ]
   },
-  "launch_approved": false
+  "launch_approved": true,
+  "launch_signed_off": "2026-11-17: live listings, images, prices (3 checked against Goldsmiths), stock, filters, search, sort, compare, price drops, Awin click-through with publisher 3102076, mobile layout"
 }
