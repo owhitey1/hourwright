@@ -36,7 +36,21 @@
       "feed_merchant_names": [
         "goldsmiths"
       ],
-      "status": "apply"
+      "status": "apply",
+      "exclude_brands": [
+        "rolex",
+        "patek philippe",
+        "patek",
+        "vacheron constantin",
+        "vacheron",
+        "tag heuer connected",
+        "grand seiko",
+        "tudor",
+        "jaeger-lecoultre",
+        "jaeger lecoultre",
+        "jaeger le coultre"
+      ],
+      "note": "No commission on excluded brands, smart watches, interest-free or PayPal Credit orders (Awin terms, Nov 2026)"
     },
     {
       "id": "beaverbrooks",
@@ -47,7 +61,8 @@
       "feed_merchant_names": [
         "beaverbrooks"
       ],
-      "status": "apply"
+      "status": "apply",
+      "exclude_brands": []
     }
   ],
   "feed": {

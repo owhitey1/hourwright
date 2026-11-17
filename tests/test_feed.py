@@ -42,6 +42,11 @@ class FeedTests(unittest.TestCase):
         self.assertFalse(p["in_stock"])
         self.assertEqual(p["group"], "ref:testbrand:tb2000b")
 
+    def test_excluded_brands_are_dropped(self):
+        rows = ff.parse_feed(RAW)
+        retailer = {"id": "test", "name": "Test Retailer", "exclude_brands": ["TestBrand"]}
+        self.assertEqual([p for p in (ff.normalise_row(r, retailer, CFG) for r in rows) if p], [])
+
     def test_price_parser_rejects_non_numbers(self):
         for bad in ("POA", "", None, "0", "-5", "1,2,3x"):
             self.assertIsNone(ff.to_price(bad))

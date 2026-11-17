@@ -98,6 +98,10 @@ def normalise_row(row, retailer, cfg):
         return None
     if not is_watch(row, feed_cfg):
         return None
+    if brand.lower() in [b.lower() for b in retailer.get("exclude_brands", [])]:
+        return None  # retailer pays no commission on this brand
+    if "smart" in name.lower():
+        return None
     was = to_price(row.get("rrp_price")) or to_price(row.get("product_price_old"))
     image = str(row.get("merchant_image_url") or row.get("aw_image_url") or "").strip()
     ref = str(row.get("mpn") or row.get("model_number") or "").strip()
