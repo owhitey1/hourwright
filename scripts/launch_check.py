@@ -16,6 +16,8 @@ for key, why in [("operator_legal_name", "legal pages must name who operates the
                  ("awin_publisher_id", "retailer home-page links are untracked without it")]:
     if not cfg.get(key):
         blockers.append(f"config.json '{key}' is empty: {why}")
+if not cfg.get("launch_approved"):
+    blockers.append("launch_approved is false: final live checks not yet signed off")
 live = [r["name"] for r in cfg["retailers"] if r.get("status") == "live"]
 if not live:
     blockers.append("no retailer has status 'live' (set it once Awin approves the programme)")
@@ -28,7 +30,7 @@ if dist.exists():
             break
 else:
     blockers.append("dist/ not built")
-for key, why in [("ga4_measurement_id", "no analytics"), ("google_site_verification", "Search Console not verified"),
+for key, why in [("ga4_measurement_id", "no analytics"),
                  ("email_form_action", "email signup hidden")]:
     if not cfg.get(key):
         warnings.append(f"'{key}' empty: {why}")

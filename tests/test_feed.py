@@ -47,6 +47,12 @@ class FeedTests(unittest.TestCase):
         retailer = {"id": "test", "name": "Test Retailer", "exclude_brands": ["TestBrand"]}
         self.assertEqual([p for p in (ff.normalise_row(r, retailer, CFG) for r in rows) if p], [])
 
+    def test_pre_owned_and_ex_display_are_dropped(self):
+        rows = ff.parse_feed(RAW)
+        for label in ("Pre-Owned TestBrand", "Ex-Display TestBrand"):
+            row = dict(rows[0], brand_name=label)
+            self.assertIsNone(ff.normalise_row(row, RETAILER, CFG))
+
     def test_price_parser_rejects_non_numbers(self):
         for bad in ("POA", "", None, "0", "-5", "1,2,3x"):
             self.assertIsNone(ff.to_price(bad))

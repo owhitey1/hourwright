@@ -64,12 +64,35 @@ def retailer_link(r):
             .format(r["awin_advertiser_id"], pub, urllib.parse.quote(r["url"], safe="")))
 
 
+def slug(text):
+    return re.sub(r"[^a-z0-9]+", "-", str(text).lower().replace("&", " and ")).strip("-")
+
+
+_GENERATED = {}
+
+
 def brand_for(product):
-    name = product["brand"].strip().lower()
+    """Editorial brand entry if we wrote a guide, otherwise a plain entry built from the feed."""
+    name = product["brand"].strip()
+    low = name.lower()
     for b in BRANDS:
-        if name in b["aliases"] or name == b["name"].lower():
+        if low in b["aliases"] or low == b["name"].lower():
             return b
-    return None
+    key = slug(name)
+    if key not in _GENERATED:
+        _GENERATED[key] = {"slug": key, "name": name, "generated": True}
+    return _GENERATED[key]
+
+
+def all_brands():
+    """Every brand with listings, plus editorial brands, sorted by name."""
+    seen = {}
+    for p in PRODUCTS:
+        b = brand_for(p)
+        seen.setdefault(b["slug"], b)
+    for b in BRANDS:
+        seen.setdefault(b["slug"], b)
+    return sorted(seen.values(), key=lambda b: b["name"].lower())
 
 
 # ---------------------------------------------------------------- layout
@@ -210,7 +233,7 @@ def card(p, r):
     stock = {True: "In stock", False: "Out of stock"}.get(p.get("in_stock"), "")
     img = (f'<img src="{e(p["image"])}" alt="{e(p["brand"] + " " + p["name"])}" loading="lazy" '
            f'width="320" height="320" referrerpolicy="no-referrer">') if p.get("image") else '<span class="noimg">No image supplied</span>'
-    return f"""<article class="card" data-id="{e(p['id'])}" data-brand="{e(b['slug'] if b else 'other')}" data-retailer="{e(p['retailer'])}" data-price="{p['price']}" data-text="{e((p['brand'] + ' ' + p['name'] + ' ' + (p.get('reference') or '')).lower())}">
+    return f"""<article class="card" data-id="{e(p['id'])}" data-brand="{e(b['slug'])}" data-retailer="{e(p['retailer'])}" data-price="{p['price']}" data-text="{e((p['brand'] + ' ' + p['name'] + ' ' + (p.get('reference') or '')).lower())}">
 <a class="thumb" href="{r}watches/{e(p['slug'])}.html">{img}</a>
 <p class="eyebrow">{e(p['brand'])}</p>
 <h3><a href="{r}watches/{e(p['slug'])}.html">{e(p['name'])}</a></h3>
@@ -285,8 +308,12 @@ def build_home():
 
 
 def filters():
-    brand_opts = "".join(f'<option value="{b["slug"]}">{e(b["name"])}</option>' for b in BRANDS
-                         if any(brand_for(p) is b for p in PRODUCTS))
+    counts = {}
+    for p in PRODUCTS:
+        k = brand_for(p)["slug"]
+        counts[k] = counts.get(k, 0) + 1
+    brand_opts = "".join(f'<option value="{b["slug"]}">{e(b["name"])} ({counts[b["slug"]]})</option>'
+                         for b in all_brands() if b["slug"] in counts)
     ret_opts = "".join(f'<option value="{rid}">{e(RETAILERS[rid]["name"])}</option>'
                        for rid in sorted({p["retailer"] for p in PRODUCTS}) if rid in RETAILERS)
     return f"""<form class="filters" id="filters" aria-label="Filter watches">
@@ -366,19 +393,40 @@ def build_product(p):
 
 
 def build_brands():
+    counts, lows = {}, {}
+    for p in PRODUCTS:
+        k = brand_for(p)["slug"]
+        counts[k] = counts.get(k, 0) + 1
+        lows[k] = min(lows.get(k, p["price"]), p["price"])
+    def blurb(b):
+        n = counts.get(b["slug"], 0)
+        listed = f"{n} {'watch' if n == 1 else 'watches'} from {gbp(lows[b['slug']])}" if n else "No current listings"
+        return f"{b['summary']} {listed}." if not b.get("generated") else f"{listed}."
     items = "".join(
-        f'<li><a href="{b["slug"]}.html"><strong>{e(b["name"])}</strong><span>{e(b["summary"])}</span></a></li>'
-        for b in BRANDS)
+        f'<li><a href="{b["slug"]}.html"><strong>{e(b["name"])}</strong><span>{e(blurb(b))}</span></a></li>'
+        for b in all_brands())
     page("brands/index.html", "Luxury watch brands",
-         "Guides to the luxury watch brands we list, with each brand's key collections and what to compare before buying.",
-         f'<section><div class="wrap"><h1>Brands</h1><p class="lede">What each maker is known for, and what to check when comparing its watches.</p><ul class="links">{items}</ul></div></section>',
+         "Every luxury watch brand we list from UK authorised retailers, with current listings and brand guides.",
+         f'<section><div class="wrap"><h1>Brands</h1><p class="lede">Every brand with new watches from {gbp(CFG["price_floor_gbp"])} at our retailers, plus guides to the major makers.</p><ul class="links">{items}</ul></div></section>',
          crumbs=[("", "Brands")])
-    for b in BRANDS:
+    for b in all_brands():
         mine = [p for p in PRODUCTS if brand_for(p) is b]
+        none_now = (f'<div class="empty"><h2>No current listings</h2><p>Our retailers do not list new {e(b["name"])} watches '
+                    f'from {gbp(CFG["price_floor_gbp"])} at the moment. Listings are checked daily.</p></div>') if PRODUCTS else EMPTY
+        listing = f'<h2>{e(b["name"])} watches at UK retailers</h2>' + ((grid(mine, "../") + checked_note()) if mine else none_now)
+        if b.get("generated"):
+            n = len(mine)
+            body = f"""<section><div class="wrap">
+<p class="eyebrow">Brand</p><h1>{e(b['name'])}</h1>
+<p class="lede">{n} new {e(b['name'])} {'watch' if n == 1 else 'watches'} from {gbp(lows[b['slug']])} at UK authorised retailers, with each retailer's own price.</p>
+{listing}
+</div></section>"""
+            page(f"brands/{b['slug']}.html", f"{b['name']} watches: UK prices",
+                 f"New {b['name']} watches from UK authorised retailers, with current retailer prices.",
+                 body, crumbs=[("brands/index.html", "Brands"), ("", b["name"])])
+            continue
         paras = "".join(f"<p>{e(x)}</p>" for x in b["body"])
         lines = "".join(f"<li>{e(x)}</li>" for x in b["lines"])
-        listing = (f'<h2>{e(b["name"])} watches at UK retailers</h2>' + grid(mine, "../") + checked_note()) if mine else (
-            f'<h2>{e(b["name"])} watches at UK retailers</h2>' + EMPTY)
         body = f"""<section><div class="wrap">
 <p class="eyebrow">Brand guide</p><h1>{e(b['name'])}</h1>
 <p class="lede">{e(b['summary'])}</p>
