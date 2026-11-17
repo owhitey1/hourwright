@@ -31,6 +31,6 @@ jobs:
       - name: Comment and label
         run: |
           gh api "repos/${{ github.repository }}/issues/$N/comments" -F body=@report.md >/dev/null
-          if [ "${{ steps.v.outputs.code }}" = 0 ]; then add=status:awaiting-verification; rm=status:blocked; else add=status:blocked; rm=status:awaiting-verification; fi
+          if [ "${{ steps.v.outputs.code }}" = 0 ]; then add=status:awaiting-verification; rm=status%3Ablocked; else add=status:blocked; rm=status%3Aawaiting-verification; fi
           gh api -X POST "repos/${{ github.repository }}/issues/$N/labels" -f "labels[]=$add" >/dev/null
           gh api -X DELETE "repos/${{ github.repository }}/issues/$N/labels/$rm" >/dev/null 2>&1 || true

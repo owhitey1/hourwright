@@ -38,7 +38,8 @@ def extract_article(text):
 
 def validate(text, catalogue, today):
     a = editorial.parse_text(text, "submission.md")
-    issues = editorial.check_article(a, catalogue, today)
+    issues = [("error", m) if ("no longer in the catalogue" in m or "out of stock" in m) else (lvl, m)
+              for lvl, m in editorial.check_article(a, catalogue, today)]
     if not a.get("_error"):
         issues += editorial.submission_checks(a)
         existing = {x.get("slug"): x["_file"] for x in editorial.load_articles() if not x.get("_error")}
