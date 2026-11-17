@@ -1,58 +1,70 @@
 # Hourwright operations
 
-How Hourwright is run by three AI agents and Steve. Everything here is public, because the repository is public. Never put credentials, feed URLs, earnings or personal data in this folder or in issues.
+How Hourwright is run by three AI agents and Steve. Everything in this repository is public, including Actions logs. Never put credentials, feed URLs, earnings or personal data in files, issues or logs.
 
 ## Who does what
 
 | Agent | Role | Owns | Must not |
 | --- | --- | --- | --- |
-| Claude | Technical Director | Code, repository, deployments, hosting, DNS and HTTPS, feeds, technical SEO, publishing system, security, tests, engineering docs. Validates and publishes editorial submissions. | Publish editorial content that has not passed the checks below |
-| Grok | Operations and Editorial Director | Research, editorial planning and drafting, Watch of the Week selection, source verification, marketing and affiliate research, commercial reporting, routine enquiries, raising technical requests | Change code, hosting or deployments |
-| ChatGPT | Independent quality assurance | Reviews Claude's technical claims, Grok's factual and commercial claims, reports and disputes | Certify its own work |
+| Claude | Technical Director | Code, repository, deployments, hosting, DNS and HTTPS, feeds, technical SEO, publishing, security, tests. Fact-checks and publishes all editorial content. | Publish anything that has not passed validation and a fact-check |
+| Grok | Operations and Editorial Director | Editorial research and drafting, Watch of the Week, buying guides, news, affiliate and marketing research, visitor-experience checks | Change code, hosting, deployments or settings |
+| ChatGPT | Independent audit | Evidence-based review of reports, claims and articles using `REVIEW_PACK.md`, the public repository and the live site | Certify its own work |
 | Steve | Owner | Approvals, spending, accounts, credentials, legal commitments | |
 
-## Shared task register: GitHub Issues
+## How work flows
 
-The register is the Issues list at https://github.com/owhitey1/hourwright/issues.
+```
+Grok (xAI API, scheduled in GitHub Actions)   Steve or Grok chat (issue form, optional)
+            \                                     /
+             v                                   v
+        GitHub issue, label type:editorial  ->  automated validation (comment + label)
+                              |
+                              v
+     Claude cloud publisher (daily 10:13 London): fact-check against primary sources,
+     correct or block, commit with status: published, close the issue with evidence
+                              |
+                              v
+        Build and deploy (GitHub Actions) -> live site; 6-hourly monitor
+```
 
-- Anyone can read it without an account, so Grok and ChatGPT can always see the current state.
-- Creating or updating issues needs a GitHub account. Claude has write access. Grok and ChatGPT do not have accounts on this repository, so they hand their submissions to Steve, who opens them with the issue forms (about a minute each), or to Claude in its chat with Steve.
-- Labels: `agent:claude`, `agent:grok`, `agent:chatgpt`, `agent:steve`; `status:backlog`, `status:in-progress`, `status:awaiting-verification`, `status:blocked`; closed means completed; `priority:high|medium|low`; `type:engineering|editorial|ops|verification`.
-- Each issue records the task, owner, priority, status, evidence, dependencies, verification needed, completion criteria and outcome.
-- Hourwright only. Firwick and other projects are kept out of this repository.
+- **Grok via the xAI API** (`.github/workflows/grok.yml`): Tuesday and Friday news, Wednesday guide, Thursday next Monday's Watch of the Week, Saturday visitor check. The workflow can read the repository and write issues only. It cannot push code, deploy, or read any other secret. It is **off until the `XAI_API_KEY` secret exists**. Cost at xAI list price is roughly 7–10 US cents per article.
+- **Issue form** ("Editorial submission"): anyone with a GitHub account can submit, and `editorial-intake.yml` validates it automatically. This is a fallback; the API route needs nobody to copy anything.
+- **Claude cloud publisher**: a scheduled Claude task that runs in Anthropic's cloud (Steve's computer can be off). It validates, fact-checks, publishes or blocks, and handles Grok's visitor-check findings.
+- Only Claude commits to the repository. Rollback is reverting a commit; the next build redeploys.
 
-## Publishing pipeline
+## Task register
 
-1. Grok researches and writes an article in the format in `EDITORIAL_STANDARDS.md`.
-2. Steve pastes it into the "Editorial submission" issue form, or passes it to Claude in chat.
-3. Claude validates product ids, prices, stock, price ceilings, links, sources, disclosures and wording, runs `scripts/editorial_check.py`, and either publishes (commits the file with `status: published`) or replies on the issue with fixes.
-4. The site rebuilds on every commit and every day at 05:17 UTC. An article with a future `publish_after` date goes live on the first build on or after that date.
-5. Revisions are new commits. Rollback is reverting a commit; the next build redeploys.
+GitHub Issues at https://github.com/owhitey1/hourwright/issues. Anyone can read it.
 
-Only Claude commits to the repository, so two agents cannot make conflicting changes at the same time.
+- Labels: `agent:claude|grok|chatgpt|steve`; `status:backlog|in-progress|awaiting-verification|blocked` (closed = completed); `priority:high|medium|low`; `type:engineering|editorial|ops|verification`; `source:grok-api` for issues filed by the Grok workflow.
+- Each issue records the task, owner, evidence, completion criteria and outcome. An issue is closed only with evidence.
+- Hourwright only. Other projects stay out of this repository.
 
-## What runs on its own, and what does not
+## What runs where (verified 17 November 2026)
 
-| Job | Where it runs | Needs |
-| --- | --- | --- |
-| Feed import, tests, editorial report, build, link check, launch gate, deploy, live smoke test | GitHub Actions, daily and on every commit | Nothing (cloud) |
-| Uptime, redirects, 404, affiliate link sample, published-article product check | GitHub Actions, every 6 hours | Nothing (cloud). Failures email the repository owner |
-| Dependency update proposals | Dependabot, monthly | Nothing (cloud). Claude reviews before merging |
-| Hourwright daily Awin and site check | Claude scheduled task, 11:43 London | Steve's computer on and the Claude desktop app open; Awin and GitHub signed in in its browser |
-| Editorial validation and publishing | Claude, on request | A Claude session with repository access |
-| Awin approvals, commission data, account changes | Awin website | An active Awin sign-in; account changes need Steve |
+| Job | Runs in | Needs Steve's computer? | Verified |
+| --- | --- | --- | --- |
+| Feed import, tests, editorial report, build, link check, launch gate, deploy, smoke test (`site.yml`, daily 05:17 UTC and on every commit) | GitHub Actions | No | Yes, passing |
+| Uptime, redirects, 404, all affiliate links' structure, a sample's landing pages, published articles' products (`monitor.yml`, every 6 hours) | GitHub Actions | No | Yes, passing |
+| HTTPS settings check, re-enable if dropped, HTTP→HTTPS redirect test (`https.yml`, daily) | GitHub Actions | No | Yes, passing |
+| Lighthouse and axe audit (`audit.yml`, Mondays) | GitHub Actions | No | Yes |
+| Editorial form validation (`editorial-intake.yml`) | GitHub Actions | No | Yes, tested |
+| Grok drafts and visitor checks (`grok.yml`) | GitHub Actions + xAI API | No | Pipeline tested in dry-run; live calls need `XAI_API_KEY` |
+| Awin programme approvals and click tracking yes/no (`awin.yml`) | GitHub Actions + Awin API | No | Built; needs `AWIN_API_TOKEN` |
+| Editorial fact-check and publishing; visitor-check triage | Claude scheduled task, cloud | No | Test runs succeeded |
+| Awin status from the website (until the API token exists) | Claude scheduled task on SwiftyPlod, 11:43 London | **Yes**: computer on, desktop app open, Awin signed in | Runs; Awin sign-in often expires |
+| Dependency updates | Dependabot, monthly | No | Yes; reviewed and applied by Claude |
 
-Nothing in the last three rows is fully unattended.
+**Failure alerts:** GitHub emails the repository owner (owhitey1) when a scheduled workflow fails. The Claude tasks send a phone notification when something needs Steve.
 
 ## Independent verification
 
-No agent certifies its own work. Checks are proportionate to risk:
-
-- Claude checks Grok's articles for product ids, prices, stock, specifications against primary sources, links, disclosures and copyright red flags. This is a technical and factual check, not a legal review.
-- Grok checks Claude's work from the visitor's side: live pages, navigation, product links and the purchase journey.
-- ChatGPT reviews `REVIEW_PACK.md` and any issue labelled `type:verification`. It can read this public repository and the live site directly.
-- Disagreements are recorded on the relevant issue with evidence and resolved before anyone relies on the disputed claim.
+- No agent certifies its own work.
+- Claude checks Grok's articles (structure, products, prices, stock, specifications against primary sources, sources, copyright red flags). This is factual and technical checking, not a legal review.
+- Grok's visitor checks review Claude's work from the visitor's side.
+- ChatGPT audits with `REVIEW_PACK.md`. It can read this repository and the live site; it cannot see Claude or Grok sessions.
+- Disagreements are recorded on the issue with evidence and resolved before anyone relies on the disputed claim.
 
 ## Measuring results
 
-Keep these separate and never add them together: search impressions and clicks (Google Search Console), sessions and page views (Google Analytics, only from visitors who accept cookies), outbound affiliate clicks (Analytics event `affiliate_click`), Awin clicks and attributed sales (Awin, tagged `clickref=hourwright`), and confirmed payable commission (Awin, after validation). The baseline is zero on 17 November 2026, the commercial launch date.
+Keep separate and never add together: search impressions and clicks (Search Console), sessions (Google Analytics, consenting visitors only), outbound affiliate clicks (Analytics event `affiliate_click`), Awin clicks and attributed sales (tagged `clickref=hourwright`), and confirmed payable commission. Baseline: zero on 17 November 2026.

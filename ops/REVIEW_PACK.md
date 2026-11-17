@@ -1,49 +1,45 @@
-# Review pack for independent QA (ChatGPT)
+# Review pack for independent audit (ChatGPT)
 
-Status as of 17 November 2026, written by Claude. Treat every item in "Claimed by Claude" as unverified until you have checked it yourself. You can read this public repository and the live site directly; you cannot see Claude's or Grok's sessions, Awin, Google Analytics or Search Console.
+Status at 17 November 2026, written by Claude. Treat "claimed by Claude" items as unverified until you check them. You can read this public repository, its Actions logs and the live site. You cannot see Claude's or Grok's sessions, Awin, Google Analytics or Search Console.
 
-## 1. Facts you can verify yourself
+## 1. Verifiable by you
 
 | Claim | How to check |
 | --- | --- |
-| Site is live on HTTPS at hourwright.co.uk | Visit it; check the certificate |
-| Catalogue of Goldsmiths watches from the Awin feed, with prices | /watches/ and /data/products.json |
-| Product buttons go through Awin with `clickref=hourwright` | Inspect any "View at Goldsmiths" link |
-| Pre-owned, ex-display and smart watches are excluded | Search /data/products.json for "pre-owned", "smart" |
-| Product pages are noindex; collections, brands, guides and journal are in the sitemap | View source; /sitemap.xml |
-| Analytics loads only after cookie consent | Open the site in a private window with dev tools; no googletagmanager request before accepting |
-| Affiliate disclosure on every page | Footer and /disclosure.html |
-| Journal: one Watch of the Week, one buying guide, one news article | /journal/ |
-| Articles say they are researched, not hands-on, and link their sources | Each article's foot |
-| Daily build, 6-hourly monitor | Actions tab: workflows "Build and deploy" and "Monitor" |
+| HTTPS enforced by the server: http and www return 301 to https://hourwright.co.uk/ | Request http://hourwright.co.uk/; Actions > "HTTPS check and enforce" log |
+| Certificate covers hourwright.co.uk and www, valid to 15 Feb 2027 | Certificate details, or the same log |
+| 742 Goldsmiths watches; every link is an Awin product link with publisher 3102076, advertiser 2174, `clickref=hourwright` | /data/products.json; Actions > "Monitor live site" log line "structure: 742 links, 0 malformed" |
+| No Rolex, Patek Philippe, Vacheron Constantin, Tudor, Grand Seiko, Jaeger-LeCoultre, smart or pre-owned watches (Goldsmiths commission exclusions) | Search /data/products.json |
+| Product pages noindex; collections, brands, guides and journal in the sitemap | View source; /sitemap.xml |
+| No Google requests before cookie consent | Private window and dev tools |
+| Lighthouse: performance 92–100, accessibility, best practices and SEO 100 (product pages SEO 66 by design: noindex) | Actions > "Live site audit" log |
+| Three journal articles, researched not hands-on, sources linked | /journal/ |
+| Grok cannot change code: `grok.yml` has `contents: read, issues: write` | .github/workflows/grok.yml |
 
-## 2. Claimed by Claude, not checkable from outside
+## 2. Claimed by Claude
 
-- Awin account 3102076 (Worth Finding) is approved for Goldsmiths; Jura and Sellors are inactive; Beaverbrooks is pending.
-- Google Search Console: sitemap submitted and accepted; home page indexed.
-- GA4 property G-DZM0840BXK receives events; a test visit appeared in realtime.
-- Three test products' prices matched the Goldsmiths site on 17 November.
-- A test click reached Goldsmiths with Awin tracking parameters.
+- Awin: Goldsmiths joined; Beaverbrooks pending; Jura and Sellors inactive.
+- Search Console: sitemap accepted; home page indexed.
+- GA4 receives page views and `affiliate_click` events after consent (tested 17 Nov; that test added one event).
+- Fact-check of the three articles against Longines, Swatch Group, Commonwealth Sport, Glasgow 2026 and Monochrome. Corrections made: timekeeper history wording, calibre L888.5 added, launch pricing wording, sources added.
 
 ## 3. Assumptions
 
-- Goldsmiths' excluded-brand list from its Awin programme terms is current.
-- Retailer feed images may be used on product cards (supplied for affiliate promotion).
-- The ICO data protection fee is likely payable (Tier 1, £52; £47 by direct debit), because the site uses analytics cookies to promote other businesses' goods. This is a self-assessment, not legal advice. Steve decides.
+- Goldsmiths' Awin exclusion list is current.
+- Retailer feed images may be shown on product cards, as supplied for affiliate promotion.
+- xAI API pricing about $2 input / $6 output per million tokens (published rates checked 17 Nov).
 
-## 4. Known risks and limitations
+## 4. Known risks
 
-- GitHub's "Enforce HTTPS" setting will not stay on (GitHub's domain check keeps returning "in progress"). The certificate works; a script redirects HTTP visitors. Retried daily.
-- One retailer only. If Goldsmiths' feed or programme stops, the site loses all commercial links.
-- The Awin sign-in in Claude's browser expires; the daily Claude check fails until Steve signs in again.
-- The Claude daily task needs Steve's computer to be on. GitHub Actions jobs do not.
-- No traffic yet. New domain; rankings will take weeks to months.
-- Grok and ChatGPT cannot write to the task register directly.
+- One retailer: losing Goldsmiths loses all commercial links.
+- New domain with no traffic yet; search ranking takes time.
+- Awin's website sign-in expires; the Awin API token removes that dependence once created.
+- ICO data protection fee assessed as due and not yet paid.
 
-## 5. What to review
+## 5. Please review
 
-1. The three articles in `content/editorial/`: factual accuracy against the cited sources, originality, balance, disclosure.
-2. Whether `ops/EDITORIAL_STANDARDS.md` and `ops/GROK_HANDOVER.md` are clear and consistent.
+1. The three articles in `content/editorial/` against their cited sources: accuracy, originality, balance, disclosure.
+2. `ops/GROK_SYSTEM_PROMPT.md` and `ops/EDITORIAL_STANDARDS.md`: clear, consistent, safe?
 3. Any claim in section 1 that does not hold.
 
-Record findings with the "Verification" issue form (via Steve), one issue per finding, with the URL and evidence. Mark each as Confirmed, Disputed or Unable to verify.
+Record findings as issues labelled `type:verification` (one per finding, with URL and evidence), marked Confirmed, Disputed or Unable to verify.

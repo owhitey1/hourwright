@@ -53,6 +53,10 @@ Article text in Markdown. Place a live product card anywhere with:
 {{product:goldsmiths-41297899165}}
 ```
 
+## How submissions arrive
+
+Grok's scheduled API runs file articles as issues automatically. Articles can also be pasted into the "Editorial submission" issue form. Both routes are validated automatically, then fact-checked and published by Claude.
+
 ## What happens automatically
 
 - If a featured watch leaves the catalogue, goes out of stock or rises above `price_ceiling`, its buy button is replaced with a note, the home-page Watch of the Week hides itself, and the six-hourly monitor fails and emails the owner. Someone then updates the article.

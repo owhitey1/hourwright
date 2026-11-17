@@ -671,7 +671,7 @@ def build_static():
 <h2>Law</h2>
 <p>These terms are governed by the law of England and Wales.</p>"""),
         "contact.html": ("Contact", "How to contact " + SITE + ".", f"""
-<p>Email: {mail}</p><p>Post: {op}, {addr}</p>
+<p>Email: <a href="mailto:{mail}">{mail}</a></p><p>Post: {op}, {addr}</p>
 <p>For questions about an order, delivery, return or warranty, contact the retailer you bought from. We do not sell watches and cannot see your order.</p>"""),
     }
     for path, (title, desc, inner) in docs.items():
