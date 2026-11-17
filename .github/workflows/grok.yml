@@ -55,9 +55,16 @@ jobs:
       - name: Fresh catalogue from the live site
         if: steps.key.outputs.on == 'true'
         run: curl -sf https://hourwright.co.uk/data/products.json -o data/products.json
+      - name: Monthly budget check
+        id: budget
+        if: steps.key.outputs.on == 'true' && env.GROK_DRY_RUN != '1'
+        run: python3 scripts/grok_budget.py check
       - name: Ask Grok
         if: steps.key.outputs.on == 'true'
         run: python3 scripts/grok_writer.py "${{ steps.kind.outputs.kind }}" out
+      - name: Record usage in the ledger
+        if: steps.key.outputs.on == 'true' && env.GROK_DRY_RUN != '1'
+        run: python3 scripts/grok_budget.py record out/usage.json "${{ steps.kind.outputs.kind }}"
       - name: Validate and file
         if: steps.key.outputs.on == 'true'
         env: {KIND: "${{ steps.kind.outputs.kind }}"}

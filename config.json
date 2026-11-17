@@ -90,6 +90,8 @@
   "launch_signed_off": "2026-11-17: live listings, images, prices (3 checked against Goldsmiths), stock, filters, search, sort, compare, price drops, Awin click-through with publisher 3102076, mobile layout",
   "grok": {
     "model": "grok-4.7",
-    "note": "xAI API model used by .github/workflows/grok.yml; key in the XAI_API_KEY secret"
+    "note": "xAI API model used by .github/workflows/grok.yml; key in the XAI_API_KEY secret",
+    "monthly_cap_usd": 5.5,
+    "cap_note": "About £4.30, below Steve's £5 ceiling. The hard stop is xAI prepaid credit with auto top-up off and a $0 invoiced limit; this cap is a second guard."
   }
 }

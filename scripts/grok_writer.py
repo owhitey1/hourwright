@@ -59,7 +59,7 @@ def build_messages(kind, today):
 
 TASK: {TASKS[kind].format(monday=monday.isoformat())}
 
-OUTPUT: {'a JSON array only.' if kind == 'visitor-check' else 'exactly one article file inside a single ```markdown fenced block (front matter first, status: approved, published: ' + (monday if kind == 'watch-of-the-week' else today).isoformat() + '), then a heading "### Verification notes" listing each specification or fact, the source URL that confirms it, and anything you could not confirm. Nothing else.'}
+OUTPUT: {'a JSON array only.' if kind == 'visitor-check' else 'exactly one article file inside a single ```markdown fenced block (front matter first, status: review, published: ' + (monday if kind == 'watch-of-the-week' else today).isoformat() + '), then a heading "### Verification notes" listing each specification or fact, the source URL that confirms it, and anything you could not confirm. Nothing else.'}
 
 EDITORIAL STANDARDS (follow exactly):
 {standards}
@@ -115,7 +115,7 @@ def main():
     system, user = build_messages(kind, today)
     if os.environ.get("GROK_DRY_RUN") == "1":
         sample = next(f for f in sorted((ROOT / "content" / "editorial").glob("*.md")) if "wotw" in f.name)
-        text = "```markdown\n" + sample.read_text().replace("status: published", "status: approved") + "```\n\n### Verification notes\n\nDry run: no API call was made."
+        text = "```markdown\n" + sample.read_text().replace("status: published", "status: review") + "```\n\n### Verification notes\n\nDry run: no API call was made."
         if kind == "visitor-check":
             text = "[]"
         usage = {"endpoint": "dry-run", "model": MODEL, "input_tokens": len(user) // 4, "output_tokens": 0, "web_search": False, "est_cost_usd": 0}

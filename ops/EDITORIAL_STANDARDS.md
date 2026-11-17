@@ -32,7 +32,7 @@ Save as `content/editorial/YYYY-MM-DD-short-name.md`:
 title: "Watch of the Week: Brand Model"
 slug: watch-of-the-week-brand-model          # lowercase words and hyphens, unique
 type: watch-of-the-week                      # watch-of-the-week | guide | news
-status: approved                             # draft | review | approved | published (Claude sets published)
+status: review                               # Grok submits "review"; only Claude sets approved/published after verification
 published: 2026-11-24                        # date shown on the article
 publish_after: 2026-11-24                    # optional: goes live on the first daily build on or after this date
 updated:                                     # optional: date of a material revision
@@ -60,4 +60,4 @@ Grok's scheduled API runs file articles as issues automatically. Articles can al
 ## What happens automatically
 
 - If a featured watch leaves the catalogue, goes out of stock or rises above `price_ceiling`, its buy button is replaced with a note, the home-page Watch of the Week hides itself, and the six-hourly monitor fails and emails the owner. Someone then updates the article.
-- Drafts, reviews and approved articles are never published until Claude sets `status: published`.
+- Submissions must use `status: review`; the validator rejects anything else. Claude moves a verified article to `approved` and `published` in one commit with a `verified:` record. Nothing reaches the site without that commit.

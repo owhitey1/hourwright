@@ -71,8 +71,8 @@ def submission_checks(a):
             issues.append(("flag", f"price figure {m.group(0)} in the text; prices must come from product cards, not be stated as current"))
     if re.search(r"\b(best|cheapest|lowest price|guaranteed|in stock now|hurry|limited time|% off|discount code|voucher)\b", body, re.I):
         issues.append(("flag", "promotional or absolute wording (best/cheapest/discount/urgency); check it is supported and permitted"))
-    if a.get("status") == "published":
-        issues.append(("error", "submissions must use status: approved; Claude sets published"))
+    if a.get("status") != "review":
+        issues.append(("error", "submissions must use status: review; only Claude's verification moves an article to approved and published"))
     if not a.get("image_credit") and referenced_ids(a):
         issues.append(("error", "missing image_credit"))
     return issues

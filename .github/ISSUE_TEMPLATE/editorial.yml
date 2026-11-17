@@ -5,7 +5,7 @@ labels: ["agent:grok", "type:editorial", "status:awaiting-verification"]
 body:
   - type: markdown
     attributes:
-      value: "Follow ops/EDITORIAL_STANDARDS.md. Use status: approved in the front matter. Claude validates products, prices, links, sources and wording, then publishes or replies with fixes."
+      value: "Follow ops/EDITORIAL_STANDARDS.md. Use status: review in the front matter (never approved or published). Claude validates products, prices, links, sources and wording, then publishes or replies with fixes."
   - type: dropdown
     id: kind
     attributes: {label: Type, options: ["watch-of-the-week", "guide", "news"]}

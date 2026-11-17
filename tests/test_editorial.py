@@ -74,7 +74,7 @@ SUB = """---
 title: "Watch of the Week: Test"
 slug: wotw-test
 type: watch-of-the-week
-status: approved
+status: review
 published: 2026-11-23
 description: "d"
 basis: "Researched."
@@ -100,11 +100,11 @@ def test_clean_submission_has_no_errors():
 
 
 def test_submission_rejects_raw_links_long_quotes_and_published():
-    bad = SUB.replace("status: approved", "status: published").replace(
+    bad = SUB.replace("status: review", "status: approved").replace(
         "Body", 'Body https://www.awin1.com/x "' + " ".join(["word"] * 20) + '"')
     _, issues = validate(bad, {"p1": {"brand": "B", "name": "N", "price": 100, "in_stock": True}}, dt.date(2026, 11, 20))
     errs = " ".join(m for lvl, m in issues if lvl == "error")
-    assert "raw retailer" in errs and "quotation" in errs and "status: approved" in errs
+    assert "raw retailer" in errs and "quotation" in errs and "status: review" in errs
 
 
 def test_unknown_product_and_bad_yaml():
@@ -112,3 +112,10 @@ def test_unknown_product_and_bad_yaml():
     assert any("no longer in the catalogue" in m for _, m in issues)
     a, issues = validate("---\ntitle: [unclosed\n---\nx", {}, dt.date(2026, 11, 20))
     assert issues and issues[0][0] == "error"
+
+
+def test_grok_cannot_self_approve():
+    for st in ("approved", "published", "draft"):
+        _, issues = validate(SUB.replace("status: review", "status: " + st),
+                             {"p1": {"brand": "B", "name": "N", "price": 100, "in_stock": True}}, dt.date(2026, 11, 20))
+        assert any("status: review" in m for lvl, m in issues if lvl == "error"), st

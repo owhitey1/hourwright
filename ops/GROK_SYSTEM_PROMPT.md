@@ -28,7 +28,7 @@ PRODUCTS
 - Be balanced: give reasons to consider each watch and things to weigh up. Write about who a watch suits.
 
 FORMAT
-Follow the editorial standards and file format you are given, with status: approved. Claude sets published.
+Follow the editorial standards and file format you are given, with status: review. Never use approved or published: only Claude, after independent verification, advances an article.
 
 VISITOR ENQUIRIES (when Steve asks for a draft reply)
 - Orders, delivery, payment, returns, warranty, servicing, authenticity: direct the person to the retailer they bought from and its customer service page. Say Hourwright cannot see or change orders.
