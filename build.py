@@ -148,6 +148,8 @@ def page(path, title, desc, body, *, jsonld=None, noindex=False, crumbs=None, og
 <meta property="og:url" content="{canonical}">
 <meta property="og:locale" content="en_GB">
 <meta name="twitter:card" content="summary">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; script-src 'self' https://www.googletagmanager.com; style-src 'self'; font-src 'self'; connect-src 'self' https://*.google-analytics.com https://www.googletagmanager.com; form-action 'self' https:; base-uri 'self'; object-src 'none'">
 {verify}
 <link rel="preload" href="{r}fonts/hanken-grotesk-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{r}css/site.css">
@@ -196,7 +198,7 @@ def card(p, r):
     img = (f'<img src="{e(p["image"])}" alt="{e(p["brand"] + " " + p["name"])}" loading="lazy" '
            f'width="320" height="320" referrerpolicy="no-referrer">') if p.get("image") else '<span class="noimg">No image supplied</span>'
     was = f'<s>{gbp(p["was_price"])}</s> ' if p.get("was_price") else ""
-    return f"""<article class="card" data-id="{e(p['id'])}" data-brand="{e(b['slug'] if b else 'other')}" data-retailer="{e(p['retailer'])}" data-price="{p['price']}">
+    return f"""<article class="card" data-id="{e(p['id'])}" data-brand="{e(b['slug'] if b else 'other')}" data-retailer="{e(p['retailer'])}" data-price="{p['price']}" data-text="{e((p['brand'] + ' ' + p['name'] + ' ' + (p.get('reference') or '')).lower())}">
 <a class="thumb" href="{r}watches/{e(p['slug'])}.html">{img}</a>
 <p class="eyebrow">{e(p['brand'])}</p>
 <h3><a href="{r}watches/{e(p['slug'])}.html">{e(p['name'])}</a></h3>
@@ -274,6 +276,7 @@ def filters():
     ret_opts = "".join(f'<option value="{rid}">{e(RETAILERS[rid]["name"])}</option>'
                        for rid in sorted({p["retailer"] for p in PRODUCTS}) if rid in RETAILERS)
     return f"""<form class="filters" id="filters" aria-label="Filter watches">
+<div><label for="f-q">Search</label><input id="f-q" type="search" placeholder="Model or reference" autocomplete="off"></div>
 <div><label for="f-brand">Brand</label><select id="f-brand"><option value="">All brands</option>{brand_opts}</select></div>
 <div><label for="f-retailer">Retailer</label><select id="f-retailer"><option value="">All retailers</option>{ret_opts}</select></div>
 <div><label for="f-price">Price</label><select id="f-price"><option value="">Any price</option>

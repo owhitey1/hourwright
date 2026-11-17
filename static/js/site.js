@@ -103,12 +103,14 @@
     var original = cards.slice();
     var apply = function () {
       var brand = $("f-brand").value, retailer = $("f-retailer").value;
+      var words = $("f-q").value.toLowerCase().split(/\s+/).filter(Boolean);
       var band = $("f-price").value.split("-"), sort = $("f-sort").value;
       var lo = band[0] ? Number(band[0]) : 0, hi = band[1] ? Number(band[1]) : Infinity, shown = 0;
       cards.forEach(function (c) {
         var price = Number(c.dataset.price);
         var ok = (!brand || c.dataset.brand === brand) && (!retailer || c.dataset.retailer === retailer) &&
-          price >= lo && price < hi;
+          price >= lo && price < hi &&
+          words.every(function (w) { return (c.dataset.text || "").indexOf(w) > -1; });
         c.hidden = !ok;
         if (ok) shown++;
       });
@@ -119,6 +121,7 @@
       $("f-count").textContent = shown + (shown === 1 ? " watch" : " watches");
     };
     form.addEventListener("change", apply);
+    $("f-q").addEventListener("input", apply);
     form.addEventListener("submit", function (ev) { ev.preventDefault(); });
     apply();
   }

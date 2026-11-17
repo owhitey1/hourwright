@@ -113,7 +113,7 @@ main>section,main>article{padding:2.75rem 0}
 
 .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:1rem;align-items:end;margin-top:2rem;padding:1rem;background:var(--surface);border:1px solid var(--line);border-radius:4px}
 .filters label,.signup label{display:block;font-size:.8125rem;font-weight:600;margin-bottom:.3rem}
-select,input[type=email]{font:inherit;width:100%;padding:.6rem .7rem;border:1px solid var(--line);border-radius:3px;background:var(--paper);color:var(--ink)}
+select,input[type=email],input[type=search]{font:inherit;width:100%;padding:.6rem .7rem;border:1px solid var(--line);border-radius:3px;background:var(--paper);color:var(--ink)}
 .count{font-size:.875rem;color:var(--muted)}
 
 .empty{border:1px dashed var(--line);border-radius:4px;padding:2rem;margin-top:1.5rem;background:var(--surface);max-width:44rem}
