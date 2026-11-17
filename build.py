@@ -18,6 +18,37 @@ CFG = json.loads((ROOT / "config.json").read_text())
 BRANDS = json.loads((ROOT / "content" / "brands.json").read_text())
 DATA = json.loads(Path(os.environ.get("HW_DATA") or ROOT / "data" / "products.json").read_text())
 PRODUCTS = DATA.get("products", [])
+COLLECTIONS = json.loads((ROOT / "content" / "collections.json").read_text())
+
+
+def in_collection(p, c):
+    if c.get("pattern") and not re.search(c["pattern"], p["name"], re.I):
+        return False
+    if c.get("min") is not None and p["price"] < c["min"]:
+        return False
+    if c.get("max") is not None and p["price"] >= c["max"]:
+        return False
+    return True
+
+
+def live_collections():
+    """Collections with enough real stock to be worth a page (at least 10 watches)."""
+    out = []
+    for c in COLLECTIONS:
+        items = [p for p in PRODUCTS if in_collection(p, c)]
+        if len(items) >= 10:
+            out.append((c, items))
+    return out
+
+
+def shop_by(r):
+    cols = live_collections()
+    if not cols:
+        return ""
+    links = "".join(f'<li><a href="{r}watches/{c["slug"]}.html">{e(c["title"])} <span class="meta">({len(items)})</span></a></li>' for c, items in cols)
+    return f'<nav class="shopby" aria-label="Shop by"><h2>Shop by type and price</h2><ul>{links}</ul></nav>'
+
+
 SITE = CFG["site_name"]
 DOMAIN = CFG["domain"].rstrip("/")
 TODAY = dt.date.today()
@@ -185,9 +216,10 @@ def page(path, title, desc, body, *, jsonld=None, noindex=False, crumbs=None, og
 <meta property="og:locale" content="en_GB">
 <meta name="twitter:card" content="summary">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; script-src 'self' https://www.googletagmanager.com; style-src 'self'; font-src 'self'; connect-src 'self' https://*.google-analytics.com https://www.googletagmanager.com; form-action 'self' https:; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; script-src 'self' https://www.googletagmanager.com; style-src 'self'; font-src 'self'; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.google.com; form-action 'self' https:; base-uri 'self'; object-src 'none'">
 {verify}
 <link rel="preload" href="{r}fonts/hanken-grotesk-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<script src="{r}js/https.js"></script>
 <link rel="stylesheet" href="{r}css/site.css">
 <link rel="icon" href="{r}favicon.svg" type="image/svg+xml">
 {ld_html}
@@ -297,6 +329,7 @@ def build_home():
 <div><h2>The retailer's price</h2><p>Prices come straight from retailer product feeds and carry the date we last checked them. We never estimate a price.</p></div>
 <div><h2>Independent guidance</h2><p>Retailers cannot pay to change what we write or how watches are ordered. <a href="how-we-choose.html">How we choose</a></p></div>
 </div></section>
+{'<section><div class="wrap">' + shop_by("") + '</div></section>' if PRODUCTS else ''}
 {'<section><div class="wrap"><h2>Newly listed</h2>' + grid(latest, "") + checked_note() + '</div></section>' if latest else ''}
 <section><div class="wrap"><h2>Brands</h2><ul class="links">{brand_links}</ul>
 <p><a class="more" href="brands/index.html">All brands</a></p></div></section>
@@ -334,6 +367,7 @@ def build_watches():
     floor = gbp(CFG["price_floor_gbp"])
     body = f"""<section><div class="wrap"><h1>Luxury watches</h1>
 <p class="lede">New watches from {floor}, sold by UK authorised retailers. Tick Compare on up to three to see them side by side.</p>
+{shop_by("../") if PRODUCTS else ""}
 {(filters() + '<h2 class="sr">Results</h2>' + grid(PRODUCTS, "../") + checked_note()) if PRODUCTS else EMPTY}
 </div></section>"""
     page("watches/index.html", "Luxury watches from UK authorised retailers",
@@ -450,6 +484,39 @@ def load_guides():
     return sorted(guides, key=lambda g: int(g.get("order", 99)))
 
 
+def related_watches(guide_slug):
+    cols = [(c, items) for c, items in live_collections() if c.get("guide") == guide_slug]
+    if not cols:
+        return ""
+    links = "".join(f'<li><a href="../watches/{c["slug"]}.html">{e(c["title"])}</a> ({len(items)} at UK retailers)</li>' for c, items in cols)
+    return f"<h2>Watches this guide applies to</h2><ul class=\"plain\">{links}</ul>"
+
+
+def build_collections():
+    guides = {g["slug"]: g for g in load_guides()}
+    for c, items in live_collections():
+        items = sorted(items, key=lambda p: p["price"])
+        g = guides.get(c.get("guide"))
+        guide_link = f'<p>Before you buy: <a href="../guides/{g["slug"]}.html">{e(g["title"])}</a>.</p>' if g else ""
+        lo, hi = items[0]["price"], items[-1]["price"]
+        others = "".join(f'<li><a href="{x["slug"]}.html">{e(x["title"])}</a></li>' for x, _ in live_collections() if x is not c)
+        body = f"""<section><div class="wrap">
+<h1>{e(c['title'])}</h1>
+<p class="lede">{e(c['intro'])}</p>
+<p class="meta">{len(items)} new watches from {gbp(lo)} to {gbp(hi)} at UK authorised retailers, cheapest first.</p>
+{guide_link}
+{grid(items, "../")}
+{checked_note()}
+<h2>More ways to browse</h2><ul class="plain">{others}</ul>
+</div></section>"""
+        ld = {"@context": "https://schema.org", "@type": "ItemList", "name": c["title"], "numberOfItems": len(items),
+              "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f"{DOMAIN}/watches/{p['slug']}.html"}
+                                  for i, p in enumerate(items[:50])]}
+        page(f"watches/{c['slug']}.html", f"{c['title']} UK: prices from {gbp(lo)}",
+             f"{len(items)} new {c['title'].lower()} from UK authorised retailers, from {gbp(lo)}. Compare retailer prices and specifications.",
+             body, jsonld=[ld], crumbs=[("watches/index.html", "Watches"), ("", c["title"])])
+
+
 def build_guides():
     guides = load_guides()
     items = "".join(
@@ -467,6 +534,7 @@ def build_guides():
 <p class="meta">Reviewed {g['mtime'].strftime('%-d %B %Y')} · <a href="../editorial-policy.html">Editorial policy</a></p>
 <div class="prose">{g['html']}</div>
 <p class="row"><a class="btn" href="../watches/index.html">Browse watches</a><a class="btn ghost" href="../compare/index.html">Compare side by side</a></p>
+{related_watches(g["slug"])}
 <h2>More guides</h2><ul class="plain">{related}</ul>
 </div></article>"""
         ld = {"@context": "https://schema.org", "@type": "Article", "headline": g["title"],
@@ -641,6 +709,7 @@ def main():
         shutil.copytree(ROOT / "static" / sub, DIST / sub)
     build_home()
     build_watches()
+    build_collections()
     build_brands()
     build_guides()
     build_compare()

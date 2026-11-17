@@ -173,3 +173,8 @@ h1+.lede,.eyebrow+h1{margin-top:.75rem}
 article .wrap.narrow h1+.lede,article .wrap.narrow .eyebrow+h1{margin-top:0}
 
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.shopby h2{margin-top:0}
+.shopby ul{list-style:none;padding:0;margin:1rem 0 0;display:flex;flex-wrap:wrap;gap:.5rem}
+.shopby a{display:inline-block;padding:.45rem .8rem;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);text-decoration:none;font-size:.9375rem}
+.shopby a:hover{border-color:var(--accent);color:var(--accent)}
+.shopby .meta{font-size:.8125rem}
