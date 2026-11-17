@@ -34,6 +34,9 @@ def gh(*args, payload=None):
 
 
 def ledger():
+    fixed = json.loads((ROOT / "config.json").read_text())["grok"].get("ledger_issue")
+    if fixed:
+        return int(fixed)
     for i in gh(f"repos/{REPO}/issues?state=open&labels=source:grok-api&per_page=100"):
         if i["title"] == TITLE:
             return i["number"]
@@ -73,7 +76,7 @@ def main():
     if usage.get("web_search"):
         est += 0.05  # allowance for search-tool fees not shown in token usage
     gh(f"repos/{REPO}/issues/{n}/comments", payload={"body":
-       f"{dt.datetime.utcnow():%Y-%m-%d %H:%M} UTC · {kind} · model {usage.get('model')} · "
+       f"{dt.datetime.now(dt.timezone.utc):%Y-%m-%d %H:%M} UTC · {kind} · model {usage.get('model')} · "
        f"{usage.get('input_tokens')} in / {usage.get('output_tokens')} out · cost_usd={est:.4f}"})
 
 
