@@ -24,7 +24,8 @@
       "feed_merchant_names": [
         "jura watches"
       ],
-      "status": "apply"
+      "status": "unavailable",
+      "note": "Awin advertiser 7153 shown as not active on 2026-11-17"
     },
     {
       "id": "goldsmiths",
