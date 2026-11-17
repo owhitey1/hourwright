@@ -1,0 +1,134 @@
+[
+  {
+    "slug": "omega", "name": "Omega", "aliases": ["omega"],
+    "founded": "1848", "home": "Biel/Bienne, Switzerland",
+    "lines": ["Speedmaster", "Seamaster", "Constellation", "De Ville"],
+    "summary": "The Speedmaster and Seamaster maker, and the benchmark for anti-magnetic chronometers.",
+    "body": [
+      "Omega traces its history to a workshop opened by Louis Brandt in 1848. Two families of watch define it for most buyers: the Speedmaster chronograph, worn on the Moon in 1969, and the Seamaster, which covers everything from dress pieces to professional dive watches.",
+      "Most current Omega movements use the Co-Axial escapement and carry Master Chronometer certification, which adds testing by the Swiss metrology institute METAS, including resistance to strong magnetic fields, on top of the standard chronometer test.",
+      "What to compare: case size within a line varies more than you might expect, and the same model is often offered on bracelet, leather and rubber at different prices. Check which you are being quoted for."
+    ]
+  },
+  {
+    "slug": "cartier", "name": "Cartier", "aliases": ["cartier"],
+    "founded": "1847", "home": "Paris, France",
+    "lines": ["Tank", "Santos", "Ballon Bleu", "Panthère"],
+    "summary": "The house that turned case shape into a signature, from the Santos to the Tank.",
+    "body": [
+      "Cartier began as a Paris jeweller in 1847 and has made wristwatches since the early twentieth century. The Santos was designed in 1904 for the aviator Alberto Santos-Dumont, and the Tank followed in 1917. Both are still in the catalogue and still recognisable at a glance.",
+      "Cartier watches are bought for design first. Many models are offered in both quartz and mechanical versions, and in several sizes, so two watches with the same name can differ a great deal in price and in what is inside.",
+      "What to compare: movement type, size (Cartier's size names differ by line) and metal. Steel, two-tone and solid gold versions of one design sit in very different price bands."
+    ]
+  },
+  {
+    "slug": "breitling", "name": "Breitling", "aliases": ["breitling"],
+    "founded": "1884", "home": "Grenchen, Switzerland",
+    "lines": ["Navitimer", "Superocean", "Chronomat", "Avenger"],
+    "summary": "Chronograph specialists with deep roots in aviation.",
+    "body": [
+      "Léon Breitling founded the company in 1884 and it has specialised in chronographs ever since. The Navitimer, introduced in 1952 with its circular slide rule bezel, remains the best-known pilot's chronograph made.",
+      "Breitling submits its movements for COSC chronometer certification, and its in-house B01 chronograph calibre is used across several lines. The Superocean covers dive watches and the Chronomat is the all-purpose sports model.",
+      "What to compare: Breitling cases tend to wear large, so check diameter and thickness. Some models use in-house calibres and others use movements based on supplier designs, and the price reflects that."
+    ]
+  },
+  {
+    "slug": "tag-heuer", "name": "TAG Heuer", "aliases": ["tag heuer", "tag-heuer", "tagheuer"],
+    "founded": "1860", "home": "La Chaux-de-Fonds, Switzerland",
+    "lines": ["Carrera", "Monaco", "Aquaracer", "Formula 1"],
+    "summary": "Motor-racing chronographs and one of the most accessible routes into Swiss luxury.",
+    "body": [
+      "Edouard Heuer founded the business in 1860. The Carrera chronograph arrived in 1963 and the square-cased Monaco in 1969, both closely tied to motor racing. The name TAG Heuer dates from the 1980s.",
+      "The range is broad. Quartz Formula 1 and Aquaracer models sit at the entry point, while Carrera and Monaco chronographs with in-house movements reach well into our price range.",
+      "What to compare: quartz against automatic versions of the same line, and whether a chronograph uses an in-house calibre. Both change the price substantially."
+    ]
+  },
+  {
+    "slug": "iwc", "name": "IWC Schaffhausen", "aliases": ["iwc", "iwc schaffhausen"],
+    "founded": "1868", "home": "Schaffhausen, Switzerland",
+    "lines": ["Pilot's Watches", "Portugieser", "Portofino", "Ingenieur", "Aquatimer"],
+    "summary": "Engineering-led watchmaking from the German-speaking side of Switzerland.",
+    "body": [
+      "IWC was founded in 1868 by the American watchmaker Florentine Ariosto Jones in Schaffhausen, on the Rhine. It is known for legible, restrained design and for pilot's watches in particular.",
+      "The Portugieser is the dressier flagship, the Portofino the simplest and most classical line, and the Ingenieur the sports watch with an integrated bracelet.",
+      "What to compare: IWC offers many variations on a few designs. Look at case size, power reserve and whether a complication such as a chronograph or perpetual calendar is included."
+    ]
+  },
+  {
+    "slug": "panerai", "name": "Panerai", "aliases": ["panerai", "officine panerai"],
+    "founded": "1860", "home": "Florence, Italy",
+    "lines": ["Luminor", "Radiomir", "Submersible"],
+    "summary": "Italian naval heritage and one of the most recognisable cases in watchmaking.",
+    "body": [
+      "Panerai started as a Florence watch shop in 1860 and later supplied instruments to the Italian Navy. Its watches stayed military for decades before becoming available to the public.",
+      "The Luminor is identified by the lever bridge that protects its crown. The Radiomir has a cushion case and wire-style lugs, and the Submersible is the dedicated dive line.",
+      "What to compare: these are large watches by design, so check the diameter against your wrist. Hand-wound and automatic versions exist side by side."
+    ]
+  },
+  {
+    "slug": "hublot", "name": "Hublot", "aliases": ["hublot"],
+    "founded": "1980", "home": "Nyon, Switzerland",
+    "lines": ["Big Bang", "Classic Fusion", "Spirit of Big Bang"],
+    "summary": "Bold cases and unusual materials, built around the Big Bang.",
+    "body": [
+      "Hublot launched in 1980 with a gold watch on a rubber strap, an unusual pairing at the time. The Big Bang of 2005 established the look the brand is known for today.",
+      "Material is the theme: ceramic, titanium, carbon and sapphire appear across the range. The Classic Fusion is the slimmer, quieter alternative to the Big Bang.",
+      "What to compare: case material drives price more than anything else here. Check the movement too, since in-house Unico chronographs cost more than models with supplied calibres."
+    ]
+  },
+  {
+    "slug": "oris", "name": "Oris", "aliases": ["oris"],
+    "founded": "1904", "home": "Hölstein, Switzerland",
+    "lines": ["Aquis", "Big Crown", "Divers Sixty-Five", "ProPilot"],
+    "summary": "An independent maker of mechanical watches with strong value in its upper range.",
+    "body": [
+      "Oris has made watches in Hölstein since 1904 and is one of the few sizeable Swiss brands that remains independent. It makes mechanical watches only.",
+      "The Aquis is its modern dive watch and the Big Crown Pointer Date its historic pilot's design. Models with the in-house Calibre 400 offer a five-day power reserve and sit at the top of the range.",
+      "What to compare: Calibre 400 models against those using supplied movements. The difference shows in power reserve, warranty terms and price."
+    ]
+  },
+  {
+    "slug": "bell-and-ross", "name": "Bell & Ross", "aliases": ["bell & ross", "bell and ross", "bell &amp; ross", "bell ross"],
+    "founded": "1992", "home": "Paris, France",
+    "lines": ["BR 03", "BR 05", "BR-X5"],
+    "summary": "The square cockpit-instrument watch, designed in Paris and made in Switzerland.",
+    "body": [
+      "Bell & Ross was founded in Paris in 1992. Its defining design is the square case with a round dial, modelled on aircraft cockpit instruments and introduced with the BR 01 in 2005.",
+      "The BR 03 is the everyday version of that idea. The BR 05 adapts it into a sports watch with an integrated bracelet.",
+      "What to compare: case size and material, and whether you want the instrument-style BR 03 or the bracelet-led BR 05."
+    ]
+  },
+  {
+    "slug": "maurice-lacroix", "name": "Maurice Lacroix", "aliases": ["maurice lacroix"],
+    "founded": "1975", "home": "Saignelégier, Switzerland",
+    "lines": ["Aikon", "Masterpiece", "Pontos"],
+    "summary": "The Aikon brought the integrated-bracelet sports watch within reach.",
+    "body": [
+      "Maurice Lacroix has made watches under its own name since 1975. The Aikon, launched in 2016, is its best-known line: a sports watch with an integrated bracelet at a price well below the famous examples of the style.",
+      "The Masterpiece collection is where the brand shows its more complicated work, including skeleton and retrograde displays.",
+      "What to compare: quartz and automatic Aikon models look similar, so check which movement you are being quoted for."
+    ]
+  },
+  {
+    "slug": "franck-muller", "name": "Franck Muller", "aliases": ["franck muller"],
+    "founded": "1991", "home": "Genthod, Switzerland",
+    "lines": ["Cintrée Curvex", "Vanguard", "Crazy Hours"],
+    "summary": "Curved tonneau cases and exuberant dials from a modern Geneva house.",
+    "body": [
+      "Franck Muller established his brand near Geneva in the early 1990s. The curved, barrel-shaped Cintrée Curvex case became its signature, usually paired with large stylised numerals.",
+      "The Vanguard is the sportier interpretation. Crazy Hours rearranges the numerals around the dial and uses a jumping hour hand to follow them.",
+      "What to compare: sizes are given by reference rather than diameter, so check the case dimensions listed by the retailer."
+    ]
+  },
+  {
+    "slug": "longines", "name": "Longines", "aliases": ["longines"],
+    "founded": "1832", "home": "Saint-Imier, Switzerland",
+    "lines": ["Spirit", "Master Collection", "HydroConquest", "Conquest"],
+    "summary": "Nearly two centuries of history at the threshold of luxury pricing.",
+    "body": [
+      "Longines has been based in Saint-Imier since 1832 and uses the winged hourglass, one of the oldest watch trademarks still in use. It has a long record in aviation and sports timing.",
+      "Much of the range sits below our usual price floor. We list the models that reach it, typically precious-metal pieces and more complicated chronographs.",
+      "What to compare: the Spirit pilot's line against the Master Collection, which carries the brand's moonphase and calendar models."
+    ]
+  }
+]

@@ -1,0 +1,60 @@
+name: Update feeds, build and deploy
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 5 * * *"   # daily, 05:17 UTC
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: site
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install markdown
+      - name: Tests
+        run: python -m unittest discover tests
+      - name: Fetch retailer feeds
+        env:
+          AWIN_FEED_URL_JURA: ${{ secrets.AWIN_FEED_URL_JURA }}
+          AWIN_FEED_URL_GOLDSMITHS: ${{ secrets.AWIN_FEED_URL_GOLDSMITHS }}
+          AWIN_FEED_URL_BEAVERBROOKS: ${{ secrets.AWIN_FEED_URL_BEAVERBROOKS }}
+        run: python scripts/fetch_feed.py
+      - name: Build
+        run: python build.py
+      - name: Check links
+        run: python scripts/check_links.py
+      - name: Launch gate
+        id: gate
+        run: python scripts/launch_check.py || echo "prelaunch=1" >> "$GITHUB_OUTPUT"
+      - name: Pre-launch build (noindex, for retailer review only)
+        if: steps.gate.outputs.prelaunch == '1'
+        run: HW_PRELAUNCH=1 python build.py
+      - name: Save price history
+        run: |
+          git config user.name "site-bot"
+          git config user.email "site-bot@users.noreply.github.com"
+          git add data/products.json
+          git diff --cached --quiet || git commit -m "Update retailer feed data"
+          git push
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

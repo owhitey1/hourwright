@@ -1,0 +1,71 @@
+{
+  "site_name": "Hourwright",
+  "domain": "https://hourwright.co.uk",
+  "tagline": "Luxury watches from UK authorised retailers, compared.",
+  "description": "Compare luxury watches from UK authorised retailers. Live retailer prices, side-by-side comparisons and plain-English buying guides for watches from \u00a32,000.",
+  "price_floor_gbp": 2000,
+  "price_ceiling_gbp": null,
+  "operator_legal_name": "Steve Peter White, a sole trader trading as Hourwright",
+  "operator_address": "81 Kingfisher Avenue, Hythe, Kent, CT21 6QT",
+  "contact_email": "hello@hourwright.co.uk",
+  "awin_publisher_id": "3102076",
+  "ga4_measurement_id": "",
+  "google_site_verification": "",
+  "bing_site_verification": "",
+  "email_form_action": "",
+  "email_form_field": "email",
+  "retailers": [
+    {
+      "id": "jura",
+      "name": "Jura Watches",
+      "url": "https://www.jurawatches.co.uk/",
+      "awin_advertiser_id": 7153,
+      "feed_env": "AWIN_FEED_URL_JURA",
+      "feed_merchant_names": [
+        "jura watches"
+      ],
+      "status": "apply"
+    },
+    {
+      "id": "goldsmiths",
+      "name": "Goldsmiths",
+      "url": "https://www.goldsmiths.co.uk/",
+      "awin_advertiser_id": 2174,
+      "feed_env": "AWIN_FEED_URL_GOLDSMITHS",
+      "feed_merchant_names": [
+        "goldsmiths"
+      ],
+      "status": "apply"
+    },
+    {
+      "id": "beaverbrooks",
+      "name": "Beaverbrooks",
+      "url": "https://www.beaverbrooks.co.uk/",
+      "awin_advertiser_id": 5856,
+      "feed_env": "AWIN_FEED_URL_BEAVERBROOKS",
+      "feed_merchant_names": [
+        "beaverbrooks"
+      ],
+      "status": "apply"
+    }
+  ],
+  "feed": {
+    "min_products": 25,
+    "max_drop_ratio": 0.5,
+    "watch_category_include": [
+      "watch"
+    ],
+    "name_exclude": [
+      "strap",
+      "winder",
+      "bracelet only",
+      "watch box",
+      "watch roll",
+      "travel case",
+      "gift card",
+      "clock",
+      "buckle",
+      "service"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+aw_deep_link,product_name,aw_product_id,merchant_image_url,description,merchant_category,search_price,merchant_name,currency,rrp_price,brand_name,in_stock,ean,mpn,colour,specifications,last_updated
+https://www.awin1.com/pclick.php?p=1&a=0&m=0,TEST Fixture Diver 42mm Automatic Watch,T1,https://example.invalid/t1.jpg,Test row one,Watches > Mens,3500.00,Test Retailer,GBP,3900.00,TestBrand,1,5012345678900,TB-1000-A,Blue,,2026-01-01
+https://www.awin1.com/pclick.php?p=2&a=0&m=0,TEST Fixture Chronograph Watch,T2,https://example.invalid/t2.jpg,Test row two,Watches > Mens,8250,Test Retailer,GBP,,TestBrand,0,,TB-2000-B,Black,,2026-01-01
+https://www.awin1.com/pclick.php?p=3&a=0&m=0,TEST Fixture Quartz Watch,T3,https://example.invalid/t3.jpg,Below the price floor,Watches > Ladies,450.00,Test Retailer,GBP,,TestBrand,1,,TB-3000-C,,,2026-01-01
+https://www.awin1.com/pclick.php?p=4&a=0&m=0,TEST Fixture Leather Watch Strap,T4,https://example.invalid/t4.jpg,Not a watch,Watches > Straps,2500.00,Test Retailer,GBP,,TestBrand,1,,TB-4000-D,,,2026-01-01
+https://tracking.example.invalid/x,TEST Fixture Untracked Watch,T5,https://example.invalid/t5.jpg,Link is not an Awin link,Watches > Mens,5000.00,Test Retailer,GBP,,TestBrand,1,,TB-5000-E,,,2026-01-01
+https://www.awin1.com/pclick.php?p=6&a=0&m=0,TEST Fixture Euro Watch,T6,https://example.invalid/t6.jpg,Wrong currency,Watches > Mens,5000.00,Test Retailer,EUR,,TestBrand,1,,TB-6000-F,,,2026-01-01
+https://www.awin1.com/pclick.php?p=7&a=0&m=0,TEST Fixture Bad Price Watch,T7,https://example.invalid/t7.jpg,Price is not a number,Watches > Mens,POA,Test Retailer,GBP,,TestBrand,1,,TB-7000-G,,,2026-01-01
+https://www.awin1.com/pclick.php?p=8&a=0&m=0,TEST Fixture Diamond Ring,T8,https://example.invalid/t8.jpg,Jewellery,Jewellery > Rings,6000.00,Test Retailer,GBP,,TestBrand,1,,TB-8000-H,,,2026-01-01
