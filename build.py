@@ -134,7 +134,7 @@ def page(path, title, desc, body, *, jsonld=None, noindex=False, crumbs=None, og
     noindex = noindex or PRELAUNCH
     depth = path.count("/")
     r = "/" if path == "404.html" else "../" * depth  # 404 is served at any depth
-    canonical = f"{DOMAIN}/{path}"
+    canonical = f"{DOMAIN}/" if path == "index.html" else f"{DOMAIN}/{path}"
     full_title = title if SITE in title else f"{title} | {SITE}"
     nav = "".join('<a href="{}{}"{}>{}</a>'.format(
         r, href, ' aria-current="page"' if path.startswith(href.split("/")[0] + "/") else "", label)
