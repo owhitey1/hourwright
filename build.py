@@ -12,6 +12,8 @@ from pathlib import Path
 
 import markdown
 
+import editorial
+
 ROOT = Path(__file__).resolve().parent
 DIST = Path(os.environ.get("HW_DIST") or ROOT / "dist")
 CFG = json.loads((ROOT / "config.json").read_text())
@@ -130,7 +132,7 @@ def all_brands():
 
 NAV = [("watches/index.html", "Watches"), ("brands/index.html", "Brands"),
        ("compare/index.html", "Compare"), ("price-drops/index.html", "Price drops"),
-       ("guides/index.html", "Guides")]
+       ("guides/index.html", "Guides"), ("journal/index.html", "Journal")]
 
 FOOT = [("about.html", "About"), ("how-we-choose.html", "How we choose"),
         ("editorial-policy.html", "Editorial policy"),
@@ -312,7 +314,7 @@ def build_home():
         for g in guides[:4])
     latest = sorted(PRODUCTS, key=lambda p: p.get("first_seen") or "", reverse=True)[:8]
     count = (f"{len(PRODUCTS):,} watches from {len({p['brand'] for p in PRODUCTS})} brands, "
-             f"priced by {len({p['retailer'] for p in PRODUCTS})} UK retailers.") if PRODUCTS else ""
+             f"priced by {len({p['retailer'] for p in PRODUCTS})} UK {'retailer' if len({p['retailer'] for p in PRODUCTS}) == 1 else 'retailers'}.") if PRODUCTS else ""
     floor = gbp(CFG["price_floor_gbp"])
     body = f"""<section class="hero"><div class="wrap">
 <div>
@@ -329,6 +331,7 @@ def build_home():
 <div><h2>The retailer's price</h2><p>Prices come straight from retailer product feeds and carry the date we last checked them. We never estimate a price.</p></div>
 <div><h2>Independent guidance</h2><p>Retailers cannot pay to change what we write or how watches are ordered. <a href="how-we-choose.html">How we choose</a></p></div>
 </div></section>
+{watch_of_the_week_block("")}
 {'<section><div class="wrap">' + shop_by("") + '</div></section>' if PRODUCTS else ''}
 {'<section><div class="wrap"><h2>Newly listed</h2>' + grid(latest, "") + checked_note() + '</div></section>' if latest else ''}
 <section><div class="wrap"><h2>Brands</h2><ul class="links">{brand_links}</ul>
@@ -701,6 +704,101 @@ def build_meta():
     (DIST / "data" / "products.json").write_text(json.dumps(slim, ensure_ascii=False))
 
 
+# ---------------------------------------------------------------- editorial
+
+CATALOGUE = {p["id"]: p for p in PRODUCTS}
+ARTICLES = [a for a in editorial.load_articles() if editorial.is_live(a, TODAY)]
+
+
+def editorial_card(pid, r, ceiling=None):
+    """A live product card for an article. The buy button is suppressed when the
+    product is gone, out of stock or above the article's price ceiling."""
+    p = CATALOGUE.get(pid)
+    if not p:
+        return ('<div class="empty"><h3>No longer listed</h3><p>This watch is not currently listed by '
+                'our retailers. We review articles when a featured watch becomes unavailable.</p></div>')
+    html = card(p, r)
+    note = ""
+    if p.get("in_stock") is False:
+        note = "Out of stock at the retailer at our last check."
+    elif ceiling and p["price"] > ceiling:
+        note = f"Now {gbp(p['price'])}, above this guide's {gbp(ceiling)} ceiling. We are reviewing this pick."
+    if note:
+        html = re.sub(r'<a class="btn"[^>]*>.*?</a>', f'<span class="meta">{e(note)}</span>', html, count=1, flags=re.S)
+    return f'<div class="grid one">{html}</div>'
+
+
+def article_url(a):
+    return f"journal/{a['slug']}.html"
+
+
+def build_journal():
+    articles = sorted(ARTICLES, key=lambda a: a["published"], reverse=True)
+    for a in articles:
+        r = "../"
+        body_html = editorial.render_body(a, lambda pid: editorial_card(pid, r, a.get("price_ceiling")))
+        listed = [pid for pid in (a.get("products") or []) if f"product:{pid}" not in a["_body"].replace(" ", "")]
+        extra = ""
+        if listed:
+            extra = "<h2>Watches in this article</h2>" + "".join(editorial_card(pid, r, a.get("price_ceiling")) for pid in listed)
+        sources = "".join(
+            f'<li><a href="{e(s["url"])}" rel="noopener" target="_blank">{e(s["title"])}</a>{", " + e(s["publisher"]) if s.get("publisher") else ""}</li>'
+            for s in a.get("sources") or [])
+        dates = f'Published {a["published"].strftime("%-d %B %Y")}'
+        if a.get("updated"):
+            dates += f' · Updated {a["updated"].strftime("%-d %B %Y")}'
+        body = f"""<article><div class="wrap narrow">
+<p class="eyebrow"><a href="index.html">{e(editorial.TYPES[a['type']])}</a></p>
+<h1>{e(a['title'])}</h1>
+<p class="lede">{e(a['description'])}</p>
+<p class="meta">{dates} · By {e(a.get('author', SITE))}</p>
+<p class="note">{e(a['basis'])} Prices and stock below come from the retailer and update daily. We may earn a commission if you buy through these links; see our <a href="../affiliate-disclosure.html">affiliate disclosure</a>.</p>
+<div class="prose">{body_html}</div>
+{extra}
+{'<h2>Sources</h2><ul class="plain">' + sources + '</ul>' if sources else ''}
+{'<p class="fine">' + e(a['image_credit']) + '</p>' if a.get('image_credit') else ''}
+{checked_note()}
+<p><a href="index.html">More from the Journal</a></p>
+</div></article>"""
+        kind = "NewsArticle" if a["type"] == "news" else "Article"
+        ld = {"@context": "https://schema.org", "@type": kind, "headline": a["title"], "description": a["description"],
+              "datePublished": a["published"].isoformat(), "dateModified": (a.get("updated") or a["published"]).isoformat(),
+              "author": {"@type": "Organization", "name": SITE}, "publisher": {"@type": "Organization", "name": SITE},
+              "mainEntityOfPage": f"{DOMAIN}/{article_url(a)}"}
+        page(article_url(a), a["title"], a["description"], body, jsonld=[ld],
+             crumbs=[("journal/index.html", "Journal"), ("", a["title"])], og_type="article")
+    def item(a):
+        return (f'<li><a href="{a["slug"]}.html"><strong>{e(a["title"])}</strong>'
+                f'<span>{e(editorial.TYPES[a["type"]])} · {a["published"].strftime("%-d %B %Y")}. {e(a["description"])}</span></a></li>')
+    sections = ""
+    for t, label in editorial.TYPES.items():
+        these = [a for a in articles if a["type"] == t]
+        if these:
+            sections += f'<h2 id="{t}">{e(label)}</h2><ul class="links">' + "".join(item(a) for a in these) + "</ul>"
+    empty = '<div class="empty"><h2>Nothing published yet</h2><p>New articles appear here.</p></div>'
+    page("journal/index.html", "Watch news, features and buying guides",
+         "Watch of the Week, buying guides and watch news from Hourwright, linked to new watches at UK authorised retailers.",
+         f'<section><div class="wrap"><h1>Journal</h1><p class="lede">Watch of the Week, buying guides and news, researched from manufacturer and retailer sources.</p>{sections or empty}</div></section>',
+         crumbs=[("", "Journal")])
+
+
+def watch_of_the_week_block(r):
+    """Home-page feature: the latest published Watch of the Week whose watch is still available."""
+    for a in sorted((a for a in ARTICLES if a["type"] == "watch-of-the-week"), key=lambda a: a["published"], reverse=True):
+        p = CATALOGUE.get(a["products"][0])
+        if not p or p.get("in_stock") is False:
+            continue
+        img = f'<img src="{e(p["image"])}" alt="{e(p["brand"] + " " + p["name"])}" width="320" height="320" loading="lazy" referrerpolicy="no-referrer">' if p.get("image") else ""
+        return f"""<section class="band"><div class="wrap wotw">
+<a class="thumb" href="{r}journal/{a['slug']}.html">{img}</a>
+<div><p class="eyebrow">Watch of the Week</p><h2><a href="{r}journal/{a['slug']}.html">{e(p['brand'])} {e(p['name'])}</a></h2>
+<p>{e(a['description'])}</p>
+{price_html(p)}
+<p class="row"><a class="btn" href="{r}journal/{a['slug']}.html">Read why</a><a class="btn ghost" href="{r}watches/{e(p['slug'])}.html">See the watch</a></p></div>
+</div></section>"""
+    return ""
+
+
 def main():
     if DIST.exists():
         shutil.rmtree(DIST)
@@ -715,6 +813,7 @@ def main():
     build_compare()
     build_drops()
     build_static()
+    build_journal()
     build_meta()
     print(f"built {len(PAGES)} indexable pages, {len(PRODUCTS)} products -> {DIST}")
 

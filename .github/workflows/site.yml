@@ -31,6 +31,8 @@ jobs:
         id: feed
         continue-on-error: true
         run: python scripts/fetch_feed.py
+      - name: Editorial check (report only)
+        run: python scripts/editorial_check.py || echo "::warning::Editorial check found articles needing review (see summary)"
       - name: Build
         run: python build.py
       - name: Check links

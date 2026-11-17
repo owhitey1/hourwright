@@ -24,5 +24,8 @@ jobs:
           curl -sL -o /dev/null -w '%{url_effective}\n' http://www.hourwright.co.uk/ | grep -q "hourwright.co.uk"
       - name: Missing pages return 404
         run: test "$(curl -s -o /dev/null -w '%{http_code}' https://hourwright.co.uk/no-such-page)" = "404"
+      - run: pip install -r requirements.txt
       - name: Affiliate links still resolve
         run: python3 scripts/check_affiliate_links.py
+      - name: Published articles still point at available watches
+        run: python3 scripts/editorial_check.py

@@ -1,0 +1,17 @@
+name: Verification request (independent review)
+description: Ask a different agent to check a claim, a page or a report. No agent verifies its own work.
+title: "[Verify] "
+labels: ["type:verification", "status:awaiting-verification"]
+body:
+  - type: textarea
+    id: claim
+    attributes: {label: Claim or work to verify}
+    validations: {required: true}
+  - type: textarea
+    id: evidence
+    attributes: {label: Evidence supplied, description: "Links to commits, workflow runs, live pages, sources."}
+    validations: {required: true}
+  - type: dropdown
+    id: reviewer
+    attributes: {label: Reviewer, options: ["agent:chatgpt", "agent:grok", "agent:claude"]}
+    validations: {required: true}

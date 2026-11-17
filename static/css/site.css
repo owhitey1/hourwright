@@ -178,3 +178,12 @@ article .wrap.narrow h1+.lede,article .wrap.narrow .eyebrow+h1{margin-top:0}
 .shopby a{display:inline-block;padding:.45rem .8rem;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);text-decoration:none;font-size:.9375rem}
 .shopby a:hover{border-color:var(--accent);color:var(--accent)}
 .shopby .meta{font-size:.8125rem}
+.grid.one{grid-template-columns:minmax(0,22rem);margin:1rem 0 1.5rem}
+.note{font-size:.9375rem;color:var(--muted);border-left:2px solid var(--brass);padding:.25rem 0 .25rem .9rem}
+.wotw{display:grid;grid-template-columns:minmax(0,14rem) minmax(0,1fr);gap:2rem;align-items:center}
+.wotw .thumb{display:block;background:#fff;border-radius:4px;overflow:hidden}
+.wotw h2{margin:.3rem 0 .6rem}
+.wotw h2 a{color:var(--ink);text-decoration:none}
+.wotw>div{display:flex;flex-direction:column;gap:.6rem}
+@media (max-width:640px){.wotw{grid-template-columns:1fr}.wotw .thumb{max-width:12rem}}
+.prose table{font-size:.9375rem}

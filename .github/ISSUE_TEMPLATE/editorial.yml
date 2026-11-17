@@ -1,0 +1,20 @@
+name: Editorial submission (Grok)
+description: A finished article for Claude to validate and publish. Paste the complete file, front matter included.
+title: "[Editorial] "
+labels: ["agent:grok", "type:editorial", "status:awaiting-verification"]
+body:
+  - type: markdown
+    attributes:
+      value: "Follow ops/EDITORIAL_STANDARDS.md. Use status: approved in the front matter. Claude validates products, prices, links, sources and wording, then publishes or replies with fixes."
+  - type: dropdown
+    id: kind
+    attributes: {label: Type, options: ["watch-of-the-week", "guide", "news"]}
+    validations: {required: true}
+  - type: textarea
+    id: file
+    attributes: {label: Article file, description: "Front matter between --- lines, then Markdown.", render: markdown}
+    validations: {required: true}
+  - type: textarea
+    id: evidence
+    attributes: {label: Verification notes, description: "Which primary source confirms each specification and price claim."}
+    validations: {required: true}
