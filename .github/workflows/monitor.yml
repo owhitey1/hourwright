@@ -1,0 +1,28 @@
+name: Monitor live site
+on:
+  schedule:
+    - cron: "41 */6 * * *"   # every 6 hours
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  uptime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Key pages load over HTTPS
+        run: |
+          set -e
+          for p in "" watches/index.html brands/index.html guides/index.html compare/index.html price-drops/index.html privacy.html affiliate-disclosure.html; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --retry 3 --retry-delay 20 "https://hourwright.co.uk/$p")
+            echo "$code  /$p"
+            test "$code" = "200"
+          done
+      - name: www and http redirect to the main address
+        run: |
+          curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' http://www.hourwright.co.uk/
+          curl -sL -o /dev/null -w '%{url_effective}\n' http://www.hourwright.co.uk/ | grep -q "hourwright.co.uk"
+      - name: Missing pages return 404
+        run: test "$(curl -s -o /dev/null -w '%{http_code}' https://hourwright.co.uk/no-such-page)" = "404"
+      - name: Affiliate links still resolve
+        run: python3 scripts/check_affiliate_links.py

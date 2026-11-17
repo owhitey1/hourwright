@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install markdown==3.7
+      - run: pip install -r requirements.txt
       - name: Tests
         run: python -m unittest discover tests
       - name: Fetch retailer feeds
@@ -67,8 +67,8 @@ jobs:
         uses: actions/deploy-pages@v4
       - name: Smoke test the live site
         run: |
-          curl -fsSL --retry 8 --retry-delay 15 --retry-all-errors http://hourwright.co.uk/ | grep -q "Hourwright"
-          curl -fsSL http://hourwright.co.uk/watches/index.html | grep -q "Luxury watches"
+          curl -fsSL --retry 8 --retry-delay 15 --retry-all-errors https://hourwright.co.uk/ | grep -q "Hourwright"
+          curl -fsSL https://hourwright.co.uk/watches/index.html | grep -q "Luxury watches"
       - name: Alert if a retailer feed failed
         if: needs.build.outputs.feed_failed == 'true'
         run: |
