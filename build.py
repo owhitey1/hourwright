@@ -215,7 +215,7 @@ def card(p, r):
 <p class="eyebrow">{e(p['brand'])}</p>
 <h3><a href="{r}watches/{e(p['slug'])}.html">{e(p['name'])}</a></h3>
 {price_html(p)}
-<p class="meta">{e(p['retailer_name'])}{' · ' + stock if stock else ''}</p>
+<p class="meta">{e(p['retailer_name'])}{' · ' + stock if stock else ''} · <a href="{r}affiliate-disclosure.html">Affiliate link</a></p>
 <div class="row"><a class="btn" href="{e(p['link'])}" rel="sponsored nofollow noopener" target="_blank" data-aff="{e(p['retailer'])}" data-pid="{e(p['id'])}">View at {e(p['retailer_name'])}</a>
 <label class="pick"><input type="checkbox" class="compare-pick" value="{e(p['id'])}"> Compare</label></div>
 </article>"""
@@ -488,6 +488,7 @@ def build_static():
         "how-we-choose.html": ("How we choose", "How watches and retailers are selected and ordered on " + SITE + ".", f"""
 <h2>Which retailers</h2>
 <p>We list retailers that state they are authorised stockists of the brands they sell and that publish an official product feed. That feed is the only source of the prices, stock status and specifications we show.</p>
+<p>We do not cover every UK retailer or every watch on sale. We only list retailers we have an affiliate relationship with, so a lower price may be available elsewhere.</p>
 <h2>Which watches</h2>
 <p>Any new watch priced from {floor} in a listed retailer's feed. We do not hand-pick products for commercial reasons.</p>
 <h2>How listings are ordered</h2>
