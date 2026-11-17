@@ -44,12 +44,20 @@ jobs:
         if: steps.gate.outputs.prelaunch == '1'
         run: HW_PRELAUNCH=1 python build.py
       - name: Save price history
+        # Another commit may land while this run builds; rebase onto it (keeping
+        # this run's fresh feed data) and retry. A failure here never blocks the deploy.
+        continue-on-error: true
         run: |
           git config user.name "site-bot"
           git config user.email "site-bot@users.noreply.github.com"
           git add data/products.json
-          git diff --cached --quiet || git commit -m "Update retailer feed data"
-          git push
+          git diff --cached --quiet && exit 0
+          git commit -m "Update retailer feed data"
+          for i in 1 2 3; do
+            git push && exit 0
+            sleep $((i * 5)); git pull --rebase -X theirs origin "${GITHUB_REF_NAME:-main}"
+          done
+          echo "::warning::Could not save price history after 3 attempts"; exit 1
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
