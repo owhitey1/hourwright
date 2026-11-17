@@ -28,6 +28,8 @@ jobs:
           AWIN_FEED_URL_JURA: ${{ secrets.AWIN_FEED_URL_JURA }}
           AWIN_FEED_URL_GOLDSMITHS: ${{ secrets.AWIN_FEED_URL_GOLDSMITHS }}
           AWIN_FEED_URL_BEAVERBROOKS: ${{ secrets.AWIN_FEED_URL_BEAVERBROOKS }}
+        id: feed
+        continue-on-error: true
         run: python scripts/fetch_feed.py
       - name: Build
         run: python build.py
@@ -49,6 +51,11 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+      - name: Record feed result
+        id: feedresult
+        run: echo "failed=${{ steps.feed.outcome == 'failure' }}" >> "$GITHUB_OUTPUT"
+    outputs:
+      feed_failed: ${{ steps.feedresult.outputs.failed }}
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -62,3 +69,8 @@ jobs:
         run: |
           curl -fsSL --retry 8 --retry-delay 15 --retry-all-errors http://hourwright.co.uk/ | grep -q "Hourwright"
           curl -fsSL http://hourwright.co.uk/watches/index.html | grep -q "Luxury watches"
+      - name: Alert if a retailer feed failed
+        if: needs.build.outputs.feed_failed == 'true'
+        run: |
+          echo "A retailer feed was rejected or unreachable. The site was deployed from the last good data; prices are hidden automatically once that data is more than 3 days old."
+          exit 1

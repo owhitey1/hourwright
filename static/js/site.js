@@ -138,7 +138,7 @@
           if (p.image) td.appendChild(el("img", { src: p.image, alt: "", loading: "lazy", referrerpolicy: "no-referrer" }));
           td.appendChild(el("a", { href: root + "watches/" + p.slug + ".html" }, p.brand + " " + p.name));
         }],
-        ["Price", function (p, td) { td.className = "price"; td.appendChild(el("strong", {}, gbp(p.price))); }],
+        ["Price", function (p, td) { if (p.price == null) { td.textContent = "See retailer"; return; } td.className = "price"; td.appendChild(el("strong", {}, gbp(p.price))); }],
         ["Retailer", function (p, td) { td.textContent = p.retailer_name; }],
         ["Reference", function (p, td) { td.textContent = p.reference || "Not supplied"; }],
         ["Colour", function (p, td) { td.textContent = p.colour || "Not supplied"; }],

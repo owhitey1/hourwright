@@ -39,6 +39,19 @@ def nice_date(iso):
 
 
 FETCHED = nice_date(DATA.get("fetched_at") or "")
+MAX_PRICE_AGE_DAYS = 3
+try:
+    _age = (TODAY - dt.date.fromisoformat((DATA.get("fetched_at") or "")[:10])).days
+except ValueError:
+    _age = None
+# If the feed has not refreshed recently, never show a price that may be out of date.
+STALE = bool(PRODUCTS) and (_age is None or _age > MAX_PRICE_AGE_DAYS)
+
+
+def price_html(p, big=False):
+    if STALE:
+        return '<p class="meta">See the current price at the retailer</p>'
+    return f'<p class="price{" big" if big else ""}"><strong>{gbp(p["price"])}</strong></p>'
 RETAILERS = {r["id"]: r for r in CFG["retailers"]}
 
 
@@ -197,12 +210,11 @@ def card(p, r):
     stock = {True: "In stock", False: "Out of stock"}.get(p.get("in_stock"), "")
     img = (f'<img src="{e(p["image"])}" alt="{e(p["brand"] + " " + p["name"])}" loading="lazy" '
            f'width="320" height="320" referrerpolicy="no-referrer">') if p.get("image") else '<span class="noimg">No image supplied</span>'
-    was = f'<s>{gbp(p["was_price"])}</s> ' if p.get("was_price") else ""
     return f"""<article class="card" data-id="{e(p['id'])}" data-brand="{e(b['slug'] if b else 'other')}" data-retailer="{e(p['retailer'])}" data-price="{p['price']}" data-text="{e((p['brand'] + ' ' + p['name'] + ' ' + (p.get('reference') or '')).lower())}">
 <a class="thumb" href="{r}watches/{e(p['slug'])}.html">{img}</a>
 <p class="eyebrow">{e(p['brand'])}</p>
 <h3><a href="{r}watches/{e(p['slug'])}.html">{e(p['name'])}</a></h3>
-<p class="price">{was}<strong>{gbp(p['price'])}</strong></p>
+{price_html(p)}
 <p class="meta">{e(p['retailer_name'])}{' · ' + stock if stock else ''}</p>
 <div class="row"><a class="btn" href="{e(p['link'])}" rel="sponsored nofollow noopener" target="_blank" data-aff="{e(p['retailer'])}" data-pid="{e(p['id'])}">View at {e(p['retailer_name'])}</a>
 <label class="pick"><input type="checkbox" class="compare-pick" value="{e(p['id'])}"> Compare</label></div>
@@ -214,6 +226,8 @@ def grid(products, r):
 
 
 def checked_note():
+    if STALE:
+        return '<p class="checked">Retailer prices are being refreshed, so we are not showing them at the moment. Follow a link to see the current price.</p>'
     if not FETCHED:
         return ""
     return f'<p class="checked">Retailer prices last checked {FETCHED}. Confirm the current price on the retailer\'s site.</p>'
@@ -293,7 +307,7 @@ def build_watches():
     floor = gbp(CFG["price_floor_gbp"])
     body = f"""<section><div class="wrap"><h1>Luxury watches</h1>
 <p class="lede">New watches from {floor}, sold by UK authorised retailers. Tick Compare on up to three to see them side by side.</p>
-{(filters() + grid(PRODUCTS, "../") + checked_note()) if PRODUCTS else EMPTY}
+{(filters() + '<h2 class="sr">Results</h2>' + grid(PRODUCTS, "../") + checked_note()) if PRODUCTS else EMPTY}
 </div></section>"""
     page("watches/index.html", "Luxury watches from UK authorised retailers",
          f"Browse new luxury watches from {floor} at UK authorised retailers, with each retailer's current price.",
@@ -312,20 +326,19 @@ def build_product(p):
     img = (f'<img src="{e(p["image"])}" alt="{e(p["brand"] + " " + p["name"])}" width="560" height="560" '
            f'referrerpolicy="no-referrer">') if p.get("image") else ""
     others = ""
-    if same:
+    if same and not STALE:
         offers = sorted(same + [p], key=lambda x: x["price"])
         others = "<h2>This model at other retailers</h2><table class=\"offers\"><tbody>" + "".join(
             f'<tr><th scope="row">{e(x["retailer_name"])}</th><td class="num">{gbp(x["price"])}</td>'
             f'<td><a href="{e(x["link"])}" rel="sponsored nofollow noopener" target="_blank" data-aff="{e(x["retailer"])}" data-pid="{e(x["id"])}">View</a></td></tr>'
             for x in offers) + "</tbody></table>"
-    was = f'<s>{gbp(p["was_price"])}</s> ' if p.get("was_price") else ""
     body = f"""<article class="product"><div class="wrap">
 <div class="shot">{img}</div>
 <div>
 <p class="eyebrow">{f'<a href="../brands/{b["slug"]}.html">{e(p["brand"])}</a>' if b else e(p['brand'])}</p>
 <h1>{e(p['name'])}</h1>
-<p class="price big">{was}<strong>{gbp(p['price'])}</strong></p>
-<p class="meta">Price supplied by {e(p['retailer_name'])}{', checked ' + FETCHED if FETCHED else ''}.</p>
+{price_html(p, big=True)}
+{'' if STALE else '<p class="meta">Price supplied by ' + e(p['retailer_name']) + (', checked ' + FETCHED if FETCHED else '') + '.</p>'}
 <p class="row"><a class="btn" href="{e(p['link'])}" rel="sponsored nofollow noopener" target="_blank" data-aff="{e(p['retailer'])}" data-pid="{e(p['id'])}">View at {e(p['retailer_name'])}</a>
 <label class="pick"><input type="checkbox" class="compare-pick" value="{e(p['id'])}"> Compare</label></p>
 <p class="fine">This is an affiliate link. We may earn a commission if you buy.</p>
@@ -339,14 +352,16 @@ def build_product(p):
     if p.get("in_stock") is not None:
         offer["availability"] = "https://schema.org/" + ("InStock" if p["in_stock"] else "OutOfStock")
     ld = {"@context": "https://schema.org", "@type": "Product", "name": p["name"],
-          "brand": {"@type": "Brand", "name": p["brand"]}, "offers": offer}
+          "brand": {"@type": "Brand", "name": p["brand"]}}
+    if not STALE:
+        ld["offers"] = offer
     if p.get("image"):
         ld["image"] = p["image"]
     if p.get("reference"):
         ld["mpn"] = p["reference"]
     crumbs = [("watches/index.html", "Watches")] + ([(f"brands/{b['slug']}.html", b["name"])] if b else []) + [("", p["name"])]
     page(f"watches/{p['slug']}.html", f"{p['brand']} {p['name']}",
-         f"{p['brand']} {p['name']}: {gbp(p['price'])} at {p['retailer_name']}. Compare this watch across UK authorised retailers.",
+         f"{p['brand']} {p['name']} at {p['retailer_name']}. Compare this watch across UK authorised retailers.",
          body, jsonld=[ld], crumbs=crumbs, og_type="product")
 
 
@@ -431,7 +446,7 @@ def build_compare():
 
 def build_drops():
     cutoff = (TODAY - dt.timedelta(days=14)).isoformat()
-    drops = [p for p in PRODUCTS if p.get("prev_price") and p.get("price_changed")
+    drops = [] if STALE else [p for p in PRODUCTS if p.get("prev_price") and p.get("price_changed")
              and p["price_changed"] >= cutoff and p["price"] < p["prev_price"]]
     drops.sort(key=lambda p: p["prev_price"] - p["price"], reverse=True)
     if drops:
@@ -478,7 +493,7 @@ def build_static():
 <h2>How listings are ordered</h2>
 <p>By brand name, then price, unless you choose a different sort. Commission rates play no part in the order and retailers cannot pay for position.</p>
 <h2>Prices</h2>
-<p>Each price is the retailer's own, with the date we last checked it. Retailers change prices without notice, so confirm on their site. If a "was" price is shown on a listing, it is the reference price the retailer itself supplies. On the price drops page, "was" is the price the same retailer listed at our previous check.</p>
+<p>Each price is the retailer's own, with the date we last checked it. Retailers change prices without notice, so confirm on their site. We do not show retailers' "was" or recommended prices on listings. If our price data is more than three days old we hide prices until it is refreshed. On the price drops page, "was" is the price the same retailer listed at our previous check.</p>
 <h2>What we do not do</h2>
 <p>We do not invent or estimate prices, specifications or availability, and we do not publish reviews of watches we have not handled.</p>"""),
         "editorial-policy.html": ("Editorial policy", "How " + SITE + " guides are written, checked and corrected.", f"""
@@ -559,8 +574,12 @@ def build_meta():
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#0e3b30"/>'
         '<circle cx="16" cy="16" r="11.5" fill="none" stroke="#d8b25a" stroke-width="1.5"/>'
         '<path d="M16 16 10.5 11M16 16l6.5-3.5" stroke="#f1f4f2" stroke-width="2" stroke-linecap="round"/></svg>')
-    slim = [{k: p.get(k) for k in ("id", "slug", "brand", "name", "price", "was_price", "retailer_name",
+    slim = [{k: p.get(k) for k in ("id", "slug", "brand", "name", "price", "retailer_name",
                                    "retailer", "in_stock", "link", "image", "reference", "colour")} for p in PRODUCTS]
+    if STALE:
+        for item in slim:
+            item["price"] = None
+            item["in_stock"] = None
     (DIST / "data").mkdir(exist_ok=True)
     (DIST / "data" / "products.json").write_text(json.dumps(slim, ensure_ascii=False))
 
