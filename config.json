@@ -36,7 +36,7 @@
       "feed_merchant_names": [
         "goldsmiths"
       ],
-      "status": "apply",
+      "status": "live",
       "exclude_brands": [
         "rolex",
         "patek philippe",
@@ -50,7 +50,9 @@
         "jaeger lecoultre",
         "jaeger le coultre"
       ],
-      "note": "No commission on excluded brands, smart watches, interest-free or PayPal Credit orders (Awin terms, Nov 2026)"
+      "note": "No commission on excluded brands, smart watches, interest-free or PayPal Credit orders (Awin terms, Nov 2026)",
+      "approved": "2026-11-17",
+      "feed_id": 24349
     },
     {
       "id": "beaverbrooks",
