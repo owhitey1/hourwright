@@ -66,8 +66,7 @@ def main():
     args = ap.parse_args()
     raw = Path(args.file or args.issue_body).read_text(encoding="utf-8")
     text = raw if args.file else extract_article(raw)
-    data = json.loads(Path(os.environ.get("HW_DATA") or ROOT / "data" / "products.json").read_text())
-    catalogue = {p["id"]: p for p in data.get("products", [])}
+    catalogue = editorial.load_catalogue(os.environ.get("HW_DATA") or ROOT / "data" / "products.json")
     today = dt.date.today()
     if not text:
         print("## Validation\n\n- ERROR: no article found. Paste the whole file, starting with the `---` front matter line.")

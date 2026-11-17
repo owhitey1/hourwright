@@ -43,6 +43,14 @@ def parse_text(text, name="submission.md"):
     return meta
 
 
+def load_catalogue(path):
+    """Catalogue as {id: product}. Accepts the build file ({"products": [...]}) or the public list."""
+    import json
+    data = json.loads(Path(path).read_text())
+    items = data.get("products", []) if isinstance(data, dict) else data
+    return {p["id"]: p for p in items}
+
+
 def load_articles():
     return [parse_text(f.read_text(encoding="utf-8"), f.name) for f in sorted(EDITORIAL_DIR.glob("*.md"))]
 

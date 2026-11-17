@@ -16,8 +16,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 import editorial  # noqa: E402
 
-data = json.loads(Path(os.environ.get("HW_DATA") or ROOT / "data" / "products.json").read_text())
-catalogue = {p["id"]: p for p in data.get("products", [])}
+catalogue = editorial.load_catalogue(os.environ.get("HW_DATA") or ROOT / "data" / "products.json")
 today = dt.date.today()
 articles = editorial.load_articles()
 slugs = {}

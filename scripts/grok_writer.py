@@ -54,7 +54,7 @@ def build_messages(kind, today):
     monday = today + dt.timedelta(days=(7 - today.weekday()) % 7 or 7)
     system = (ROOT / "ops" / "GROK_SYSTEM_PROMPT.md").read_text()
     standards = (ROOT / "ops" / "EDITORIAL_STANDARDS.md").read_text()
-    data = json.loads((ROOT / "data" / "products.json").read_text())
+    products = list(editorial.load_catalogue(ROOT / "data" / "products.json").values())
     user = f"""Today is {today.isoformat()}.
 
 TASK: {TASKS[kind].format(monday=monday.isoformat())}
@@ -68,7 +68,7 @@ PUBLISHED ARTICLES:
 {published_lines()}
 
 IN-STOCK CATALOGUE (id | brand | name | reference | current price). Use ids exactly as written:
-{catalogue_lines(data['products'])}
+{catalogue_lines(products)}
 """
     return system, user
 

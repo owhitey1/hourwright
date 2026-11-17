@@ -228,7 +228,7 @@ def page(path, title, desc, body, *, jsonld=None, noindex=False, crumbs=None, og
 </head>
 <body data-root="{r}" data-ga="{e(CFG.get('ga4_measurement_id') or '')}">
 <a class="skip" href="#main">Skip to content</a>
-<p class="disclosure"><span class="wrap">We may earn a commission when you buy from a retailer through our links. It never changes the price you pay. <a href="{r}affiliate-disclosure.html">How we are funded</a></span></p>
+<aside class="disclosure" aria-label="Affiliate disclosure"><span class="wrap">We may earn a commission when you buy from a retailer through our links. It never changes the price you pay. <a href="{r}affiliate-disclosure.html">How we are funded</a></span></aside>
 <header class="site-head"><div class="wrap">
 <a class="brand" href="{r}index.html">{e(SITE)}</a>
 <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>

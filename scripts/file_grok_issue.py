@@ -40,7 +40,8 @@ def summary(text):
 
 def file_article(kind, reply, usage):
     text = extract_article(reply)
-    catalogue = {p["id"]: p for p in json.loads((ROOT / "data" / "products.json").read_text())["products"]}
+    import editorial
+    catalogue = editorial.load_catalogue(ROOT / "data" / "products.json")
     notes = reply.split("### Verification notes", 1)[1].strip() if "### Verification notes" in reply else "(none supplied)"
     if text:
         a, issues = validate(text, catalogue, dt.date.today())
