@@ -1,0 +1,64 @@
+name: Grok editorial and visitor checks
+# Grok (xAI API) drafts articles and visitor checks on a schedule and files them
+# as issues. This workflow can read the repository and write issues only: it
+# cannot push code, deploy or read any other secret. Claude validates and publishes.
+on:
+  schedule:
+    - cron: "17 6 * * 4"   # Thursday: next Monday's Watch of the Week
+    - cron: "17 6 * * 2"   # Tuesday: news
+    - cron: "17 6 * * 5"   # Friday: news
+    - cron: "17 6 * * 3"   # Wednesday: buying guide
+    - cron: "47 6 * * 6"   # Saturday: visitor check
+  workflow_dispatch:
+    inputs:
+      kind:
+        type: choice
+        options: [watch-of-the-week, news, guide, visitor-check]
+        default: news
+      dry_run:
+        type: boolean
+        default: false
+        description: "Use a canned reply (no xAI call) to test the pipeline"
+permissions:
+  contents: read
+  issues: write
+concurrency: grok
+jobs:
+  grok:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+      GROK_DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Choose task
+        id: kind
+        run: |
+          k="${{ inputs.kind }}"
+          if [ -z "$k" ]; then
+            case "$(date -u +%u)" in 4) k=watch-of-the-week;; 3) k=guide;; 6) k=visitor-check;; *) k=news;; esac
+          fi
+          echo "kind=$k" >> "$GITHUB_OUTPUT"; echo "Task: $k"
+      - name: Is Grok connected?
+        id: key
+        run: |
+          if [ -z "$XAI_API_KEY" ] && [ "$GROK_DRY_RUN" != 1 ]; then
+            echo "::notice::XAI_API_KEY secret not set; Grok automation is off. See ops/README.md."
+            echo "on=false" >> "$GITHUB_OUTPUT"
+          else echo "on=true" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.key.outputs.on == 'true'
+        uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - if: steps.key.outputs.on == 'true'
+        run: pip install -r requirements.txt
+      - name: Fresh catalogue from the live site
+        if: steps.key.outputs.on == 'true'
+        run: curl -sf https://hourwright.co.uk/data/products.json -o data/products.json
+      - name: Ask Grok
+        if: steps.key.outputs.on == 'true'
+        run: python3 scripts/grok_writer.py "${{ steps.kind.outputs.kind }}" out
+      - name: Validate and file
+        if: steps.key.outputs.on == 'true'
+        env: {KIND: "${{ steps.kind.outputs.kind }}"}
+        run: python3 scripts/file_grok_issue.py "$KIND" out

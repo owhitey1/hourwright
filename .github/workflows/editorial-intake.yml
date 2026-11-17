@@ -1,0 +1,36 @@
+name: Editorial submission check
+# Validates articles submitted through the "Editorial submission" issue form
+# and comments the result. Read-only on code; writes issue comments and labels.
+on:
+  issues:
+    types: [opened, edited]
+permissions:
+  contents: read
+  issues: write
+jobs:
+  check:
+    if: contains(github.event.issue.labels.*.name, 'type:editorial')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      N: ${{ github.event.issue.number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -r requirements.txt
+      - run: curl -sf https://hourwright.co.uk/data/products.json -o data/products.json
+      - name: Validate
+        id: v
+        env:
+          BODY: ${{ github.event.issue.body }}
+        run: |
+          printf '%s' "$BODY" > body.txt
+          set +e; python3 scripts/validate_submission.py --issue-body body.txt --json r.json > report.md; code=$?; set -e
+          echo "code=$code" >> "$GITHUB_OUTPUT"; cat report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Comment and label
+        run: |
+          gh api "repos/${{ github.repository }}/issues/$N/comments" -F body=@report.md >/dev/null
+          if [ "${{ steps.v.outputs.code }}" = 0 ]; then add=status:awaiting-verification; rm=status:blocked; else add=status:blocked; rm=status:awaiting-verification; fi
+          gh api -X POST "repos/${{ github.repository }}/issues/$N/labels" -f "labels[]=$add" >/dev/null
+          gh api -X DELETE "repos/${{ github.repository }}/issues/$N/labels/$rm" >/dev/null 2>&1 || true

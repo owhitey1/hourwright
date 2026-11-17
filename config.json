@@ -2,7 +2,7 @@
   "site_name": "Hourwright",
   "domain": "https://hourwright.co.uk",
   "tagline": "Luxury watches from UK authorised retailers, compared.",
-  "description": "Compare luxury watches from UK authorised retailers. Live retailer prices, side-by-side comparisons and plain-English buying guides for watches from \u00a32,000.",
+  "description": "Compare luxury watches from UK authorised retailers. Live retailer prices, side-by-side comparisons and plain-English buying guides for watches from £2,000.",
   "price_floor_gbp": 2000,
   "price_ceiling_gbp": null,
   "operator_legal_name": "Steve Peter White, a sole trader trading as Hourwright",
@@ -87,5 +87,9 @@
     ]
   },
   "launch_approved": true,
-  "launch_signed_off": "2026-11-17: live listings, images, prices (3 checked against Goldsmiths), stock, filters, search, sort, compare, price drops, Awin click-through with publisher 3102076, mobile layout"
+  "launch_signed_off": "2026-11-17: live listings, images, prices (3 checked against Goldsmiths), stock, filters, search, sort, compare, price drops, Awin click-through with publisher 3102076, mobile layout",
+  "grok": {
+    "model": "grok-4.7",
+    "note": "xAI API model used by .github/workflows/grok.yml; key in the XAI_API_KEY secret"
+  }
 }

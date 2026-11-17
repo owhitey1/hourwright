@@ -63,3 +63,52 @@ class EditorialTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# --- submissions -------------------------------------------------------------
+import sys as _sys
+_sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+from validate_submission import extract_article, validate  # noqa: E402
+
+SUB = """---
+title: "Watch of the Week: Test"
+slug: wotw-test
+type: watch-of-the-week
+status: approved
+published: 2026-11-23
+description: "d"
+basis: "Researched."
+products: [p1]
+image_credit: "feed"
+---
+Body {{product:p1}}
+"""
+
+
+def test_extract_from_issue_form():
+    body = "### Type\n\nwatch-of-the-week\n\n### Article file\n\n```markdown\n" + SUB + "```\n\n### Verification notes\n\nx"
+    assert extract_article(body).startswith("---\ntitle:")
+
+
+def test_extract_bare_paste():
+    assert "slug: wotw-test" in extract_article("Here it is:\n" + SUB + "\n### Verification notes\nx")
+
+
+def test_clean_submission_has_no_errors():
+    _, issues = validate(SUB, {"p1": {"brand": "B", "name": "N", "price": 100, "in_stock": True}}, dt.date(2026, 11, 20))
+    assert not [m for lvl, m in issues if lvl == "error"]
+
+
+def test_submission_rejects_raw_links_long_quotes_and_published():
+    bad = SUB.replace("status: approved", "status: published").replace(
+        "Body", 'Body https://www.awin1.com/x "' + " ".join(["word"] * 20) + '"')
+    _, issues = validate(bad, {"p1": {"brand": "B", "name": "N", "price": 100, "in_stock": True}}, dt.date(2026, 11, 20))
+    errs = " ".join(m for lvl, m in issues if lvl == "error")
+    assert "raw retailer" in errs and "quotation" in errs and "status: approved" in errs
+
+
+def test_unknown_product_and_bad_yaml():
+    _, issues = validate(SUB, {}, dt.date(2026, 11, 20))
+    assert any("no longer in the catalogue" in m for _, m in issues)
+    a, issues = validate("---\ntitle: [unclosed\n---\nx", {}, dt.date(2026, 11, 20))
+    assert issues and issues[0][0] == "error"

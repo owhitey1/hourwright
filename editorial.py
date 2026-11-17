@@ -20,22 +20,54 @@ PRODUCT_TOKEN = re.compile(r"\{\{\s*product:([a-z0-9-]+)\s*\}\}")
 REQUIRED = ("title", "slug", "type", "status", "description", "published", "basis")
 
 
-def load_articles():
-    out = []
-    for f in sorted(EDITORIAL_DIR.glob("*.md")):
-        text = f.read_text(encoding="utf-8")
-        if not text.startswith("---\n"):
-            out.append({"_file": f.name, "_error": "missing front matter"})
-            continue
-        _, head, body = text.split("---\n", 2)
+def parse_text(text, name="submission.md"):
+    """Parse one article file's text into a metadata dict (body in _body)."""
+    text = text.replace("\r\n", "\n").lstrip("\ufeff")
+    if not text.startswith("---\n") or text.count("---\n") < 2:
+        return {"_file": name, "_error": "missing front matter"}
+    _, head, body = text.split("---\n", 2)
+    try:
         meta = yaml.safe_load(head) or {}
-        meta["_file"] = f.name
-        meta["_body"] = body
-        for k in ("published", "updated", "publish_after", "week_of"):
-            if isinstance(meta.get(k), str):
+    except yaml.YAMLError as e:
+        return {"_file": name, "_error": f"front matter is not valid YAML: {e}"}
+    if not isinstance(meta, dict):
+        return {"_file": name, "_error": "front matter is not a set of fields"}
+    meta["_file"] = name
+    meta["_body"] = body
+    for k in ("published", "updated", "publish_after", "week_of"):
+        if isinstance(meta.get(k), str):
+            try:
                 meta[k] = dt.date.fromisoformat(meta[k])
-        out.append(meta)
-    return out
+            except ValueError:
+                meta["_error"] = f"{k} is not a date (use YYYY-MM-DD)"
+    return meta
+
+
+def load_articles():
+    return [parse_text(f.read_text(encoding="utf-8"), f.name) for f in sorted(EDITORIAL_DIR.glob("*.md"))]
+
+
+def submission_checks(a):
+    """Extra checks for new submissions (not re-run on published articles every day)."""
+    issues = []
+    body = a.get("_body", "")
+    if re.search(r"awin1\.com|goldsmiths\.co\.uk|beaverbrooks\.co\.uk", body, re.I):
+        issues.append(("error", "raw retailer or Awin link in the text; use {{product:id}} tokens"))
+    for q in re.findall(r"[\u201c\"]([^\u201d\"]{60,})[\u201d\"]", body):
+        if len(q.split()) >= 15:
+            issues.append(("error", f"quotation of {len(q.split())} words; the limit is under 15: \"{q[:50]}...\""))
+    for m in re.finditer(r"\u00a3\s?\d[\d,]*", body):
+        before = body[max(0, m.start() - 40):m.start()].lower()
+        after = body[m.end():m.end() + 25].lower()
+        if not re.search(r"under|below|up to|less than|around|about|from|ceiling|at launch|launch", before) and "ceiling" not in after:
+            issues.append(("flag", f"price figure {m.group(0)} in the text; prices must come from product cards, not be stated as current"))
+    if re.search(r"\b(best|cheapest|lowest price|guaranteed|in stock now|hurry|limited time|% off|discount code|voucher)\b", body, re.I):
+        issues.append(("flag", "promotional or absolute wording (best/cheapest/discount/urgency); check it is supported and permitted"))
+    if a.get("status") == "published":
+        issues.append(("error", "submissions must use status: approved; Claude sets published"))
+    if not a.get("image_credit") and referenced_ids(a):
+        issues.append(("error", "missing image_credit"))
+    return issues
 
 
 def referenced_ids(a):

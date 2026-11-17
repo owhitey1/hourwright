@@ -4,6 +4,7 @@ slug: longines-hydroconquest-glasgow-2026-limited-edition
 type: news
 status: published
 published: 2026-11-17
+updated: 2026-11-17
 author: Hourwright
 description: "Longines marked its role at the Glasgow 2026 Commonwealth Games with a teal HydroConquest limited to 2,026 pieces per size. Here is what changed, and what stayed the same."
 basis: "Based on the published announcements listed under Sources and the retailer's specifications. We have not handled this watch."
@@ -13,6 +14,9 @@ sources:
   - title: "Longines celebrates Glasgow 2026 partnership with limited edition HydroConquest model"
     url: "https://www.commonwealthsport.com/news/4500566/longines-celebrates-glasgow-2026-partnership-with-limited-edition-hydroconquest-model"
     publisher: "Commonwealth Sport"
+  - title: "Glasgow 2026 ceremonies"
+    url: "https://www.glasgow2026.com/get-involved/ceremonies"
+    publisher: "Glasgow 2026"
   - title: "Longines brings Commonwealth Games colour to the HydroConquest for Glasgow 2026"
     url: "https://timeandtidewatches.com/longines-hydroconquest-commonwealth-games-introducing/"
     publisher: "Time+Tide"
@@ -30,7 +34,7 @@ review:
   by: ""
   date: ""
 ---
-Longines has timed the Commonwealth Games since the 1962 Perth Games, according to Commonwealth Sport, and marked the Glasgow 2026 Games with a commemorative version of its HydroConquest dive watch. The edition was announced in May 2026, ahead of the Games opening in Glasgow on 23 July. Six months on, Goldsmiths still lists both sizes.
+Longines first served as official timekeeper of the Commonwealth Games at the 1962 Perth Games, according to Commonwealth Sport, and returned in that role for Glasgow 2026. It marked the Games with a commemorative version of its HydroConquest dive watch. The edition was announced in May 2026, ahead of the Games opening in Glasgow on 23 July. Six months on, Goldsmiths still lists both sizes.
 
 ## What is different
 
@@ -42,7 +46,7 @@ The changes are cosmetic and specific to the Games:
 
 ## What is the same
 
-Underneath, it is a current-generation HydroConquest. Both sizes are rated to 300 metres, with a unidirectional ceramic bezel, screw-in crown and screw-down caseback. The automatic movement beats at 25,200 vibrations per hour and has a silicon balance spring and a power reserve of up to 72 hours. It comes on a black rubber strap with a folding clasp. UK pricing at launch was the same for both sizes, and Goldsmiths' current price for each is shown below.
+Underneath, it is a current-generation HydroConquest. Both sizes are rated to 300 metres, with a unidirectional ceramic bezel, screw-in crown and screw-down caseback. The automatic movement, Longines' calibre L888.5, beats at 25,200 vibrations per hour and has a silicon balance spring and a power reserve of up to 72 hours. It comes on a black rubber strap with a folding clasp. Longines set the same launch price for both sizes, and Goldsmiths' current price for each is shown below.
 
 ## Our view
 
