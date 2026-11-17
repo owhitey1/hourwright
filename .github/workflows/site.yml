@@ -64,7 +64,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
       - name: Smoke test the live site
         run: |
           curl -fsSL --retry 8 --retry-delay 15 --retry-all-errors https://hourwright.co.uk/ | grep -q "Hourwright"
