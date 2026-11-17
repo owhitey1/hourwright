@@ -18,7 +18,7 @@ sources:
     url: "https://www.swatchgroup.com/en/services/archive/2025/longines-spirit-pilot-spirit-pilot-flyback"
     publisher: "Swatch Group"
   - title: "Longines Legend Diver L3.764.4.90.9"
-    url: "https://www.longines.com/p/watch-longines-legend-diver-l3-764-4-90-9"
+    url: "https://www.longines.com/en-us/p/watch-longines-legend-diver-l3-764-4-90-9"
     publisher: "Longines"
   - title: "Longines celebrates Glasgow 2026 partnership with limited edition HydroConquest"
     url: "https://www.commonwealthsport.com/news/4500566/longines-celebrates-glasgow-2026-partnership-with-limited-edition-hydroconquest-model"

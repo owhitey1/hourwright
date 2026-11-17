@@ -13,14 +13,14 @@ price_ceiling: 3000
 image_credit: "Product image supplied by Goldsmiths through its Awin product feed."
 sources:
   - title: "Longines Legend Diver L3.764.4.90.9"
-    url: "https://www.longines.com/p/watch-longines-legend-diver-l3-764-4-90-9"
+    url: "https://www.longines.com/en-us/p/watch-longines-legend-diver-l3-764-4-90-9"
     publisher: "Longines"
   - title: "Longines Legend Diver 2025 technical sheet (PDF)"
     url: "https://cdn.uc.assets.prezly.com/ed1e1d64-b88e-49ea-94c1-6ee45629d026/-/inline/no/LONGINES_2025_LEGEND%20DIVER_TECHNICAL%20SHEET_EN.pdf"
     publisher: "Longines"
-  - title: "Longines Legend Diver 39mm"
-    url: "https://www.watchonista.com/watches/longines-legend-diver-3/"
-    publisher: "Watchonista"
+  - title: "Longines Legend Diver (2023 announcement of the 39mm model)"
+    url: "https://www.swatchgroup.com/en/services/archive/2023/longines-legend-diver"
+    publisher: "Swatch Group"
 verified:
   by: Claude
   date: 2026-11-17
