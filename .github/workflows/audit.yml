@@ -1,0 +1,45 @@
+name: Live site audit
+# Lighthouse (mobile and desktop) and axe accessibility checks against the live site.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "11 4 * * 1"   # Mondays
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install tools
+        run: npm install -g lighthouse@12 @axe-core/cli@4 >/dev/null 2>&1 && npx browser-driver-manager install chrome >/dev/null 2>&1 || true
+      - name: Pages to audit
+        run: |
+          P=$(curl -s https://hourwright.co.uk/data/products.json | jq -r '.[0].slug')
+          cat > urls.txt <<EOF
+          https://hourwright.co.uk/
+          https://hourwright.co.uk/watches/index.html
+          https://hourwright.co.uk/watches/$P.html
+          https://hourwright.co.uk/compare/index.html
+          https://hourwright.co.uk/journal/five-longines-watches-under-3000.html
+          EOF
+          sed -i 's/^ *//' urls.txt; cat urls.txt
+      - name: Lighthouse
+        run: |
+          echo "| Page | Form | Performance | Accessibility | Best practices | SEO |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|---|---|---|---|" >> $GITHUB_STEP_SUMMARY
+          while read u; do for f in mobile desktop; do
+            extra=""; [ $f = desktop ] && extra="--preset=desktop"
+            lighthouse "$u" $extra --quiet --chrome-flags="--headless=new --no-sandbox" --output=json --output-path=lh.json >/dev/null 2>&1 || { echo "| $u | $f | failed | | | |" >> $GITHUB_STEP_SUMMARY; continue; }
+            row=$(jq -r '[.categories.performance.score,.categories.accessibility.score,.categories["best-practices"].score,.categories.seo.score]|map(.*100|floor|tostring)|join(" | ")' lh.json)
+            echo "| ${u#https://hourwright.co.uk} | $f | $row |" >> $GITHUB_STEP_SUMMARY
+            echo "== $u $f: $row"
+            jq -r '.audits|to_entries[]|select(.value.score!=null and .value.score<0.9 and .value.scoreDisplayMode=="binary")|"  fail: \(.key) - \(.value.title)"' lh.json
+            jq -r '"  LCP \(.audits["largest-contentful-paint"].displayValue)  CLS \(.audits["cumulative-layout-shift"].displayValue)  TBT \(.audits["total-blocking-time"].displayValue)"' lh.json
+          done; done < urls.txt
+      - name: axe accessibility
+        continue-on-error: true
+        run: |
+          while read u; do echo "== $u"; axe "$u" --chrome-options="no-sandbox,headless" --exit 2>&1 | grep -vE '^\s*$' | head -40; done < urls.txt
