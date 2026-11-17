@@ -31,7 +31,7 @@ jobs:
       XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
       GROK_DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Choose task
         id: kind
         run: |
@@ -48,7 +48,7 @@ jobs:
             echo "on=false" >> "$GITHUB_OUTPUT"
           else echo "on=true" >> "$GITHUB_OUTPUT"; fi
       - if: steps.key.outputs.on == 'true'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with: {python-version: "3.12"}
       - if: steps.key.outputs.on == 'true'
         run: pip install -r requirements.txt
