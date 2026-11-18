@@ -65,6 +65,12 @@ GitHub Issues at https://github.com/owhitey1/hourwright/issues. Anyone can read 
 - ChatGPT audits with `REVIEW_PACK.md`. It can read this repository and the live site; it cannot see Claude or Grok sessions.
 - Disagreements are recorded on the issue with evidence and resolved before anyone relies on the disputed claim.
 
+## Affiliate links: never click them automatically
+
+Awin records every request to an awin1.com link as a click. No workflow, script, scheduled task or agent may open affiliate links. Link health is checked from structure and feed freshness only (`scripts/check_affiliate_links.py`, guarded by tests). If a human ever needs to test a link, add `&clickref=hourwright-test` so it is separable in Awin's click-reference report. Incident record: issue #25 (181 automated clicks on 17 Nov, stopped 18 Nov).
+
+Outbound clicks also carry `clickref2` with the page type (home, catalogue, product, journal, compare, collections, brands); Awin shows it in the transaction report, not the click report.
+
 ## Measuring results
 
 Keep separate and never add together: search impressions and clicks (Search Console), sessions (Google Analytics, consenting visitors only), outbound affiliate clicks (Analytics event `affiliate_click`), Awin clicks and attributed sales (tagged `clickref=hourwright`), and confirmed payable commission. Baseline: zero on 17 November 2026.
