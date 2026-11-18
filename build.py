@@ -134,7 +134,7 @@ def all_brands():
 
 # ---------------------------------------------------------------- layout
 
-NAV = [("watches/index.html", "Watches"), ("brands/index.html", "Brands"),
+NAV = [("watches/index.html", "Watches"), ("watch-finder/index.html", "Finder"), ("brands/index.html", "Brands"),
        ("compare/index.html", "Compare"), ("price-drops/index.html", "Price drops"),
        ("guides/index.html", "Guides"), ("journal/index.html", "Journal")]
 
@@ -337,7 +337,7 @@ def build_home():
 <p class="eyebrow">UK authorised retailers only</p>
 <h1>Find the right watch. Then find the right price for it.</h1>
 <p class="lede">{e(SITE)} compares luxury watches from {floor} across UK authorised retailers, with the retailer's own price beside each one and guides written in plain English.</p>
-<p class="row"><a class="btn" href="watches/index.html">Browse watches</a><a class="btn ghost" href="compare/index.html">Compare side by side</a></p>
+<p class="row"><a class="btn" href="watch-finder/index.html">Find a watch for your budget</a><a class="btn ghost" href="watches/index.html">Browse all watches</a></p>
 <p class="fine">{count}</p>
 </div>
 {dial_svg()}
@@ -566,6 +566,84 @@ def build_guides():
               "mainEntityOfPage": f"{DOMAIN}/guides/{g['slug']}.html"}
         page(f"guides/{g['slug']}.html", g["title"], g["description"], body, jsonld=[ld],
              crumbs=[("guides/index.html", "Guides"), ("", g["title"])], og_type="article")
+
+
+FINDER_STYLES = [  # (key, label, pattern on the retailer's product name); only what the name states
+    ("dive", "Dive watch", None), ("chronograph", "Chronograph", None),
+    ("gmt", "Travel / GMT", r"\bgmt\b|zulu time|world ?time|worldtimer|dual time|geosphere"),
+    ("skeleton", "Skeleton dial", None), ("diamond", "Set with diamonds", None), ("gold", "Gold", None),
+]
+FINDER_READING = {  # style or wearer -> Journal article slug worth reading first
+    "dive": "longines-hydroconquest-vs-oris-aquis-date", "ladies": "luxury-watches-for-her-christmas",
+    "mens": "luxury-watches-for-him-christmas",
+}
+
+
+def finder_attrs(p):
+    """Attributes the finder may use. Everything comes from the retailer's own product name or price;
+    nothing is inferred beyond what the name states."""
+    name = p["name"]
+    size = re.search(r"(\d{2}(?:\.\d+)?)\s?mm", name, re.I)
+    cols = {c["slug"]: c for c in COLLECTIONS}
+    styles = []
+    for key, _, pat in FINDER_STYLES:
+        if pat is None:
+            c = cols.get({"dive": "dive-watches", "chronograph": "chronographs", "skeleton": "skeleton-watches",
+                          "diamond": "diamond-watches", "gold": "gold-watches"}[key])
+            pat = c and c.get("pattern")
+        if pat and re.search(pat, name, re.I):
+            styles.append(key)
+    if re.search(r"\b(ladies|women|womens|lady)\b", name, re.I):
+        who = "ladies"
+    elif re.search(r"\b(mens|men's|gents)\b", name, re.I):
+        who = "mens"
+    else:
+        who = "any"  # unisex or not stated
+    return {"size": float(size.group(1)) if size else None, "styles": styles, "who": who}
+
+
+def build_finder():
+    counts = {}
+    for p in PRODUCTS:
+        b = brand_for(p)
+        counts[b["slug"]] = (b["name"], counts.get(b["slug"], ("", 0))[1] + 1)
+    brand_opts = "".join(f'<option value="{k}">{e(v[0])}</option>' for k, v in sorted(counts.items(), key=lambda x: x[1][0].lower()))
+    style_opts = "".join(f'<option value="{k}">{e(label)}</option>' for k, label, _ in FINDER_STYLES)
+    budgets = [2500, 3000, 4000, 5000, 7500, 10000, 15000]
+    budget_opts = "".join(f'<option value="{b}"{" selected" if b == 5000 else ""}>Up to {gbp(b)}</option>' for b in budgets)
+    reading = {k: {"title": a["title"], "url": f"../{article_url(a)}"} for k, slug in FINDER_READING.items()
+               for a in ARTICLES if a["slug"] == slug}
+    body = f"""<section><div class="wrap">
+<h1>Watch finder</h1>
+<p class="lede">Tell us your budget and what you want the watch for. We show matching new watches from UK authorised retailers, using only what each retailer states in its listing.</p>
+<form class="filters" id="finder" aria-label="Watch finder" data-reading='{e(json.dumps(reading))}'>
+<div><label for="w-budget">Budget</label><select id="w-budget">{budget_opts}<option value="">Any budget</option></select></div>
+<div><label for="w-style">Style</label><select id="w-style"><option value="">Any style</option>{style_opts}</select></div>
+<div><label for="w-who">Listed as</label><select id="w-who"><option value="">Any</option><option value="mens">Men's or unisex</option><option value="ladies">Women's or unisex</option></select></div>
+<div><label for="w-size">Case size</label><select id="w-size"><option value="">Any size</option><option value="0-36">Under 36mm</option><option value="36-41">36 to 40mm</option><option value="41-99">41mm and over</option></select></div>
+<div><label for="w-brand">Brand</label><select id="w-brand"><option value="">Any brand</option>{brand_opts}</select></div>
+<div><label for="w-sort">Order</label><select id="w-sort"><option value="asc">Price, low to high</option><option value="desc">Price, high to low</option></select></div>
+<p class="count" id="w-count" aria-live="polite"></p>
+</form>
+<div id="w-reading"></div>
+<div class="grid" id="w-results"></div>
+<p class="row"><button class="btn ghost" type="button" id="w-more" hidden>Show more</button></p>
+<p class="fine">How it works: case size and style come from the retailer's product name, so watches whose listing does not state a size are left out when you choose one. "Listed as" follows the retailer's own men's or ladies' label; watches with no label count as unisex. Check the full specification on the watch's page or the retailer's site before you buy. Not sure about size? Read our <a href="../guides/watch-size-guide.html">watch size guide</a>.</p>
+{checked_note()}
+<noscript><p>The watch finder needs JavaScript. You can <a href="../watches/index.html">browse and filter all watches</a> instead.</p></noscript>
+</div></section>"""
+    page("watch-finder/index.html", "Watch finder: luxury watches by budget, style and size",
+         "Find a new luxury watch by budget, style, case size and brand, with current prices from UK authorised retailers.",
+         body, crumbs=[("", "Watch finder")])
+    rows = []
+    for p in PRODUCTS:
+        a = finder_attrs(p)
+        rows.append({"id": p["id"], "slug": p["slug"], "brand": p["brand"], "b": brand_for(p)["slug"], "name": p["name"],
+                     "price": None if STALE else p["price"], "image": p.get("image"), "link": p["link"],
+                     "retailer": p["retailer"], "retailer_name": p["retailer_name"],
+                     "in_stock": None if STALE else p.get("in_stock"), **a})
+    (DIST / "data").mkdir(exist_ok=True)
+    (DIST / "data" / "finder.json").write_text(json.dumps(rows, ensure_ascii=False, separators=(",", ":")))
 
 
 def build_compare():
@@ -879,6 +957,7 @@ def main():
     build_brands()
     build_guides()
     build_compare()
+    build_finder()
     build_drops()
     build_static()
     build_journal()

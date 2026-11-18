@@ -137,6 +137,70 @@
     apply();
   }
 
+
+  /* ---- watch finder: matches only on what the retailer's listing states */
+  var finder = $("finder");
+  if (finder) {
+    var out = $("w-results"), more = $("w-more"), shownMax = 24, rows = [];
+    var reading = {};
+    try { reading = JSON.parse(finder.dataset.reading || "{}"); } catch (e) { reading = {}; }
+    var card = function (p) {
+      var a = el("article", { "class": "card" });
+      var href = root + "watches/" + p.slug + ".html";
+      var thumb = el("a", { "class": "thumb", href: href });
+      if (p.image) thumb.appendChild(el("img", { src: p.image, alt: p.brand + " " + p.name, loading: "lazy", width: "320", height: "320", referrerpolicy: "no-referrer" }));
+      a.appendChild(thumb);
+      a.appendChild(el("p", { "class": "eyebrow" }, p.brand));
+      var h = el("h3"); h.appendChild(el("a", { href: href }, p.name)); a.appendChild(h);
+      var price = el("p", { "class": "price" }); price.appendChild(el("strong", {}, p.price == null ? "See retailer" : gbp(p.price))); a.appendChild(price);
+      var why = [];
+      if (p.size) why.push(p.size + "mm case (retailer's listing)");
+      if (p.styles.length) why.push(p.styles.join(", ").replace("gmt", "travel/GMT"));
+      a.appendChild(el("p", { "class": "meta" }, (why.join(" · ") || "Case size not stated in the listing") + " · " + p.retailer_name));
+      var row = el("div", { "class": "row" });
+      row.appendChild(el("a", { "class": "btn", href: p.link, rel: "sponsored nofollow noopener", target: "_blank", "data-aff": p.retailer, "data-pid": p.id }, "View at " + p.retailer_name));
+      var lab = el("label", { "class": "pick" }); var box = el("input", { type: "checkbox", "class": "compare-pick", value: p.id });
+      lab.appendChild(box); lab.appendChild(document.createTextNode(" Compare")); row.appendChild(lab);
+      a.appendChild(row);
+      return a;
+    };
+    var run = function (keepMax) {
+      if (!keepMax) shownMax = 24;
+      var budget = Number($("w-budget").value) || Infinity, style = $("w-style").value, who = $("w-who").value;
+      var size = $("w-size").value.split("-"), brand = $("w-brand").value, sort = $("w-sort").value;
+      var matches = rows.filter(function (p) {
+        if (p.in_stock === false) return false;
+        if (p.price != null && p.price > budget) return false;
+        if (style && p.styles.indexOf(style) < 0) return false;
+        if (who && p.who !== "any" && p.who !== who) return false;
+        if (brand && p.b !== brand) return false;
+        if (size[0] !== "" && (p.size == null || p.size < Number(size[0]) || p.size >= Number(size[1]))) return false;
+        return true;
+      }).sort(function (a, b) { return ((a.price || 0) - (b.price || 0)) * (sort === "desc" ? -1 : 1); });
+      out.textContent = "";
+      matches.slice(0, shownMax).forEach(function (p) { out.appendChild(card(p)); });
+      more.hidden = matches.length <= shownMax;
+      $("w-count").textContent = matches.length + (matches.length === 1 ? " watch matches" : " watches match");
+      var tip = reading[style] || reading[who], box = $("w-reading");
+      box.textContent = "";
+      if (tip) {
+        var p = el("p", { "class": "note" }, "Before you choose: ");
+        p.appendChild(el("a", { href: tip.url }, tip.title));
+        box.appendChild(p);
+      }
+      if (!matches.length) out.appendChild(el("p", { "class": "empty" }, "No watches match all of these. Try a higher budget, any size or any brand."));
+      syncBoxes();
+      if (window.gtag) window.gtag("event", "finder_search", { budget: $("w-budget").value || "any", style: style || "any", size: $("w-size").value || "any", results: matches.length });
+    };
+    fetch(root + "data/finder.json").then(function (r) { return r.json(); }).then(function (data) {
+      rows = data;
+      finder.addEventListener("change", function () { run(false); });
+      finder.addEventListener("submit", function (ev) { ev.preventDefault(); });
+      more.addEventListener("click", function () { shownMax += 24; run(true); });
+      run(false);
+    }).catch(function () { $("w-count").textContent = "The finder could not load. Browse all watches instead."; });
+  }
+
   /* ---- compare page */
   var host = $("compare");
   if (host && host.dataset.empty !== "feed") {
@@ -152,7 +216,10 @@
         ["Price", function (p, td) { if (p.price == null) { td.textContent = "See retailer"; return; } td.className = "price"; td.appendChild(el("strong", {}, gbp(p.price))); }],
         ["Retailer", function (p, td) { td.textContent = p.retailer_name; }],
         ["Reference", function (p, td) { td.textContent = p.reference || "Not supplied"; }],
-        ["Colour", function (p, td) { td.textContent = p.colour || "Not supplied"; }],
+        ["Case size", function (p, td) {
+          var m = /(\d{2}(?:\.\d+)?)\s?mm/i.exec(p.name);
+          td.textContent = m ? m[1] + "mm (from the retailer's listing)" : "Not stated by the retailer";
+        }],
         ["Availability", function (p, td) {
           td.textContent = p.in_stock === true ? "In stock" : p.in_stock === false ? "Out of stock" : "Check with retailer";
         }],

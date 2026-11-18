@@ -187,3 +187,4 @@ article .wrap.narrow h1+.lede,article .wrap.narrow .eyebrow+h1{margin-top:0}
 .wotw>div{display:flex;flex-direction:column;gap:.6rem}
 @media (max-width:640px){.wotw{grid-template-columns:1fr}.wotw .thumb{max-width:12rem}}
 .prose table{font-size:.9375rem}
+#finder{grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr))}
