@@ -119,3 +119,15 @@ def test_grok_cannot_self_approve():
         _, issues = validate(SUB.replace("status: review", "status: " + st),
                              {"p1": {"brand": "B", "name": "N", "price": 100, "in_stock": True}}, dt.date(2026, 11, 20))
         assert any("status: review" in m for lvl, m in issues if lvl == "error"), st
+
+
+# --- no automated affiliate clicks ---------------------------------------------
+def test_link_checker_never_requests_links():
+    src = (Path(__file__).resolve().parent.parent / "scripts" / "check_affiliate_links.py").read_text()
+    assert "urllib.request" not in src and "urlopen" not in src and "requests" not in src
+
+
+def test_grok_is_told_not_to_click_affiliate_links():
+    root = Path(__file__).resolve().parent.parent
+    assert "Never open or follow" in (root / "ops" / "GROK_SYSTEM_PROMPT.md").read_text()
+    assert "Never open or follow any affiliate link" in (root / "scripts" / "grok_writer.py").read_text()

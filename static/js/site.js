@@ -55,8 +55,19 @@
   });
 
   /* ---- affiliate click events (sent only when analytics is on) */
+  /* Tag the Awin link with the kind of page the click came from (clickref2),
+     so Awin reports show which pages lead to clicks and sales. No personal data. */
+  function pageType() {
+    var seg = location.pathname.split("/").filter(Boolean);
+    if (!seg.length || seg[0] === "index.html") return "home";
+    if (seg[0] === "watches") return (seg[1] && seg[1] !== "index.html") ? "product" : "catalogue";
+    return seg[0].replace(/[^a-z-]/g, "").slice(0, 20) || "other";
+  }
   document.addEventListener("click", function (ev) {
     var a = ev.target.closest && ev.target.closest("a[data-aff]");
+    if (a && /^https:\/\/www\.awin1\.com\//.test(a.href) && a.href.indexOf("clickref2=") < 0) {
+      a.href += "&clickref2=" + pageType();
+    }
     if (a && window.gtag) window.gtag("event", "affiliate_click", {
       retailer: a.dataset.aff, product_id: a.dataset.pid || "", page_path: location.pathname
     });
