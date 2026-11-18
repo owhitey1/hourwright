@@ -4,15 +4,20 @@
 # writes original copy and submits with status: review. Claude verifies and publishes.
 # Edit or reorder freely; add new briefs at the end with a new id.
 
-- id: B2
+# B2 (Christmas gifts for her) was published by Claude on 2026-11-18:
+# journal/luxury-watches-for-her-christmas.html. A HydroConquest vs Aquis Date comparison was
+# published the same day; B1 and B6 must not repeat it (link to it instead).
+# Order reviewed 2026-11-18 for commercial intent: seasonal gift guide first, then category guides.
+
+- id: B8
   type: guide
-  working_title: "Luxury watches for her this Christmas: considered picks from £2,000"
-  search_intent: "Seasonal gift intent: 'luxury women's watch gift', 'best ladies watch for Christmas UK', 'Chanel J12 alternatives'."
-  reader: "A partner or family member buying a lasting gift, unsure of sizes and styles."
-  must_cover: "How to pick a size without the recipient's wrist; quartz vs automatic for occasional wear; jewellery-style vs everyday; Goldsmiths' delivery and returns are the retailer's (link to its own pages, do not restate policies)."
-  products: "5 to 6 in-stock ladies' watches across Chanel, Longines, Rado and one other brand, spanning about £2,000 to £8,000."
-  price_ceiling: 8000
-  publish_by: 2026-11-25
+  working_title: "Luxury watches for him this Christmas: considered picks from about £2,000"
+  search_intent: "Seasonal gift intent: 'luxury watch gift for him', 'Christmas watch for husband UK', 'men's watch gift under 5000'."
+  reader: "A partner or family member buying a lasting gift for a man, unsure of size and style."
+  must_cover: "Size without knowing the wrist (compare a watch he wears); sports vs dress; automatic vs quartz; check the retailer's own Christmas delivery cut-offs and returns (no policy restated). Link to journal/luxury-watches-for-her-christmas.html and guides/buying-a-luxury-watch-as-a-gift.html."
+  products: "5 to 6 in-stock men's watches from at least four brands (Longines, Oris, Norqain, Zenith, Montblanc, Raymond Weil), about £2,000 to £6,000."
+  price_ceiling: 6000
+  publish_by: 2026-11-27
 
 - id: B1
   type: guide
@@ -60,6 +65,16 @@
   search_intent: "Head-to-head comparisons: 'Oris vs Longines', 'is Oris better than Longines'."
   reader: "A buyer choosing between two well-regarded brands at the same budget."
   must_cover: "Movements (in-house vs sourced, as each brand states), warranty lengths, design language, resale is out of scope (no claims). Balanced: no winner declared without reasons."
-  products: "2 to 3 in-stock watches from each brand under £3,000, placed side by side."
+  products: "2 to 3 in-stock watches from each brand under £3,000, placed side by side. Not dive watches: the HydroConquest vs Aquis Date comparison already exists; link to it."
   price_ceiling: 3000
   publish_by: 2026-12-23
+
+- id: B7
+  type: guide
+  working_title: "Chanel J12 sizes and versions explained: 28mm, 33mm and 38mm"
+  search_intent: "Model research with purchase intent: 'Chanel J12 sizes', 'Chanel J12 33mm vs 38mm', 'Chanel J12 quartz or automatic'."
+  reader: "Someone set on a J12 who needs to choose size, colour, movement and strap or bracelet."
+  must_cover: "Sizes and thickness from Chanel's own pages; quartz vs automatic calibres as Chanel names them; ceramic bracelet vs rubber strap; check each reference on chanel.com (retailer listings have been inconsistent)."
+  products: "4 to 6 in-stock J12 references across sizes."
+  price_ceiling: 0
+  publish_by: 2026-12-09
