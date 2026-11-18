@@ -14,3 +14,15 @@ Pins link to Hourwright pages, never to retailer or Awin links.
 | dive-watches-uk.png | Dive watches | Luxury dive watches: UK prices compared | New dive watches from UK authorised retailers, with the retailer's own price beside each one. | https://hourwright.co.uk/watches/dive-watches.html?utm_source=pinterest&utm_medium=social |
 
 Rules: one pin per page to start, no repeated pins, no prices or discounts in pin text (prices change daily), no "best" claims.
+
+## Added 19 Nov (prepared 18 Nov), not yet published
+
+| Image | Board | Title | Description | Link |
+| --- | --- | --- | --- | --- |
+| christmas-for-him.png | Watch gift ideas | Luxury watches for him this Christmas | Five men's watches from Oris, Hamilton, Raymond Weil, Longines and Norqain, with advice on size, style and movement. | https://hourwright.co.uk/journal/luxury-watches-for-him-christmas.html?utm_source=pinterest&utm_medium=social |
+| watch-finder.png | Watch buying guides | Find a luxury watch for your budget | Choose a budget, style and case size and see matching new watches from UK authorised retailers. | https://hourwright.co.uk/watch-finder/index.html?utm_source=pinterest&utm_medium=social |
+| watches-under-3000.png | Watches by budget | Luxury watches under £3,000 | New watches from UK authorised retailers, cheapest first, with each retailer's own price. | https://hourwright.co.uk/watches/under-3000.html?utm_source=pinterest&utm_medium=social |
+| chronographs-uk.png | Chronographs | Luxury chronographs: UK prices compared | Chronographs from UK authorised retailers, compared side by side. | https://hourwright.co.uk/watches/chronographs.html?utm_source=pinterest&utm_medium=social |
+| longines-brand.png | Watch brands | Longines, explained | Longines' key collections and current UK retailer prices. | https://hourwright.co.uk/brands/longines.html?utm_source=pinterest&utm_medium=social |
+
+Activation once the Hourwright profile exists and is connected to Claude (Composio "pinterest", new account): create the five boards above, then publish one pin a day, oldest first, Christmas pins before 10 December. Claude can do all of this; Steve only creates the profile, claims the domain and connects it.
