@@ -1,0 +1,65 @@
+# Editorial briefs for Grok's scheduled buying guides (grok.yml, Wednesdays).
+# Grok takes the first brief that has no issue yet ("[B1]" etc. in an issue title).
+# Briefs set the angle; Grok researches, chooses products from the live catalogue,
+# writes original copy and submits with status: review. Claude verifies and publishes.
+# Edit or reorder freely; add new briefs at the end with a new id.
+
+- id: B2
+  type: guide
+  working_title: "Luxury watches for her this Christmas: considered picks from £2,000"
+  search_intent: "Seasonal gift intent: 'luxury women's watch gift', 'best ladies watch for Christmas UK', 'Chanel J12 alternatives'."
+  reader: "A partner or family member buying a lasting gift, unsure of sizes and styles."
+  must_cover: "How to pick a size without the recipient's wrist; quartz vs automatic for occasional wear; jewellery-style vs everyday; Goldsmiths' delivery and returns are the retailer's (link to its own pages, do not restate policies)."
+  products: "5 to 6 in-stock ladies' watches across Chanel, Longines, Rado and one other brand, spanning about £2,000 to £8,000."
+  price_ceiling: 8000
+  publish_by: 2026-11-25
+
+- id: B1
+  type: guide
+  working_title: "The best luxury dive watches under £5,000 in the UK"
+  search_intent: "Buyers comparing a first serious dive watch: 'best dive watch under 5000', 'luxury dive watch UK', 'Longines HydroConquest vs Oris Aquis'."
+  reader: "Someone with a £2,000–£5,000 budget who will actually swim with it and wants a respected Swiss brand."
+  must_cover: "ISO 6425 and what water resistance really means; bezel types (external vs internal); size and wrist fit; bracelet vs rubber; servicing intervals and warranty."
+  products: "4 to 6 in-stock dive watches from at least three brands (Longines, Oris, Rado, Norqain are well stocked). Exactly one per brand family unless sizes differ meaningfully."
+  price_ceiling: 5000
+  publish_by: 2026-12-02
+
+- id: B3
+  type: guide
+  working_title: "Luxury chronographs under £5,000: what you get at each price"
+  search_intent: "'best chronograph under 5000', 'automatic chronograph UK', 'Longines chronograph review'."
+  reader: "A buyer wanting a mechanical chronograph from a heritage brand without stretching to £10,000."
+  must_cover: "Column wheel vs cam movements in plain English (only where the manufacturer states it); legibility; thickness; what a tachymeter is for."
+  products: "4 to 5 in-stock chronographs (Longines, Oris, Norqain and others in stock)."
+  price_ceiling: 5000
+  publish_by: 2026-12-02
+
+- id: B4
+  type: guide
+  working_title: "Travel watches: the best GMT and world-time watches under £5,000"
+  search_intent: "'best GMT watch under 5000', 'travel watch UK', 'Longines Zulu Time vs'."
+  reader: "Frequent travellers who want a second time zone that is easy to set."
+  must_cover: "True 'flyer' GMT vs 'caller' GMT (only as each manufacturer describes its movement); world-time vs GMT; date handling across time zones."
+  products: "3 to 5 in-stock GMT or world-time watches; the Longines Spirit Zulu Time may appear but should not dominate."
+  price_ceiling: 5000
+  publish_by: 2026-12-09
+
+- id: B5
+  type: guide
+  working_title: "Independent watchmakers you can buy new in the UK"
+  search_intent: "'independent watch brands', 'Louis Erard review', 'Czapek UK', 'alternatives to big Swiss brands'."
+  reader: "Enthusiasts who want something less common from a small maker, bought new from an authorised UK retailer."
+  must_cover: "What 'independent' means and its limits; small production and servicing realities; why these makers are distinctive (from their own published material)."
+  products: "4 to 6 in-stock pieces from Louis Erard, Norqain, Czapek, Speake-Marin, Gerald Charles or ID Genève."
+  price_ceiling: 0
+  publish_by: 2026-12-16
+
+- id: B6
+  type: guide
+  working_title: "Oris vs Longines: which to buy for under £3,000"
+  search_intent: "Head-to-head comparisons: 'Oris vs Longines', 'is Oris better than Longines'."
+  reader: "A buyer choosing between two well-regarded brands at the same budget."
+  must_cover: "Movements (in-house vs sourced, as each brand states), warranty lengths, design language, resale is out of scope (no claims). Balanced: no winner declared without reasons."
+  products: "2 to 3 in-stock watches from each brand under £3,000, placed side by side."
+  price_ceiling: 3000
+  publish_by: 2026-12-23

@@ -49,7 +49,9 @@ def file_article(kind, reply, usage):
         flags = [m for lvl, m in issues if lvl == "flag"]
         report = "\n".join([f"- ❌ {m}" for m in errors] + [f"- ⚠️ {m}" for m in flags]
                            + [f"- ℹ️ {m}" for lvl, m in issues if lvl == "info"]) or "- ✅ No problems found by the automated checks."
-        title = f"[Editorial] {a.get('title') or kind}"
+        brief = json.loads((ROOT / "out" / "brief.json").read_text()) if (ROOT / "out" / "brief.json").exists() else None
+        tag = f"[{brief['id']}] " if brief else ""
+        title = f"[Editorial] {tag}{a.get('title') or kind}"
         fname = filename_for(a)
     else:
         errors, flags, report = ["no article file found in Grok's reply"], [], "- ❌ No article file found in Grok's reply."

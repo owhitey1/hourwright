@@ -50,7 +50,26 @@ def published_lines():
     return "\n".join(out) or "(none)"
 
 
-def build_messages(kind, today):
+def next_brief():
+    """First brief in content/briefs.yml without an issue yet (title contains [id])."""
+    import subprocess
+    import yaml
+    path = ROOT / "content" / "briefs.yml"
+    if not path.exists():
+        return None
+    briefs = yaml.safe_load(path.read_text()) or []
+    titles = ""
+    if os.environ.get("GITHUB_REPOSITORY"):
+        r = subprocess.run(["gh", "api", f"repos/{os.environ['GITHUB_REPOSITORY']}/issues?state=all&per_page=100",
+                            "--jq", ".[].title"], capture_output=True, text=True)
+        titles = r.stdout
+    for b in briefs:
+        if f"[{b['id']}]" not in titles:
+            return b
+    return None
+
+
+def build_messages(kind, today, brief=None):
     monday = today + dt.timedelta(days=(7 - today.weekday()) % 7 or 7)
     system = (ROOT / "ops" / "GROK_SYSTEM_PROMPT.md").read_text()
     standards = (ROOT / "ops" / "EDITORIAL_STANDARDS.md").read_text()
@@ -58,6 +77,7 @@ def build_messages(kind, today):
     user = f"""Today is {today.isoformat()}.
 
 TASK: {TASKS[kind].format(monday=monday.isoformat())}
+{('BRIEF (follow this angle; set price_ceiling to ' + str(brief.get('price_ceiling')) + ' if above 0):' + chr(10) + json.dumps(brief, default=str, indent=1)) if brief else ''}
 
 OUTPUT: {'a JSON array only.' if kind == 'visitor-check' else 'exactly one article file inside a single ```markdown fenced block (front matter first, status: review, published: ' + (monday if kind == 'watch-of-the-week' else today).isoformat() + '), then a heading "### Verification notes" listing each specification or fact, the source URL that confirms it, and anything you could not confirm. Nothing else.'}
 
@@ -112,7 +132,9 @@ def main():
     kind, out = sys.argv[1], Path(sys.argv[2])
     out.mkdir(parents=True, exist_ok=True)
     today = dt.date.today()
-    system, user = build_messages(kind, today)
+    brief = next_brief() if kind == "guide" else None
+    system, user = build_messages(kind, today, brief)
+    (out / "brief.json").write_text(json.dumps(brief, default=str) if brief else "null")
     if os.environ.get("GROK_DRY_RUN") == "1":
         sample = next(f for f in sorted((ROOT / "content" / "editorial").glob("*.md")) if "wotw" in f.name)
         text = "```markdown\n" + sample.read_text().replace("status: published", "status: review") + "```\n\n### Verification notes\n\nDry run: no API call was made."
