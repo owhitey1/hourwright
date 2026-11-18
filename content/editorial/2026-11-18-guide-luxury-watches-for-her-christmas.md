@@ -4,6 +4,7 @@ slug: luxury-watches-for-her-christmas
 type: guide
 status: published
 published: 2026-11-18
+updated: 2026-11-18
 author: Hourwright
 description: "Five women's watches from Longines, Rado, Chanel and Chopard for a lasting Christmas gift, with plain advice on size, quartz versus automatic and everyday wear."
 basis: "Researched from each manufacturer's published specifications and the retailer's listings. We have not handled these watches, and this is not a ranking."
@@ -108,5 +109,7 @@ Consider: at 30 metres it is not a swimming watch, and a leather strap needs car
 ## Buying it as a gift
 
 Buy from an authorised retailer so the manufacturer's warranty applies, and keep the warranty card or digital certificate with the receipt. Check the retailer's own delivery cut-off dates for Christmas and its returns window before you order, especially if you are guessing the style or size; policies are the retailer's and can change. Our guide to [buying a luxury watch as a gift](../guides/buying-a-luxury-watch-as-a-gift.html) covers sizing adjustments, engraving and presentation.
+
+Buying for a man too? See [luxury watches for him this Christmas](luxury-watches-for-him-christmas.html).
 
 If none of these suits her, our [ladies' watches](../watches/ladies-watches.html) page lists every women's watch we track, cheapest first.
