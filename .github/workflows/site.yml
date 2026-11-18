@@ -87,8 +87,11 @@ jobs:
         uses: actions/deploy-pages@v5
       - name: Smoke test the live site
         run: |
-          curl -fsSL --retry 8 --retry-delay 15 --retry-all-errors https://hourwright.co.uk/ | grep -q "Hourwright"
-          curl -fsSL https://hourwright.co.uk/watches/index.html | grep -q "Luxury watches"
+          # Save to a file first: piping into grep -q closes the pipe early, which curl reports as an error and retries.
+          curl -fsSL --retry 8 --retry-delay 15 --retry-all-errors https://hourwright.co.uk/ -o /tmp/home.html
+          grep -q "Hourwright" /tmp/home.html
+          curl -fsSL https://hourwright.co.uk/watches/index.html -o /tmp/watches.html
+          grep -q "Luxury watches" /tmp/watches.html
       - name: Notify IndexNow (Bing and others) of new or changed pages
         continue-on-error: true
         run: |
