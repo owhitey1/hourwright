@@ -27,7 +27,7 @@ Grok (xAI API, scheduled in GitHub Actions)   Steve or Grok chat (issue form, op
         Build and deploy (GitHub Actions) -> live site; 6-hourly monitor
 ```
 
-- **Grok via the xAI API** (`.github/workflows/grok.yml`): Tuesday and Friday news, Wednesday guide, Thursday next Monday's Watch of the Week, Saturday visitor check. The workflow can read the repository and write issues only. It cannot push code, deploy, or read any other secret. It is **off until the `XAI_API_KEY` secret exists**. Cost at xAI list price is roughly 7–10 US cents per article.
+- **Grok via the xAI API** (`.github/workflows/grok.yml`): Tuesday and Friday news, Wednesday guide, Thursday next Monday's Watch of the Week, Saturday visitor check. The workflow can read the repository and write issues only. It cannot push code, deploy, or read any other secret. It is **off until the `XAI_API_KEY` secret exists**. Grok must submit `status: review`; only Claude's verification advances an article. Cost at xAI list price is roughly 7–10 US cents per article plus any search fees. Two spending stops: xAI prepaid credit with auto top-up off and a $0 invoiced limit (requests are refused when credit runs out), and the workflow's own monthly cap of $5.50 (about £4.30) recorded in issue #22.
 - **Issue form** ("Editorial submission"): anyone with a GitHub account can submit, and `editorial-intake.yml` validates it automatically. This is a fallback; the API route needs nobody to copy anything.
 - **Claude cloud publisher**: a scheduled Claude task that runs in Anthropic's cloud (Steve's computer can be off). It validates, fact-checks, publishes or blocks, and handles Grok's visitor-check findings.
 - Only Claude commits to the repository. Rollback is reverting a commit; the next build redeploys.
@@ -40,7 +40,7 @@ GitHub Issues at https://github.com/owhitey1/hourwright/issues. Anyone can read 
 - Each issue records the task, owner, evidence, completion criteria and outcome. An issue is closed only with evidence.
 - Hourwright only. Other projects stay out of this repository.
 
-## What runs where (verified 17 November 2026)
+## What runs where (verified 18 November 2026)
 
 | Job | Runs in | Needs Steve's computer? | Verified |
 | --- | --- | --- | --- |
@@ -49,13 +49,13 @@ GitHub Issues at https://github.com/owhitey1/hourwright/issues. Anyone can read 
 | HTTPS settings check, re-enable if dropped, HTTP→HTTPS redirect test (`https.yml`, daily) | GitHub Actions | No | Yes, passing |
 | Lighthouse and axe audit (`audit.yml`, Mondays) | GitHub Actions | No | Yes |
 | Editorial form validation (`editorial-intake.yml`) | GitHub Actions | No | Yes, tested |
-| Grok drafts and visitor checks (`grok.yml`) | GitHub Actions + xAI API | No | Pipeline tested in dry-run; live calls need `XAI_API_KEY` |
+| Grok drafts and visitor checks (`grok.yml`), with a monthly budget check and usage ledger (#22) | GitHub Actions + xAI API | No | Pipeline, validation, ledger and budget stop tested without calling xAI; live calls need `XAI_API_KEY` |
 | Awin programme approvals and click tracking yes/no (`awin.yml`) | GitHub Actions + Awin API | No | Built; needs `AWIN_API_TOKEN` |
-| Editorial fact-check and publishing; visitor-check triage | Claude scheduled task, cloud | No | Test runs succeeded |
+| Editorial fact-check and publishing; visitor-check triage | Claude scheduled task, cloud, daily 10:13 London | No | **Proven 17–18 Nov**: fact-checked, committed, pushed and closed a test submission (#18, commit 181ca60) |
 | Awin status from the website (until the API token exists) | Claude scheduled task on SwiftyPlod, 11:43 London | **Yes**: computer on, desktop app open, Awin signed in | Runs; Awin sign-in often expires |
 | Dependency updates | Dependabot, monthly | No | Yes; reviewed and applied by Claude |
 
-**Failure alerts:** GitHub emails the repository owner (owhitey1) when a scheduled workflow fails. The Claude tasks send a phone notification when something needs Steve.
+**Failure alerts:** GitHub emails owhitey1 when a workflow run fails (if Actions notifications are on in GitHub settings). Delivery cannot be confirmed from Claude's access. Test it any time: Actions > Monitor live site > Run workflow > tick "alert_test". The run fails on purpose and GitHub should email you. The Claude tasks send a phone notification when something needs Steve.
 
 ## Independent verification
 
