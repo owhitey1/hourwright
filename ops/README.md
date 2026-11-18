@@ -46,6 +46,7 @@ GitHub Issues at https://github.com/owhitey1/hourwright/issues. Anyone can read 
 | --- | --- | --- | --- |
 | Feed import, tests, editorial report, build, link check, launch gate, deploy, smoke test (`site.yml`, daily 05:17 UTC and on every commit) | GitHub Actions | No | Yes, passing |
 | Uptime, redirects, 404, all affiliate links' structure without requesting them, catalogue freshness, published articles' products (`monitor.yml`, every 6 hours) | GitHub Actions | No | Yes, passing |
+| IndexNow notification of new pages and changed Journal articles to Bing and other IndexNow engines (`scripts/indexnow.py`, after each deploy; not used by Google) | GitHub Actions | No | Yes, 83 URLs accepted (HTTP 202) on 18 Nov |
 | HTTPS settings check, re-enable if dropped, HTTP→HTTPS redirect test (`https.yml`, daily) | GitHub Actions | No | Yes, passing |
 | Lighthouse and axe audit (`audit.yml`, Mondays) | GitHub Actions | No | Yes |
 | Editorial form validation (`editorial-intake.yml`) | GitHub Actions | No | Yes, tested |
@@ -73,4 +74,4 @@ Outbound clicks also carry `clickref2` with the page type (home, catalogue, prod
 
 ## Measuring results
 
-Keep separate and never add together: search impressions and clicks (Search Console), sessions (Google Analytics, consenting visitors only), outbound affiliate clicks (Analytics event `affiliate_click`), Awin clicks and attributed sales (tagged `clickref=hourwright`), and confirmed payable commission. Baseline: zero on 17 November 2026.
+Keep separate and never add together: search impressions and clicks (Search Console), sessions (Google Analytics, consenting visitors only), outbound affiliate clicks (Analytics event `affiliate_click`), Awin clicks and attributed sales (tagged `clickref=hourwright`), and confirmed payable commission. Baseline: zero on 17 November 2026. Weekly figures: issue #26. Acquisition plan: `ops/ACQUISITION.md`.
