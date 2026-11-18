@@ -46,7 +46,7 @@ Corrections made during Claude's checks: timekeeper-history wording, calibre add
 | Claim | How to check |
 | --- | --- |
 | HTTPS enforced by the server; http and www return 301 | Request http://hourwright.co.uk/; Actions > "HTTPS check and enforce" |
-| 742 links, 0 malformed; sample lands on Goldsmiths product pages | Actions > "Monitor live site" log |
+| 742 links, 0 malformed (checked without requesting them, so no artificial clicks) | Actions > "Monitor live site" log |
 | Grok cannot change code (`contents: read, issues: write`) | .github/workflows/grok.yml |
 | Grok must submit `status: review`; anything else is rejected | editorial.py `submission_checks`; issue #19 (rejected test) |
 | Cloud publisher verified and pushed from a fresh cloud session | Issues #17 and #18; commit 181ca60 |

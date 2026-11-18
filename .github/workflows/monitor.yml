@@ -35,7 +35,7 @@ jobs:
       - name: Missing pages return 404
         run: test "$(curl -s -o /dev/null -w '%{http_code}' https://hourwright.co.uk/no-such-page)" = "404"
       - run: pip install -r requirements.txt
-      - name: Affiliate links still resolve
+      - name: Affiliate links well-formed and catalogue fresh (no links requested)
         run: python3 scripts/check_affiliate_links.py
       - name: Published articles still point at available watches
         run: python3 scripts/editorial_check.py

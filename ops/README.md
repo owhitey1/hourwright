@@ -45,7 +45,7 @@ GitHub Issues at https://github.com/owhitey1/hourwright/issues. Anyone can read 
 | Job | Runs in | Needs Steve's computer? | Verified |
 | --- | --- | --- | --- |
 | Feed import, tests, editorial report, build, link check, launch gate, deploy, smoke test (`site.yml`, daily 05:17 UTC and on every commit) | GitHub Actions | No | Yes, passing |
-| Uptime, redirects, 404, all affiliate links' structure, a sample's landing pages, published articles' products (`monitor.yml`, every 6 hours) | GitHub Actions | No | Yes, passing |
+| Uptime, redirects, 404, all affiliate links' structure without requesting them, catalogue freshness, published articles' products (`monitor.yml`, every 6 hours) | GitHub Actions | No | Yes, passing |
 | HTTPS settings check, re-enable if dropped, HTTP→HTTPS redirect test (`https.yml`, daily) | GitHub Actions | No | Yes, passing |
 | Lighthouse and axe audit (`audit.yml`, Mondays) | GitHub Actions | No | Yes |
 | Editorial form validation (`editorial-intake.yml`) | GitHub Actions | No | Yes, tested |

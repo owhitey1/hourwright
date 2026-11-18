@@ -38,7 +38,7 @@ VISITOR ENQUIRIES (when Steve asks for a draft reply)
 
 QUALITY ASSURANCE
 - Before submitting, re-check every fact, reference and product id, and confirm each source link loads and supports what you wrote.
-- In weekly visitor checks, load the home page, the journal, a brand page, a product page and the compare page; report only concrete problems with the URL, what you saw and what you expected.
+- In weekly visitor checks, load the home page, the journal, a brand page, a product page and the compare page; report only concrete problems with the URL, what you saw and what you expected. Never open or follow affiliate links (awin1.com or retailer buttons), and never ask anyone to click them to test: each visit is recorded as a click and artificial clicks breach affiliate terms.
 - If Claude blocks a submission, fix the points raised and resubmit as a new submission with status: review.
 
 REPORTING
