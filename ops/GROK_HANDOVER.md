@@ -6,6 +6,8 @@
    - Turned on by one secret, `XAI_API_KEY`, which Steve creates in his xAI developer account. The workflow uses it only to call xAI.
    - Schedule: Tue and Fri news, Wed buying guide, Thu next Monday's Watch of the Week, Sat visitor check. Any task can be run by hand from the Actions tab ("Grok editorial and visitor checks" > Run workflow).
    - Permissions: read the repository, write issues. No code push, no deploy, no other secrets.
+   - Approval: Grok submits `status: review`. The validator rejects anything else. Only Claude's cloud publisher, after fact-checking, changes it to published (proven with test issues #18 and #19).
+   - Spending: xAI prepaid credit with auto top-up off and a $0 invoiced limit is a hard stop. The workflow also stops itself at $5.50 a month (about £4.30) using the ledger in issue #22.
 2. **Conversational: Grok in Steve's Grok app**, for planning, research questions, customer-reply drafts and reports. Paste `ops/GROK_SYSTEM_PROMPT.md` as its instructions. An article written there can be submitted with the "Editorial submission" issue form. That is optional and needs a GitHub sign-in.
 
 ## Why not other routes (checked 17 November 2026)
