@@ -73,12 +73,29 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            scripts/indexnow.py
+            static/root
+      - name: Record the live sitemap before deploying
+        run: |
+          curl -fsS https://hourwright.co.uk/sitemap.xml -o /tmp/old-sitemap.xml || true
+          KEY=$(basename static/root/*.txt)
+          curl -fsS -o /dev/null "https://hourwright.co.uk/$KEY" && echo "FIRST=" >> "$GITHUB_ENV" || echo "FIRST=--first-run" >> "$GITHUB_ENV"
       - id: deployment
         uses: actions/deploy-pages@v5
       - name: Smoke test the live site
         run: |
           curl -fsSL --retry 8 --retry-delay 15 --retry-all-errors https://hourwright.co.uk/ | grep -q "Hourwright"
           curl -fsSL https://hourwright.co.uk/watches/index.html | grep -q "Luxury watches"
+      - name: Notify IndexNow (Bing and others) of new or changed pages
+        continue-on-error: true
+        run: |
+          KEY=$(basename static/root/*.txt)
+          curl -fsS --retry 5 --retry-delay 10 --retry-all-errors "https://hourwright.co.uk/$KEY" -o /dev/null
+          curl -fsS https://hourwright.co.uk/sitemap.xml -o /tmp/new-sitemap.xml
+          python3 scripts/indexnow.py /tmp/old-sitemap.xml /tmp/new-sitemap.xml $FIRST
       - name: Alert if a retailer feed failed
         if: needs.build.outputs.feed_failed == 'true'
         run: |

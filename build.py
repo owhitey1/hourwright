@@ -7,6 +7,7 @@ import math
 import os
 import re
 import shutil
+import unicodedata
 import urllib.parse
 from pathlib import Path
 
@@ -54,7 +55,9 @@ def shop_by(r):
 SITE = CFG["site_name"]
 DOMAIN = CFG["domain"].rstrip("/")
 TODAY = dt.date.today()
-PAGES = []  # (path, lastmod) for the sitemap
+PAGES = []  # indexable paths for the sitemap
+LEGACY_REDIRECTS = {"brands/id-gen-ve.html": "brands/id-geneve.html"}  # old path -> new path
+LASTMOD = {}  # path -> date where the page has a real content date (articles)
 PRELAUNCH = bool(os.environ.get("HW_PRELAUNCH"))  # deployed for review, hidden from search engines
 
 e = html.escape
@@ -98,7 +101,8 @@ def retailer_link(r):
 
 
 def slug(text):
-    return re.sub(r"[^a-z0-9]+", "-", str(text).lower().replace("&", " and ")).strip("-")
+    plain = unicodedata.normalize("NFKD", str(text)).encode("ascii", "ignore").decode()  # Genève -> geneve
+    return re.sub(r"[^a-z0-9]+", "-", plain.lower().replace("&", " and ")).strip("-")
 
 
 _GENERATED = {}
@@ -163,7 +167,7 @@ def dial_svg():
             '<circle cx="100" cy="100" r="3.5" class="pin"/></svg>')
 
 
-def page(path, title, desc, body, *, jsonld=None, noindex=False, crumbs=None, og_type="website"):
+def page(path, title, desc, body, *, jsonld=None, noindex=False, crumbs=None, og_type="website", image=None, lastmod=None):
     noindex = noindex or PRELAUNCH
     depth = path.count("/")
     r = "/" if path == "404.html" else "../" * depth  # 404 is served at any depth
@@ -181,7 +185,7 @@ def page(path, title, desc, body, *, jsonld=None, noindex=False, crumbs=None, og
             f'<a href="{r}{h}">{e(l)}</a>' if h else f"<span>{e(l)}</span>" for h, l in trail) + "</nav>"
         ld.append({"@context": "https://schema.org", "@type": "BreadcrumbList",
                    "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": l,
-                                        "item": f"{DOMAIN}/{h}" if h else canonical}
+                                        "item": (f"{DOMAIN}/" if h == "index.html" else f"{DOMAIN}/{h}") if h else canonical}
                                        for i, (h, l) in enumerate(trail)]})
     ld_html = "".join('<script type="application/ld+json">{}</script>'.format(
         json.dumps(x, ensure_ascii=False).replace("</", "<\\/")) for x in ld)
@@ -216,7 +220,8 @@ def page(path, title, desc, body, *, jsonld=None, noindex=False, crumbs=None, og
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:url" content="{canonical}">
 <meta property="og:locale" content="en_GB">
-<meta name="twitter:card" content="summary">
+{f'<meta property="og:image" content="{e(image)}">' if image else ''}
+<meta name="twitter:card" content="{'summary_large_image' if image else 'summary'}">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; script-src 'self' https://www.googletagmanager.com; style-src 'self'; font-src 'self'; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.google.com; form-action 'self' https:; base-uri 'self'; object-src 'none'">
 {verify}
@@ -258,6 +263,8 @@ def page(path, title, desc, body, *, jsonld=None, noindex=False, crumbs=None, og
     target.write_text(out, encoding="utf-8")
     if not noindex:
         PAGES.append(path)
+        if lastmod:
+            LASTMOD[path] = lastmod
 
 
 # ---------------------------------------------------------------- components
@@ -304,6 +311,15 @@ def retailer_strip(r):
 
 # ---------------------------------------------------------------- pages
 
+def home_journal():
+    """Latest buying guides and comparisons from the Journal (they carry live product cards)."""
+    picks = sorted((a for a in ARTICLES if a["type"] == "guide"), key=lambda a: a["published"], reverse=True)[:4]
+    if not picks:
+        return ""
+    items = "".join(f'<li><a href="{article_url(a)}"><strong>{e(a["title"])}</strong><span>{e(a["description"])}</span></a></li>' for a in picks)
+    return f'<section><div class="wrap"><h2>Buying advice from the Journal</h2><ul class="links">{items}</ul><p><a class="more" href="journal/index.html">All Journal articles</a></p></div></section>'
+
+
 def build_home():
     brand_links = "".join(
         f'<li><a href="brands/{b["slug"]}.html"><strong>{e(b["name"])}</strong><span>{e(b["summary"])}</span></a></li>'
@@ -336,6 +352,7 @@ def build_home():
 {'<section><div class="wrap"><h2>Newly listed</h2>' + grid(latest, "") + checked_note() + '</div></section>' if latest else ''}
 <section><div class="wrap"><h2>Brands</h2><ul class="links">{brand_links}</ul>
 <p><a class="more" href="brands/index.html">All brands</a></p></div></section>
+{home_journal()}
 <section><div class="wrap"><h2>Buying guides</h2><ul class="links">{guide_links}</ul>
 <p><a class="more" href="guides/index.html">All guides</a></p></div></section>"""
     ld = [{"@context": "https://schema.org", "@type": "WebSite", "name": SITE, "url": DOMAIN + "/"},
@@ -450,7 +467,8 @@ def build_brands():
         mine = [p for p in PRODUCTS if brand_for(p) is b]
         none_now = (f'<div class="empty"><h2>No current listings</h2><p>Our retailers do not list new {e(b["name"])} watches '
                     f'from {gbp(CFG["price_floor_gbp"])} at the moment. Listings are checked daily.</p></div>') if PRODUCTS else EMPTY
-        listing = f'<h2>{e(b["name"])} watches at UK retailers</h2>' + ((grid(mine, "../") + checked_note()) if mine else none_now)
+        listing = (related_articles([p["id"] for p in mine], "../", heading=f"{b['name']} in the Journal") +
+                   f'<h2>{e(b["name"])} watches at UK retailers</h2>' + ((grid(mine, "../") + checked_note()) if mine else none_now))
         if b.get("generated"):
             n = len(mine)
             body = f"""<section><div class="wrap">
@@ -508,6 +526,7 @@ def build_collections():
 <p class="lede">{e(c['intro'])}</p>
 <p class="meta">{len(items)} new watches from {gbp(lo)} to {gbp(hi)} at UK authorised retailers, cheapest first.</p>
 {guide_link}
+{related_articles([p["id"] for p in items], "../", heading="Buying advice for these watches")}
 {grid(items, "../")}
 {checked_note()}
 <h2>More ways to browse</h2><ul class="plain">{others}</ul>
@@ -684,10 +703,17 @@ def build_static():
 
 
 def build_meta():
-    urls = "".join(f"<url><loc>{DOMAIN}/{'' if p == 'index.html' else p}</loc><lastmod>{TODAY.isoformat()}</lastmod></url>" for p in PAGES)
+    urls = "".join(f"<url><loc>{DOMAIN}/{'' if p == 'index.html' else p}</loc><lastmod>{LASTMOD.get(p, TODAY).isoformat()}</lastmod></url>" for p in PAGES)
     (DIST / "sitemap.xml").write_text(
         f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>')
     (DIST / "robots.txt").write_text(f"User-agent: *\nAllow: /\n" + ("" if PRELAUNCH else f"\nSitemap: {DOMAIN}/sitemap.xml\n"))
+    for old, new in LEGACY_REDIRECTS.items():  # renamed URLs keep working for anyone who saved them
+        (DIST / old).parent.mkdir(parents=True, exist_ok=True)
+        (DIST / old).write_text(
+            f'<!DOCTYPE html><html lang="en-GB"><head><meta charset="utf-8"><title>Moved</title>'
+            f'<meta name="robots" content="noindex"><link rel="canonical" href="{DOMAIN}/{new}">'
+            f'<meta http-equiv="refresh" content="0; url={DOMAIN}/{new}"></head>'
+            f'<body><p><a href="{"../" * old.count("/")}{new}">This page has moved.</a></p></body></html>', encoding="utf-8")
     (DIST / "CNAME").write_text(urllib.parse.urlparse(DOMAIN).netloc + "\n")
     (DIST / ".nojekyll").write_text("")
     (DIST / "favicon.svg").write_text(
@@ -710,6 +736,31 @@ CATALOGUE = {p["id"]: p for p in PRODUCTS}
 ARTICLES = [a for a in editorial.load_articles() if editorial.is_live(a, TODAY)]
 
 
+def related_articles(product_ids, r, limit=3, exclude=None, heading="From the Journal"):
+    """Published articles that feature any of these watches, most overlap first (internal links to buying guides)."""
+    ids = set(product_ids)
+    scored = []
+    for a in ARTICLES:
+        if a is exclude:
+            continue
+        hits = len(ids & set(a.get("products") or []))
+        if hits:
+            scored.append((hits, a["published"], a))
+    scored.sort(key=lambda x: (x[0], x[1]), reverse=True)
+    if not scored:
+        return ""
+    links = "".join(f'<li><a href="{r}{article_url(a)}">{e(a["title"])}</a></li>' for _, _, a in scored[:limit])
+    return f'<h2>{e(heading)}</h2><ul class="plain">{links}</ul>'
+
+
+def article_image(a):
+    for pid in a.get("products") or []:
+        p = CATALOGUE.get(pid)
+        if p and p.get("image"):
+            return p["image"]
+    return None
+
+
 def editorial_card(pid, r, ceiling=None):
     """A live product card for an article. The buy button is suppressed when the
     product is gone, out of stock or above the article's price ceiling."""
@@ -730,6 +781,16 @@ def editorial_card(pid, r, ceiling=None):
 
 def article_url(a):
     return f"journal/{a['slug']}.html"
+
+
+def more_articles(a):
+    """Related reading under an article: same type first, then newest."""
+    others = sorted((x for x in ARTICLES if x is not a),
+                    key=lambda x: (x["type"] == a["type"], x["published"]), reverse=True)[:4]
+    if not others:
+        return ""
+    return '<h2>Related reading</h2><ul class="plain">' + "".join(
+        f'<li><a href="{x["slug"]}.html">{e(x["title"])}</a></li>' for x in others) + "</ul>"
 
 
 def build_journal():
@@ -758,6 +819,7 @@ def build_journal():
 {'<h2>Sources</h2><ul class="plain">' + sources + '</ul>' if sources else ''}
 {'<p class="fine">' + e(a['image_credit']) + '</p>' if a.get('image_credit') else ''}
 {checked_note()}
+{more_articles(a)}
 <p><a href="index.html">More from the Journal</a></p>
 </div></article>"""
         kind = "NewsArticle" if a["type"] == "news" else "Article"
@@ -765,8 +827,12 @@ def build_journal():
               "datePublished": a["published"].isoformat(), "dateModified": (a.get("updated") or a["published"]).isoformat(),
               "author": {"@type": "Organization", "name": SITE}, "publisher": {"@type": "Organization", "name": SITE},
               "mainEntityOfPage": f"{DOMAIN}/{article_url(a)}"}
+        img = article_image(a)
+        if img:
+            ld["image"] = img
         page(article_url(a), a["title"], a["description"], body, jsonld=[ld],
-             crumbs=[("journal/index.html", "Journal"), ("", a["title"])], og_type="article")
+             crumbs=[("journal/index.html", "Journal"), ("", a["title"])], og_type="article",
+             image=img, lastmod=a.get("updated") or a["published"])
     def item(a):
         return (f'<li><a href="{a["slug"]}.html"><strong>{e(a["title"])}</strong>'
                 f'<span>{e(editorial.TYPES[a["type"]])} · {a["published"].strftime("%-d %B %Y")}. {e(a["description"])}</span></a></li>')
@@ -805,6 +871,8 @@ def main():
     DIST.mkdir()
     for sub in ("css", "js", "fonts"):
         shutil.copytree(ROOT / "static" / sub, DIST / sub)
+    for f in (ROOT / "static" / "root").glob("*"):  # files served from the site root (IndexNow key)
+        shutil.copy(f, DIST / f.name)
     build_home()
     build_watches()
     build_collections()
