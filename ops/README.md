@@ -51,8 +51,8 @@ GitHub Issues at https://github.com/owhitey1/hourwright/issues. Anyone can read 
 | Editorial form validation (`editorial-intake.yml`) | GitHub Actions | No | Running |
 | Grok drafts (`grok.yml`) | GitHub Actions + xAI API | No | Off until `XAI_API_KEY` (#16); no cost while off |
 | Editorial verification and publishing; restart of missed schedules | Claude scheduled task (cloud), 10:13 London | No | Running |
-| **Daily report**: site health, publishing queue, Awin clicks/sales/commission and programme status, Search Console, Analytics (`scripts/daily_report.py`) | GitHub Actions in the **private** repo `owhitey1/hourwright-ops`; report posted to a private issue and emailed by GitHub | No | Built; needs the private repo and API credentials (#28) |
-| Awin programme status from the Awin website | Claude scheduled task on SwiftyPlod, 11:43 London | **Yes** | Kept until the daily report is live, then disabled |
+| **Daily report**: site health, publishing queue, Awin clicks/sales/commission and programme status, Search Console, Analytics (`scripts/daily_report.py`) | GitHub Actions in the **private** repo `owhitey1/hourwright-ops`, daily 07:41 UTC; report posted to a private issue and emailed by GitHub | No | **Live** for site and Awin (verified 19 Nov against the Awin dashboard); Search Console and Analytics optional, not yet connected |
+| Awin programme status from the Awin website | Claude scheduled task on SwiftyPlod | Yes | **Disabled 19 Nov**: replaced by the private daily report |
 | Dependency updates | Dependabot | No | Running |
 
 Awin, Search Console and Analytics figures are commercial data, so they are reported only in the private repository, never in this public one or its logs.
