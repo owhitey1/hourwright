@@ -131,3 +131,25 @@ def test_grok_is_told_not_to_click_affiliate_links():
     root = Path(__file__).resolve().parent.parent
     assert "Never open or follow" in (root / "ops" / "GROK_SYSTEM_PROMPT.md").read_text()
     assert "Never open or follow any affiliate link" in (root / "scripts" / "grok_writer.py").read_text()
+
+
+# --- daily report (mocked Awin API) ------------------------------------------
+def test_daily_report_awin_section(monkeypatch):
+    import importlib
+    dr = importlib.import_module("daily_report")
+    monkeypatch.setenv("AWIN_API_TOKEN", "x")
+
+    def fake(url, headers=None, data=None, method=None):
+        if "/programmes" in url:
+            return [{"id": 2174}] if "joined" in url else []
+        if "/reports/advertiser" in url:
+            return [{"advertiserId": 2174, "clicks": 190, "pendingNo": 1, "pendingValue": 2850.0, "pendingComm": 85.5,
+                     "confirmedNo": 0, "confirmedValue": 0, "confirmedComm": 0, "declinedComm": 0}]
+        if "/transactions/" in url:
+            return [{"clickRefs": {"clickRef": "hourwright", "clickRef2": "journal"}}]
+        return []
+    monkeypatch.setattr(dr, "http_json", fake)
+    lines, problems = dr.awin_section(dt.date(2026, 11, 20))
+    text = "\n".join(lines)
+    assert "Goldsmiths joined" in text and "£85.50 commission pending" in text
+    assert "hourwright/journal 1" in text and not problems

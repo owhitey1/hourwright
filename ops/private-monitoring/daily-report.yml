@@ -1,0 +1,38 @@
+# Copy to .github/workflows/daily-report.yml in the PRIVATE repo owhitey1/hourwright-ops.
+# Secrets there: AWIN_API_TOKEN (required for Awin), GOOGLE_SA_JSON and GA4_PROPERTY_ID (optional).
+# Posts the report as a comment on the private issue "Daily report"; GitHub emails the owner.
+name: Daily report
+on:
+  schedule:
+    - cron: "41 7 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    env:
+      AWIN_API_TOKEN: ${{ secrets.AWIN_API_TOKEN }}
+      GOOGLE_SA_JSON: ${{ secrets.GOOGLE_SA_JSON }}
+      GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          repository: owhitey1/hourwright   # public code, no secrets
+      - uses: actions/setup-python@v7
+        with: {python-version: "3.12"}
+      - run: pip install -q google-auth requests
+      - name: Build report (never printed to the log)
+        id: r
+        run: |
+          set +e; python3 scripts/daily_report.py report.md --strict; echo "code=$?" >> "$GITHUB_OUTPUT"; exit 0
+      - name: Post to the private "Daily report" issue
+        run: |
+          N=$(gh api "repos/${{ github.repository }}/issues?state=open&per_page=100" --jq '[.[]|select(.title=="Daily report")][0].number // empty')
+          if [ -z "$N" ]; then N=$(gh api "repos/${{ github.repository }}/issues" -f title="Daily report" -f body="One comment per day. Private." --jq .number); fi
+          gh api "repos/${{ github.repository }}/issues/$N/comments" -F body=@report.md >/dev/null
+      - name: Fail (and email) if something needs attention
+        if: steps.r.outputs.code != '0'
+        run: exit 1

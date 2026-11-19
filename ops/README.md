@@ -40,21 +40,24 @@ GitHub Issues at https://github.com/owhitey1/hourwright/issues. Anyone can read 
 - Each issue records the task, owner, evidence, completion criteria and outcome. An issue is closed only with evidence.
 - Hourwright only. Other projects stay out of this repository.
 
-## What runs where (verified 18 November 2026)
+## What runs where (audited 19 November 2026)
 
-| Job | Runs in | Needs Steve's computer? | Verified |
+| Job | Runs in | Needs Steve's computer? | Status |
 | --- | --- | --- | --- |
-| Feed import, tests, editorial report, build, link check, launch gate, deploy, smoke test (`site.yml`, daily 05:17 UTC and on every commit) | GitHub Actions | No | Yes, passing |
-| Uptime, redirects, 404, all affiliate links' structure without requesting them, catalogue freshness, published articles' products (`monitor.yml`, every 6 hours) | GitHub Actions | No | Yes, passing |
-| IndexNow notification of new pages and changed Journal articles to Bing and other IndexNow engines (`scripts/indexnow.py`, after each deploy; not used by Google) | GitHub Actions | No | Yes, 83 URLs accepted (HTTP 202) on 18 Nov |
-| HTTPS settings check, re-enable if dropped, HTTP→HTTPS redirect test (`https.yml`, daily) | GitHub Actions | No | Yes, passing |
-| Lighthouse and axe audit (`audit.yml`, Mondays) | GitHub Actions | No | Yes |
-| Editorial form validation (`editorial-intake.yml`) | GitHub Actions | No | Yes, tested |
-| Grok drafts and visitor checks (`grok.yml`), with a monthly budget check and usage ledger (#22) | GitHub Actions + xAI API | No | Pipeline, validation, ledger and budget stop tested without calling xAI; live calls need `XAI_API_KEY` |
-| Awin programme approvals and click tracking yes/no (`awin.yml`) | GitHub Actions + Awin API | No | Built; needs `AWIN_API_TOKEN` |
-| Editorial fact-check and publishing; visitor-check triage | Claude scheduled task, cloud, daily 10:13 London | No | **Proven 17–18 Nov**: fact-checked, committed, pushed and closed a test submission (#18, commit 181ca60) |
-| Awin status from the website (until the API token exists) | Claude scheduled task on SwiftyPlod, 11:43 London | **Yes**: computer on, desktop app open, Awin signed in | Runs; Awin sign-in often expires |
-| Dependency updates | Dependabot, monthly | No | Yes; reviewed and applied by Claude |
+| Feed import, tests, build, deploy, smoke test (`site.yml`, daily and on every push) | GitHub Actions | No | Running |
+| Uptime, redirects, 404, affiliate link structure (no links requested), published articles' products (`monitor.yml`, every 6 h) | GitHub Actions | No | Running |
+| HTTPS settings and HTTP→HTTPS redirect (`https.yml`, daily) | GitHub Actions | No | Running |
+| Lighthouse and axe (`audit.yml`, Mondays) | GitHub Actions | No | Running |
+| Editorial form validation (`editorial-intake.yml`) | GitHub Actions | No | Running |
+| Grok drafts (`grok.yml`) | GitHub Actions + xAI API | No | Off until `XAI_API_KEY` (#16); no cost while off |
+| Editorial verification and publishing; restart of missed schedules | Claude scheduled task (cloud), 10:13 London | No | Running |
+| **Daily report**: site health, publishing queue, Awin clicks/sales/commission and programme status, Search Console, Analytics (`scripts/daily_report.py`) | GitHub Actions in the **private** repo `owhitey1/hourwright-ops`; report posted to a private issue and emailed by GitHub | No | Built; needs the private repo and API credentials (#28) |
+| Awin programme status from the Awin website | Claude scheduled task on SwiftyPlod, 11:43 London | **Yes** | Kept until the daily report is live, then disabled |
+| Dependency updates | Dependabot | No | Running |
+
+Awin, Search Console and Analytics figures are commercial data, so they are reported only in the private repository, never in this public one or its logs.
+
+GitHub runs scheduled workflows on a best-effort basis and can delay or skip them; the cloud publisher restarts any core workflow that misses its window.
 
 **Failure alerts:** GitHub emails owhitey1 when a workflow run fails (if Actions notifications are on in GitHub settings). Delivery cannot be confirmed from Claude's access. Test it any time: Actions > Monitor live site > Run workflow > tick "alert_test". The run fails on purpose and GitHub should email you. The Claude tasks send a phone notification when something needs Steve.
 
