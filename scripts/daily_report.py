@@ -149,8 +149,12 @@ def awin_section(today):
     return lines, problems
 
 
-# ------------------------------------------------------------ Google (SA key)
+# --------------------------------------------------------------------- Google
+# Auth: GOOGLE_ACCESS_TOKEN (short-lived, from keyless Workload Identity Federation
+# in the private workflow) or, as a fallback, a service-account key in GOOGLE_SA_JSON.
 def google_token(scopes):
+    if os.environ.get("GOOGLE_ACCESS_TOKEN"):
+        return os.environ["GOOGLE_ACCESS_TOKEN"]
     raw = os.environ.get("GOOGLE_SA_JSON")
     if not raw:
         return None
@@ -161,59 +165,107 @@ def google_token(scopes):
     return creds.token
 
 
+def _gsc_query(h, site, body):
+    return http_json(f"https://www.googleapis.com/webmasters/v3/sites/{site}/searchAnalytics/query", h,
+                     json.dumps(body).encode(), "POST").get("rows") or []
+
+
 def gsc_section(today):
     token = google_token(["https://www.googleapis.com/auth/webmasters.readonly"])
     if not token:
-        return ["## Search Console", "- Not connected (GOOGLE_SA_JSON missing)."], []
+        return ["## Search Console", "- Not connected."], []
     h = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     site = urllib.parse.quote(GSC_SITE, safe="")
-    lines = ["## Search Console"]
-    end = today - dt.timedelta(days=2)  # GSC data lags about two days
-    start = end - dt.timedelta(days=6)
+    lines = ["## Search Console (organic Google search)"]
     try:
-        body = json.dumps({"startDate": start.isoformat(), "endDate": end.isoformat(), "dimensions": []}).encode()
-        r = http_json(f"https://www.googleapis.com/webmasters/v3/sites/{site}/searchAnalytics/query", h, body, "POST")
-        rows = r.get("rows") or []
-        c = rows[0] if rows else {"clicks": 0, "impressions": 0, "position": 0}
-        lines.append(f"- {start:%d %b}–{end:%d %b}: {c['clicks']:.0f} clicks, {c['impressions']:.0f} impressions"
-                     + (f", average position {c['position']:.1f}" if rows else " (no data yet)"))
-        body = json.dumps({"startDate": start.isoformat(), "endDate": end.isoformat(), "dimensions": ["query"], "rowLimit": 5}).encode()
-        top = http_json(f"https://www.googleapis.com/webmasters/v3/sites/{site}/searchAnalytics/query", h, body, "POST").get("rows") or []
-        if top:
-            lines.append("- Top queries: " + "; ".join(f"{t['keys'][0]} ({t['impressions']:.0f} impr, {t['clicks']:.0f} clicks)" for t in top))
+        # Google's data lags 2-3 days; find the latest day that has data in the last 10 days.
+        days = _gsc_query(h, site, {"startDate": (today - dt.timedelta(days=10)).isoformat(), "endDate": today.isoformat(),
+                                    "dimensions": ["date"], "dataState": "all"})
+        latest = max((r["keys"][0] for r in days), default=None)
+        end = dt.date.fromisoformat(latest) if latest else today - dt.timedelta(days=3)
+        start = end - dt.timedelta(days=6)
+        tot = _gsc_query(h, site, {"startDate": start.isoformat(), "endDate": end.isoformat(), "dataState": "all"})
+        if tot:
+            t = tot[0]
+            lines.append(f"- {start:%d %b}–{end:%d %b} (latest available; Google lags 2–3 days): {t['clicks']:.0f} clicks, "
+                         f"{t['impressions']:.0f} impressions, CTR {t['ctr']*100:.1f}%, average position {t['position']:.1f}")
+        else:
+            lines.append(f"- No search data recorded for {start:%d %b}–{end:%d %b} yet (new site; 0 impressions so far, or data still processing)")
+        for dim, label in (("query", "Top queries"), ("page", "Top landing pages")):
+            rows = _gsc_query(h, site, {"startDate": (end - dt.timedelta(days=27)).isoformat(), "endDate": end.isoformat(),
+                                        "dimensions": [dim], "rowLimit": 5, "dataState": "all"})
+            if rows:
+                lines.append(f"- {label} (28 days): " + "; ".join(
+                    f"{r['keys'][0].replace('https://hourwright.co.uk', '') or '/'} ({r['impressions']:.0f} impr, {r['clicks']:.0f} clicks)" for r in rows))
         sm = http_json(f"https://www.googleapis.com/webmasters/v3/sites/{site}/sitemaps", h).get("sitemap") or []
-        for s in sm:
-            sub = sum(int(c.get("submitted", 0)) for c in s.get("contents", []))
-            lines.append(f"- Sitemap {s['path']}: last read {s.get('lastDownloaded', '?')[:10]}, {sub} URLs, "
-                         f"{s.get('errors', 0)} errors, {s.get('warnings', 0)} warnings")
+        for s_ in sm:
+            sub = sum(int(c.get("submitted", 0)) for c in s_.get("contents", []))
+            lines.append(f"- Sitemap: Google last read it {str(s_.get('lastDownloaded', '?'))[:10]}; {sub} URLs submitted; "
+                         f"{s_.get('errors', 0)} errors, {s_.get('warnings', 0)} warnings")
+        # Indexed vs submitted: inspect each sitemap URL (URL Inspection API, free quota 2,000/day).
+        sm_xml = urllib.request.urlopen("https://hourwright.co.uk/sitemap.xml", timeout=60).read().decode()
+        urls = [u.split("</loc>")[0] for u in sm_xml.split("<loc>")[1:]]
+        verdicts = {}
+        indexed_journal = []
+        for u in urls[:150]:
+            try:
+                r = http_json("https://searchconsole.googleapis.com/v1/urlInspection/index:inspect", h,
+                              json.dumps({"inspectionUrl": u, "siteUrl": GSC_SITE}).encode(), "POST")
+                st = (r.get("inspectionResult", {}).get("indexStatusResult", {}) or {}).get("coverageState", "Unknown")
+            except urllib.error.HTTPError as e:
+                st = f"inspection error {e.code}"
+            verdicts[st] = verdicts.get(st, 0) + 1
+            if "/journal/" in u and "indexed" in st.lower() and "not" not in st.lower():
+                indexed_journal.append(u.rsplit("/", 1)[-1])
+        indexed = sum(v for k, v in verdicts.items() if "indexed" in k.lower() and "not" not in k.lower())
+        lines.append(f"- Indexing: {indexed} of {len(urls)} sitemap URLs indexed. Breakdown: "
+                     + "; ".join(f"{k} {v}" for k, v in sorted(verdicts.items(), key=lambda x: -x[1])))
     except urllib.error.HTTPError as e:
-        lines.append(f"- Search Console API error HTTP {e.code}")
+        lines.append(f"- Search Console API error HTTP {e.code} (check the service account is a user on the property)")
         return lines, ["Search Console"]
     return lines, []
+
+
+def _ga_report(h, prop, body):
+    return http_json(f"https://analyticsdata.googleapis.com/v1beta/properties/{prop}:runReport", h,
+                     json.dumps(body).encode(), "POST").get("rows") or []
 
 
 def ga_section(today):
     prop = os.environ.get("GA4_PROPERTY_ID")
     token = google_token(["https://www.googleapis.com/auth/analytics.readonly"]) if prop else None
     if not token:
-        return ["## Analytics (consenting visitors only)", "- Not connected (GOOGLE_SA_JSON or GA4_PROPERTY_ID missing)."], []
+        return ["## Analytics (consenting visitors only)", "- Not connected."], []
     h = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    lines = ["## Analytics (consenting visitors only)"]
+    lines = ["## Analytics (visitors who accepted cookies only; yesterday's figures can still change)"]
     try:
-        body = json.dumps({"dateRanges": [{"startDate": "yesterday", "endDate": "yesterday"}, {"startDate": "7daysAgo", "endDate": "yesterday"}],
-                           "metrics": [{"name": "sessions"}, {"name": "activeUsers"}]}).encode()
-        r = http_json(f"https://analyticsdata.googleapis.com/v1beta/properties/{prop}:runReport", h, body, "POST")
-        vals = {row.get("dimensionValues", [{}])[-1].get("value", f"r{i}"): [m["value"] for m in row["metricValues"]]
-                for i, row in enumerate(r.get("rows") or [])}
-        lines.append(f"- Sessions / users: {json.dumps(vals) if vals else 'no data'}")
-        body = json.dumps({"dateRanges": [{"startDate": "7daysAgo", "endDate": "yesterday"}],
-                           "dimensions": [{"name": "eventName"}], "metrics": [{"name": "eventCount"}],
-                           "dimensionFilter": {"filter": {"fieldName": "eventName", "stringFilter": {"value": "affiliate_click"}}}}).encode()
-        r = http_json(f"https://analyticsdata.googleapis.com/v1beta/properties/{prop}:runReport", h, body, "POST")
-        n = sum(int(row["metricValues"][0]["value"]) for row in r.get("rows") or [])
-        lines.append(f"- affiliate_click events, last 7 days: {n}")
+        for label, rng in (("Yesterday", {"startDate": "yesterday", "endDate": "yesterday"}),
+                           ("Last 7 days", {"startDate": "7daysAgo", "endDate": "yesterday"})):
+            r = _ga_report(h, prop, {"dateRanges": [rng], "metrics": [{"name": "activeUsers"}, {"name": "sessions"},
+                                                                      {"name": "screenPageViews"}]})
+            v = [m["value"] for m in r[0]["metricValues"]] if r else ["0", "0", "0"]
+            ev = _ga_report(h, prop, {"dateRanges": [rng], "dimensions": [{"name": "eventName"}], "metrics": [{"name": "eventCount"}],
+                                      "dimensionFilter": {"filter": {"fieldName": "eventName", "stringFilter": {"value": "affiliate_click"}}}})
+            clicks = sum(int(x["metricValues"][0]["value"]) for x in ev)
+            lines.append(f"- {label}: {v[0]} users, {v[1]} sessions, {v[2]} page views, {clicks} retailer clicks (affiliate_click)")
+        src = _ga_report(h, prop, {"dateRanges": [{"startDate": "28daysAgo", "endDate": "yesterday"}],
+                                   "dimensions": [{"name": "sessionDefaultChannelGroup"}], "metrics": [{"name": "sessions"}],
+                                   "orderBys": [{"metric": {"metricName": "sessions"}, "desc": True}], "limit": 6})
+        if src:
+            lines.append("- Traffic sources (28 days): " + "; ".join(f"{x['dimensionValues'][0]['value']} {x['metricValues'][0]['value']}" for x in src))
+        lp = _ga_report(h, prop, {"dateRanges": [{"startDate": "28daysAgo", "endDate": "yesterday"}],
+                                  "dimensions": [{"name": "landingPage"}], "metrics": [{"name": "sessions"}],
+                                  "orderBys": [{"metric": {"metricName": "sessions"}, "desc": True}], "limit": 5})
+        if lp:
+            lines.append("- Top landing pages (28 days): " + "; ".join(f"{x['dimensionValues'][0]['value']} {x['metricValues'][0]['value']}" for x in lp))
+        bypage = _ga_report(h, prop, {"dateRanges": [{"startDate": "28daysAgo", "endDate": "yesterday"}],
+                                      "dimensions": [{"name": "pagePath"}], "metrics": [{"name": "eventCount"}],
+                                      "dimensionFilter": {"filter": {"fieldName": "eventName", "stringFilter": {"value": "affiliate_click"}}},
+                                      "orderBys": [{"metric": {"metricName": "eventCount"}, "desc": True}], "limit": 5})
+        if bypage:
+            lines.append("- Retailer clicks by page (28 days): " + "; ".join(f"{x['dimensionValues'][0]['value']} {x['metricValues'][0]['value']}" for x in bypage))
     except urllib.error.HTTPError as e:
-        lines.append(f"- Analytics API error HTTP {e.code}")
+        lines.append(f"- Analytics API error HTTP {e.code} (check the service account has Viewer access to the property)")
         return lines, ["Analytics"]
     return lines, []
 
