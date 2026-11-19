@@ -33,7 +33,12 @@ GSC_SITE = "sc-domain:hourwright.co.uk"
 WORKFLOWS = {"site.yml": ("Build and deploy", 26), "monitor.yml": ("Monitor", 8), "https.yml": ("HTTPS", 26)}
 
 
+_AWIN_QUERY_TOKEN = None
+
+
 def http_json(url, headers=None, data=None, method=None):
+    if _AWIN_QUERY_TOKEN and url.startswith("https://api.awin.com") and "accessToken=" not in url:
+        url += ("&" if "?" in url else "?") + "accessToken=" + urllib.parse.quote(_AWIN_QUERY_TOKEN)
     req = urllib.request.Request(url, headers=headers or {}, data=data, method=method)
     with urllib.request.urlopen(req, timeout=60) as r:
         return json.loads(r.read() or b"null")
@@ -74,11 +79,30 @@ def site_section(now):
 
 # ---------------------------------------------------------------------- Awin
 def awin_section(today):
-    token = os.environ.get("AWIN_API_TOKEN")
+    token = (os.environ.get("AWIN_API_TOKEN") or "").strip().strip('"').strip("'")
+    if token.lower().startswith("bearer "):
+        token = token[7:].strip()
     if not token:
         return ["## Awin", "- Not connected (AWIN_API_TOKEN missing)."], []
     h = {"Authorization": f"Bearer {token}"}
     base = f"https://api.awin.com/publishers/{PUB}"
+    # Diagnose authentication without revealing the token: length and character classes only.
+    shape = f"{len(token)} chars, " + ("hex/uuid-like" if all(c in "0123456789abcdefABCDEF-" for c in token) else "other characters")
+    try:
+        accounts = http_json("https://api.awin.com/accounts?type=publisher", h)
+        ids = [str(a.get("accountId")) for a in (accounts or {}).get("accounts", [])]
+        if ids and PUB not in ids:
+            return ["## Awin", f"- Token works but is not linked to publisher {PUB} (token {shape})."], ["Awin API"]
+    except urllib.error.HTTPError as e:
+        if e.code == 401:
+            try:
+                http_json(f"https://api.awin.com/accounts?type=publisher&accessToken={urllib.parse.quote(token)}")
+                global _AWIN_QUERY_TOKEN
+                _AWIN_QUERY_TOKEN = token
+                h = {}
+            except urllib.error.HTTPError as e2:
+                return ["## Awin", f"- Awin rejected the token (HTTP {e.code}/{e2.code}; token {shape}). "
+                        "Create a new token in Awin > API Credentials and replace the AWIN_API_TOKEN secret."], ["Awin API"]
     lines, problems = ["## Awin"], []
     status = {}
     try:
