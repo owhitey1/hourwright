@@ -33,9 +33,9 @@ GSC_SITE = "sc-domain:hourwright.co.uk"
 WORKFLOWS = {"site.yml": ("Build and deploy", 26), "monitor.yml": ("Monitor", 8), "https.yml": ("HTTPS", 26)}
 
 
-def http_json(url, headers=None, data=None, method=None):
+def http_json(url, headers=None, data=None, method=None, timeout=60):
     req = urllib.request.Request(url, headers=headers or {}, data=data, method=method)
-    with urllib.request.urlopen(req, timeout=60) as r:
+    with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read() or b"null")
 
 
@@ -202,28 +202,50 @@ def gsc_section(today):
             sub = sum(int(c.get("submitted", 0)) for c in s_.get("contents", []))
             lines.append(f"- Sitemap: Google last read it {str(s_.get('lastDownloaded', '?'))[:10]}; {sub} URLs submitted; "
                          f"{s_.get('errors', 0)} errors, {s_.get('warnings', 0)} warnings")
-        # Indexed vs submitted: inspect each sitemap URL (URL Inspection API, free quota 2,000/day).
-        sm_xml = urllib.request.urlopen("https://hourwright.co.uk/sitemap.xml", timeout=60).read().decode()
-        urls = [u.split("</loc>")[0] for u in sm_xml.split("<loc>")[1:]]
-        verdicts = {}
-        indexed_journal = []
-        for u in urls[:150]:
-            try:
-                r = http_json("https://searchconsole.googleapis.com/v1/urlInspection/index:inspect", h,
-                              json.dumps({"inspectionUrl": u, "siteUrl": GSC_SITE}).encode(), "POST")
-                st = (r.get("inspectionResult", {}).get("indexStatusResult", {}) or {}).get("coverageState", "Unknown")
-            except urllib.error.HTTPError as e:
-                st = f"inspection error {e.code}"
-            verdicts[st] = verdicts.get(st, 0) + 1
-            if "/journal/" in u and "indexed" in st.lower() and "not" not in st.lower():
-                indexed_journal.append(u.rsplit("/", 1)[-1])
-        indexed = sum(v for k, v in verdicts.items() if "indexed" in k.lower() and "not" not in k.lower())
-        lines.append(f"- Indexing: {indexed} of {len(urls)} sitemap URLs indexed. Breakdown: "
-                     + "; ".join(f"{k} {v}" for k, v in sorted(verdicts.items(), key=lambda x: -x[1])))
     except urllib.error.HTTPError as e:
         lines.append(f"- Search Console API error HTTP {e.code} (check the service account is a user on the property)")
         return lines, ["Search Console"]
+    except Exception as e:  # keep the section, flag it
+        lines.append(f"- Search Console performance data failed: {type(e).__name__}")
+        return lines, ["Search Console"]
+    lines.append(_indexing_line(h))
     return lines, []
+
+
+def _inspect(h, u):
+    try:
+        r = http_json("https://searchconsole.googleapis.com/v1/urlInspection/index:inspect", h,
+                      json.dumps({"inspectionUrl": u, "siteUrl": GSC_SITE}).encode(), "POST", timeout=25)
+        return (r.get("inspectionResult", {}).get("indexStatusResult", {}) or {}).get("coverageState", "Unknown")
+    except urllib.error.HTTPError as e:
+        return f"inspection error {e.code}"
+    except Exception as e:
+        return f"inspection {type(e).__name__}"
+
+
+def _indexing_line(h, budget_s=240):
+    """Indexed vs submitted via the URL Inspection API (free; 2,000/day). Never fails the section."""
+    import concurrent.futures as cf
+    import time
+    try:
+        sm_xml = urllib.request.urlopen("https://hourwright.co.uk/sitemap.xml", timeout=30).read().decode()
+    except Exception as e:
+        return f"- Indexing: not checked (sitemap fetch failed: {type(e).__name__})"
+    urls = [u.split("</loc>")[0] for u in sm_xml.split("<loc>")[1:]][:150]
+    verdicts, deadline = {}, time.monotonic() + budget_s
+    pool = cf.ThreadPoolExecutor(max_workers=6)
+    futs = [pool.submit(_inspect, h, u) for u in urls]
+    for f in futs:
+        left = deadline - time.monotonic()
+        try:
+            st = f.result(timeout=max(left, 0.01))
+        except cf.TimeoutError:
+            st = "not checked (time limit)"
+        verdicts[st] = verdicts.get(st, 0) + 1
+    pool.shutdown(wait=False, cancel_futures=True)
+    indexed = sum(v for k, v in verdicts.items() if "indexed" in k.lower() and "not" not in k.lower())
+    return (f"- Indexing: {indexed} of {len(urls)} sitemap URLs indexed. Breakdown: "
+            + "; ".join(f"{k} {v}" for k, v in sorted(verdicts.items(), key=lambda x: -x[1])))
 
 
 def _ga_report(h, prop, body):
