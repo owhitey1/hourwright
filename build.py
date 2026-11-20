@@ -470,7 +470,8 @@ def build_brands():
             return None
         rets = sorted({x["retailer_name"] for x in mine})
         who = rets[0] if len(rets) == 1 else ", ".join(rets[:-1]) + " and " + rets[-1]
-        title = f"{b['name']} watches UK: {n} {'model' if n == 1 else 'models'} from {gbp(min(x['price'] for x in mine))}"
+        noun = b['name'] if b['name'].lower().endswith("watches") else f"{b['name']} watches"
+        title = f"{noun} UK: {n} {'model' if n == 1 else 'models'} from {gbp(min(x['price'] for x in mine))}"
         desc = (f"The new {b['name']} watch at {gbp(mine[0]['price'])} from a UK authorised retailer ({who}). Price checked daily; buy direct from the retailer.") if n == 1 else (f"Compare {n} new {b['name']} {'watch' if n == 1 else 'watches'} from {gbp(min(x['price'] for x in mine))} "
                 f"at UK authorised retailers ({who}). Prices checked daily; buy direct from the retailer.")
         return title, desc
