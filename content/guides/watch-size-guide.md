@@ -1,5 +1,5 @@
-title: Watch size guide
-description: How to read case diameter, lug-to-lug and thickness, and how to work out what will fit your wrist before you order online.
+title: Watch size guide: how to measure a watch and your wrist
+description: How to measure a watch (case diameter, lug-to-lug, thickness) and your wrist, and work out what will fit before you order online.
 order: 4
 ---
 Buying a watch online means judging fit from numbers. Three measurements tell you most of what you need.
