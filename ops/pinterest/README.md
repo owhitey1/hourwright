@@ -6,7 +6,9 @@
 - Automation: Composio Pinterest connection `pinterest_hele-phrase` (alias `hourwright`). **Always pass this account explicitly.** `pinterest_jared-unvest` is Chrome & Coast Prints and must never be used for Hourwright.
 - Board: Watch gift ideas (id 230739249598077527).
 - Published: christmas-for-her (pin 230739180905793140), christmas-for-him (pin 230739180905793144), 20 Nov 2026.
-- Next: one pin a day from the remaining seven, creating each board on first use.
+- Schedule: cloud scheduled task "Hourwright Pinterest daily pin" (trig_01Ad7e7DmZ3f8Dw1t4cyNnDK), daily 06:52 UK. Publishes the next `queued` pin in `queue.json` (one a day), then switches to fresh-content mode: Mon/Wed/Fri only, only for a real Hourwright page not pinned in the last 90 days, image made with `scripts/make_pin.py`. Nothing qualifies, nothing is published.
+- Figures: the same task saves Hourwright's Pinterest impressions, outbound clicks and saves to `owhitey1/hourwright-ops/pinterest/stats.json`; the private daily report shows them, plus GA4 sessions and retailer clicks from Pinterest.
+- Audit 20 Nov 2026: no other scheduled task, workflow or script publishes to Pinterest.
 
 
 Original typographic pins (1000 x 1500) in Hourwright's colours and fonts. No retailer or brand photography is used, because retailer feed images are licensed for affiliate promotion on our site, not for re-posting on Pinterest.
