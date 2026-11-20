@@ -1,4 +1,13 @@
-# Pinterest pins (prepared 18 Nov 2026, not yet published)
+# Pinterest pins
+
+## Status (20 Nov 2026)
+- Profile: **Hourwright** business profile, https://uk.pinterest.com/hourwright/ (linked to Steve's Pinterest login; separate from Chrome & Coast Prints).
+- Website: hourwright.co.uk **claimed and verified** (meta tag `p:domain_verify`, set in `config.json`).
+- Automation: Composio Pinterest connection `pinterest_hele-phrase` (alias `hourwright`). **Always pass this account explicitly.** `pinterest_jared-unvest` is Chrome & Coast Prints and must never be used for Hourwright.
+- Board: Watch gift ideas (id 230739249598077527).
+- Published: christmas-for-her (pin 230739180905793140), christmas-for-him (pin 230739180905793144), 20 Nov 2026.
+- Next: one pin a day from the remaining seven, creating each board on first use.
+
 
 Original typographic pins (1000 x 1500) in Hourwright's colours and fonts. No retailer or brand photography is used, because retailer feed images are licensed for affiliate promotion on our site, not for re-posting on Pinterest.
 
