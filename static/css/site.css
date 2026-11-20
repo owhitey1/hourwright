@@ -47,7 +47,7 @@ s{color:var(--muted)}
 .eyebrow a{color:inherit}
 .lede{font-size:1.1875rem;max-width:40rem;color:var(--muted)}
 
-.disclosure{background:var(--ink);color:var(--paper);font-size:.8125rem;padding:.45rem 0}
+.disclosure{background:#10211c;color:#e0bd6a;font-size:1rem;padding:.5rem 0}
 .disclosure .wrap{display:block}
 .disclosure a{color:inherit}
 

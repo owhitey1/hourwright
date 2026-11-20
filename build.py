@@ -233,7 +233,7 @@ def page(path, title, desc, body, *, jsonld=None, noindex=False, crumbs=None, og
 </head>
 <body data-root="{r}" data-ga="{e(CFG.get('ga4_measurement_id') or '')}">
 <a class="skip" href="#main">Skip to content</a>
-<aside class="disclosure" aria-label="Affiliate disclosure"><span class="wrap">We may earn a commission when you buy from a retailer through our links. It never changes the price you pay. <a href="{r}affiliate-disclosure.html">How we are funded</a></span></aside>
+<aside class="disclosure" aria-label="Affiliate disclosure"><span class="wrap"><strong>Disclosure:</strong> we may earn a commission when you buy from a retailer through our links. It never changes the price you pay. <a href="{r}affiliate-disclosure.html">How we are funded</a></span></aside>
 <header class="site-head"><div class="wrap">
 <a class="brand" href="{r}index.html">{e(SITE)}</a>
 <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
@@ -904,7 +904,7 @@ def build_journal():
 <h1>{e(a['title'])}</h1>
 <p class="lede">{e(a['description'])}</p>
 <p class="meta">{dates} · By {e(a.get('author', SITE))}</p>
-<p class="note">{e(a['basis'])} Prices and stock below come from the retailer and update daily. We may earn a commission if you buy through these links; see our <a href="../affiliate-disclosure.html">affiliate disclosure</a>.</p>
+<p class="note">{e(a['basis'])} Drafted with AI assistance and checked against the sources listed. Prices and stock below come from the retailer and update daily. We may earn a commission if you buy through these links; see our <a href="../affiliate-disclosure.html">affiliate disclosure</a>.</p>
 <div class="prose">{body_html}</div>
 {extra}
 {'<h2>Sources</h2><ul class="plain">' + sources + '</ul>' if sources else ''}
