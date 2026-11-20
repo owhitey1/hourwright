@@ -27,6 +27,18 @@ A mechanical watch needs wearing or winding and loses or gains a few seconds a d
 
 Order earlier than you think you need to. Popular models go out of stock before major gifting dates, and delivery of high-value items usually needs a signature.
 
+## Christmas 2026: the dates that matter at Goldsmiths
+
+Most of the watches we currently list are sold by Goldsmiths. Its [returns policy](https://www.goldsmiths.co.uk/i/returns-policy) (checked 20 November 2026) sets out an extended Christmas window:
+
+- **Bought between 1 October and 20 December 2026:** can be exchanged or returned for a refund up to and including 3 January 2027.
+- **Bought on or after 21 December 2026:** the standard 14-day returns policy applies.
+- **Condition:** the watch must be unused, in its original packaging with no alterations, and returned with the guarantee and the receipt or proof of purchase.
+
+If you are guessing the size or style, ordering by 20 December keeps the longer window. If a bracelet needs adjusting, ask the retailer whether that counts as an alteration before you have it done.
+
+On delivery, Goldsmiths' [delivery information](https://www.goldsmiths.co.uk/i/delivery-information) says in-stock items ordered by 9pm are sent for next-day delivery, but next-day delivery is not guaranteed and there may be a delay of a day or so around Christmas. When we checked, it had not published a final Christmas order date, so check the product page before you order. Policies are the retailer's and can change.
+
 ## The warranty card
 
 The manufacturer's warranty starts on the date of sale, so it will be dated when you buy and not when you give it. For most gifts that is a matter of weeks and makes no practical difference. Make sure the card is stamped or activated and goes in the box.
