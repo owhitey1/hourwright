@@ -94,5 +94,6 @@
     "monthly_cap_usd": 5.5,
     "cap_note": "About £4.30, below Steve's £5 ceiling. The hard stop is xAI prepaid credit with auto top-up off and a $0 invoiced limit; this cap is a second guard.",
     "ledger_issue": 22
-  }
+  },
+  "pinterest_domain_verify": "4e1391f8b1747dd009fc6e9d8adfc1ab"
 }
