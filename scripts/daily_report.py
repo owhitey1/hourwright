@@ -286,10 +286,45 @@ def ga_section(today):
                                       "orderBys": [{"metric": {"metricName": "eventCount"}, "desc": True}], "limit": 5})
         if bypage:
             lines.append("- Retailer clicks by page (28 days): " + "; ".join(f"{x['dimensionValues'][0]['value']} {x['metricValues'][0]['value']}" for x in bypage))
+        # Actual website visits from Pinterest (any session whose source contains "pinterest": utm-tagged pins and organic referrals)
+        pin_filter = {"filter": {"fieldName": "sessionSource", "stringFilter": {"matchType": "CONTAINS", "value": "pinterest", "caseSensitive": False}}}
+        for label, rng in (("yesterday", {"startDate": "yesterday", "endDate": "yesterday"}),
+                           ("last 7 days", {"startDate": "7daysAgo", "endDate": "yesterday"})):
+            r = _ga_report(h, prop, {"dateRanges": [rng], "metrics": [{"name": "sessions"}, {"name": "activeUsers"}],
+                                     "dimensionFilter": pin_filter})
+            v = [m["value"] for m in r[0]["metricValues"]] if r else ["0", "0"]
+            ev = _ga_report(h, prop, {"dateRanges": [rng], "metrics": [{"name": "eventCount"}],
+                                      "dimensionFilter": {"andGroup": {"expressions": [pin_filter,
+                                          {"filter": {"fieldName": "eventName", "stringFilter": {"value": "affiliate_click"}}}]}}})
+            pc = ev[0]["metricValues"][0]["value"] if ev else "0"
+            lines.append(f"- From Pinterest, {label}: {v[0]} sessions, {v[1]} users, {pc} retailer clicks")
     except urllib.error.HTTPError as e:
         lines.append(f"- Analytics API error HTTP {e.code} (check the service account has Viewer access to the property)")
         return lines, ["Analytics"]
     return lines, []
+
+
+def pinterest_section(today):
+    """Pinterest figures saved by the daily Hourwright pin task (Composio, Hourwright account only)."""
+    path = os.environ.get("HW_PINTEREST_STATS")
+    if not path or not os.path.exists(path):
+        return ["## Pinterest (Hourwright profile)", "- No figures yet (the daily pin task saves them)."], []
+    try:
+        d = json.load(open(path))
+    except Exception as e:
+        return ["## Pinterest (Hourwright profile)", f"- Stats file unreadable: {type(e).__name__}"], ["Pinterest"]
+    lines = ["## Pinterest (Hourwright profile; Pinterest's own figures, may lag 1-2 days)"]
+    age = (today - dt.date.fromisoformat(d.get("saved", "1970-01-01"))).days
+    for key, label in (("yesterday", "Yesterday"), ("last_7_days", "Last 7 days")):
+        m = d.get(key) or {}
+        lines.append(f"- {label}: {m.get('impressions', '?')} impressions, {m.get('outbound_clicks', '?')} outbound clicks, "
+                     f"{m.get('saves', '?')} saves")
+    lines.append(f"- Pins published: {d.get('pins_published', '?')}; last published: {d.get('last_pin', '-')}; next: {d.get('next_pin', '-')}")
+    problems = []
+    if age > 2:
+        lines.append(f"- Stats are {age} days old: the daily pin task may not be running.")
+        problems.append("Pinterest")
+    return lines, problems
 
 
 def main():
@@ -298,7 +333,7 @@ def main():
     now = dt.datetime.now(dt.timezone.utc)
     today = now.date()
     parts, problems = [f"# Hourwright daily report, {today:%a %d %b %Y}"], []
-    for fn in (lambda: site_section(now), lambda: awin_section(today), lambda: gsc_section(today), lambda: ga_section(today)):
+    for fn in (lambda: site_section(now), lambda: awin_section(today), lambda: gsc_section(today), lambda: ga_section(today), lambda: pinterest_section(today)):
         try:
             lines, probs = fn()
         except Exception as e:  # noqa: BLE001  (one failing source never hides the others)
