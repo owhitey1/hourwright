@@ -463,8 +463,20 @@ def build_brands():
          "Every luxury watch brand we list from UK authorised retailers, with current listings and brand guides.",
          f'<section><div class="wrap"><h1>Brands</h1><p class="lede">Every brand with new watches from {gbp(CFG["price_floor_gbp"])} at our retailers, plus guides to the major makers.</p><ul class="links">{items}</ul></div></section>',
          crumbs=[("", "Brands")])
+    def brand_meta(b, mine):
+        """Search-facing title and description built from current listings (accurate by construction)."""
+        n = len(mine)
+        if not n:
+            return None
+        rets = sorted({x["retailer_name"] for x in mine})
+        who = rets[0] if len(rets) == 1 else ", ".join(rets[:-1]) + " and " + rets[-1]
+        title = f"{b['name']} watches UK: {n} {'model' if n == 1 else 'models'} from {gbp(min(x['price'] for x in mine))}"
+        desc = (f"The new {b['name']} watch at {gbp(mine[0]['price'])} from a UK authorised retailer ({who}). Price checked daily; buy direct from the retailer.") if n == 1 else (f"Compare {n} new {b['name']} {'watch' if n == 1 else 'watches'} from {gbp(min(x['price'] for x in mine))} "
+                f"at UK authorised retailers ({who}). Prices checked daily; buy direct from the retailer.")
+        return title, desc
     for b in all_brands():
         mine = [p for p in PRODUCTS if brand_for(p) is b]
+        meta = brand_meta(b, mine)
         none_now = (f'<div class="empty"><h2>No current listings</h2><p>Our retailers do not list new {e(b["name"])} watches '
                     f'from {gbp(CFG["price_floor_gbp"])} at the moment. Listings are checked daily.</p></div>') if PRODUCTS else EMPTY
         listing = (related_articles([p["id"] for p in mine], "../", heading=f"{b['name']} in the Journal") +
@@ -476,8 +488,8 @@ def build_brands():
 <p class="lede">{n} new {e(b['name'])} {'watch' if n == 1 else 'watches'} from {gbp(lows[b['slug']])} at UK authorised retailers, with each retailer's own price.</p>
 {listing}
 </div></section>"""
-            page(f"brands/{b['slug']}.html", f"{b['name']} watches: UK prices",
-                 f"New {b['name']} watches from UK authorised retailers, with current retailer prices.",
+            page(f"brands/{b['slug']}.html", meta[0] if meta else f"{b['name']} watches: UK prices",
+                 meta[1] if meta else f"New {b['name']} watches from UK authorised retailers, with current retailer prices.",
                  body, crumbs=[("brands/index.html", "Brands"), ("", b["name"])])
             continue
         paras = "".join(f"<p>{e(x)}</p>" for x in b["body"])
@@ -490,8 +502,8 @@ def build_brands():
 <h2>Key collections</h2><ul>{lines}</ul></aside></div>
 {listing}
 </div></section>"""
-        page(f"brands/{b['slug']}.html", f"{b['name']} watches: brand guide and UK prices",
-             f"{b['name']} watches from UK authorised retailers. {b['summary']}",
+        page(f"brands/{b['slug']}.html", meta[0] if meta else f"{b['name']} watches: brand guide and UK prices",
+             (meta[1] if meta else f"{b['name']} watches from UK authorised retailers. {b['summary']}"),
              body, crumbs=[("brands/index.html", "Brands"), ("", b["name"])])
 
 
