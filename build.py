@@ -194,6 +194,8 @@ def page(path, title, desc, body, *, jsonld=None, noindex=False, crumbs=None, og
         verify += f'<meta name="google-site-verification" content="{e(CFG["google_site_verification"])}">'
     if CFG.get("bing_site_verification"):
         verify += f'<meta name="msvalidate.01" content="{e(CFG["bing_site_verification"])}">'
+    if CFG.get("pinterest_domain_verify"):
+        verify += f'<meta name="p:domain_verify" content="{e(CFG["pinterest_domain_verify"])}">'
     signup = ""
     if CFG.get("email_form_action"):
         signup = f"""<section class="signup"><div class="wrap">
