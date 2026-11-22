@@ -78,3 +78,47 @@
   products: "4 to 6 in-stock J12 references across sizes."
   price_ceiling: 0
   publish_by: 2026-12-09
+
+# Added 2026-11-22 for the first-sale campaign (ops/ACQUISITION.md). Campaign order:
+# B7, B9, B11, B4, B10, B12, then B3, B6, B5.
+
+- id: B9
+  type: guide
+  working_title: "Longines Conquest 38mm, 41mm or 42mm: which size and version to buy"
+  search_intent: "Size and version choice before purchase: 'Longines Conquest 38 vs 41', 'Longines Conquest which size', 'Longines Conquest automatic or quartz'."
+  reader: "Someone set on a Conquest who needs to pick size, dial, movement and bracelet."
+  must_cover: "Case sizes, thickness, movement calibres and power reserve from longines.com pages for each reference; quartz vs automatic; how to judge size from a watch you already own. Check each catalogue reference on longines.com (Conquest and Conquest Heritage are different lines)."
+  products: "4 to 6 in-stock Conquest references across sizes."
+  price_ceiling: 0
+  publish_by: 2026-11-26
+
+- id: B11
+  type: guide
+  working_title: "Longines DolceVita and Mini DolceVita: sizes and versions explained"
+  search_intent: "Women's gift research: 'Longines Mini DolceVita size', 'Longines DolceVita review', 'Longines ladies watch gift'."
+  reader: "Someone buying a dress watch for her, often as a gift, choosing between sizes, diamonds and straps."
+  must_cover: "Case dimensions and movements from longines.com; quartz throughout unless Longines says otherwise; strap and bracelet options; sizing a gift without knowing the wrist. Link to journal/luxury-watches-for-her-christmas.html."
+  products: "4 to 6 in-stock DolceVita and Mini DolceVita references."
+  price_ceiling: 0
+  publish_by: 2026-11-28
+
+- id: B10
+  type: guide
+  working_title: "Rado Captain Cook sizes and versions explained"
+  search_intent: "'Rado Captain Cook 37 vs 42', 'Rado Captain Cook which size', 'Rado Captain Cook ceramic'."
+  reader: "A buyer drawn to the Captain Cook's design who must choose size, material and bezel."
+  must_cover: "Sizes, materials (steel, ceramic, bronze where listed), movements and power reserve from rado.com reference pages; which versions have a rotating bezel; bracelet systems as Rado describes them."
+  products: "4 to 6 in-stock Captain Cook references."
+  price_ceiling: 0
+  publish_by: 2026-11-30
+
+- id: B12
+  type: guide
+  working_title: "Zenith Chronomaster: the Sport, the Original and the Open explained"
+  search_intent: "'Zenith Chronomaster Sport review', 'Zenith Chronomaster Sport vs Original', 'El Primero 3600'."
+  reader: "A buyer with £8,000–£12,000 choosing a high-frequency chronograph from a heritage maker."
+  # Feed note 22 Nov: "Chronomaster Lollipop Honey 38mm" listed at £2,105; verify on zenith-watches.com before featuring or excluding.
+  must_cover: "El Primero calibres and what Zenith says the 1/10th-second display does; case sizes and bezels per line; power reserve from zenith-watches.com. No claims about resale or rarity."
+  products: "3 to 5 in-stock Chronomaster references."
+  price_ceiling: 0
+  publish_by: 2026-12-01
