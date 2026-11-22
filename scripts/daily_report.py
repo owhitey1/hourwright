@@ -305,6 +305,22 @@ def ga_section(today):
                                           {"filter": {"fieldName": "eventName", "stringFilter": {"value": "affiliate_click"}}}]}}})
             pc = ev[0]["metricValues"][0]["value"] if ev else "0"
             lines.append(f"- From Pinterest, {label}: {v[0]} sessions, {v[1]} users, {pc} retailer clicks")
+        # Results by channel, so organic search, Pinterest/social, referrals (outreach) and direct are judged separately.
+        wk = {"startDate": "7daysAgo", "endDate": "yesterday"}
+        ch = {"dimensions": [{"name": "sessionDefaultChannelGroup"}]}
+        ses = {x["dimensionValues"][0]["value"]: x["metricValues"][0]["value"]
+               for x in _ga_report(h, prop, {"dateRanges": [wk], **ch, "metrics": [{"name": "sessions"}]})}
+        clk = {x["dimensionValues"][0]["value"]: x["metricValues"][0]["value"]
+               for x in _ga_report(h, prop, {"dateRanges": [wk], **ch, "metrics": [{"name": "eventCount"}],
+                                             "dimensionFilter": {"filter": {"fieldName": "eventName", "stringFilter": {"value": "affiliate_click"}}}})}
+        names = ["Organic Search", "Organic Social", "Referral", "Direct"] + sorted(set(ses) - {"Organic Search", "Organic Social", "Referral", "Direct"})
+        lines.append("- By channel, last 7 days (sessions / retailer clicks): " + "; ".join(
+            f"{n} {ses.get(n, '0')} / {clk.get(n, '0')}" for n in names))
+        ref = _ga_report(h, prop, {"dateRanges": [{"startDate": "28daysAgo", "endDate": "yesterday"}],
+                                   "dimensions": [{"name": "sessionSource"}], "metrics": [{"name": "sessions"}],
+                                   "dimensionFilter": {"filter": {"fieldName": "sessionDefaultChannelGroup", "stringFilter": {"value": "Referral"}}},
+                                   "orderBys": [{"metric": {"metricName": "sessions"}, "desc": True}], "limit": 8})
+        lines.append("- Referring sites (28 days): " + ("; ".join(f"{x['dimensionValues'][0]['value']} {x['metricValues'][0]['value']}" for x in ref) if ref else "none recorded"))
     except urllib.error.HTTPError as e:
         lines.append(f"- Analytics API error HTTP {e.code} (check the service account has Viewer access to the property)")
         return lines, ["Analytics"]
