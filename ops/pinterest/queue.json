@@ -4,7 +4,8 @@
   "forbidden_accounts": ["pinterest_jared-unvest"],
   "image_base": "https://raw.githubusercontent.com/owhitey1/hourwright/main/ops/pinterest/",
   "boards": {
-    "Watch gift ideas": "230739249598077527"
+    "Watch gift ideas": "230739249598077527",
+    "Watches by budget": "230739249598080223"
   },
   "board_descriptions": {
     "Watch gift ideas": "Luxury watch gift ideas from UK authorised retailers, with plain advice on size, style and movement. From Hourwright (hourwright.co.uk).",
@@ -21,7 +22,7 @@
     {"id": "christmas-for-him", "image": "christmas-for-him.png", "board": "Watch gift ideas", "status": "published", "published": "2026-11-20", "pin_id": "230739180905793144",
      "title": "Luxury watches for him this Christmas",
      "link": "https://hourwright.co.uk/journal/luxury-watches-for-him-christmas.html?utm_source=pinterest&utm_medium=social"},
-    {"id": "watches-under-3000", "image": "watches-under-3000.png", "board": "Watches by budget", "status": "queued",
+    {"id": "watches-under-3000", "image": "watches-under-3000.png", "board": "Watches by budget", "status": "published", "published": "2026-11-22", "pin_id": "230739180905836823",
      "title": "Luxury watches under £3,000: UK prices compared",
      "description": "New luxury watches under £3,000 from UK authorised retailers, cheapest first, with each retailer's own price. A practical starting point if you are setting a Christmas gift budget.",
      "alt_text": "Graphic: Luxury watches under £3,000. New watches from UK authorised retailers, cheapest first, with the retailer's own price. Hourwright.",
