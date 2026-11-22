@@ -19,6 +19,18 @@ def kept(rows):
 
 
 class FeedTests(unittest.TestCase):
+    def test_non_awin_feed_columns_are_mapped(self):
+        raw = ("Product Name|Buy URL|Sale Price|Brand|Currency|ID\n"
+               "Carrera Chronograph 42mm|https://click.example/x|5200.00|TAG Heuer|GBP|R1\n").encode()
+        rows = ff.map_columns(ff.parse_feed(raw, "|"), {"product_name": "Product Name", "aw_deep_link": "Buy URL",
+                                                        "search_price": "Sale Price", "brand_name": "Brand",
+                                                        "currency": "Currency", "aw_product_id": "ID"})
+        self.assertEqual(rows[0]["product_name"], "Carrera Chronograph 42mm")
+        self.assertEqual(rows[0]["search_price"], "5200.00")
+        self.assertEqual(rows[0]["aw_deep_link"], "https://click.example/x")
+        self.assertEqual(rows[0]["mpn"] if "mpn" in rows[0] else "", "")
+        self.assertIs(ff.map_columns(rows, None), rows)
+
     def test_parses_plain_and_gzip(self):
         self.assertEqual(len(ff.parse_feed(RAW)), 8)
         self.assertEqual(len(ff.parse_feed(gzip.compress(RAW))), 8)

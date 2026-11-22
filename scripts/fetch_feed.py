@@ -131,11 +131,21 @@ def normalise_row(row, retailer, cfg):
     }
 
 
-def parse_feed(raw_bytes):
+def parse_feed(raw_bytes, delimiter=","):
     if raw_bytes[:2] == b"\x1f\x8b":
         raw_bytes = gzip.decompress(raw_bytes)
     text = raw_bytes.decode("utf-8-sig", errors="replace")
-    return list(csv.DictReader(io.StringIO(text)))
+    return list(csv.DictReader(io.StringIO(text), delimiter=delimiter))
+
+
+def map_columns(rows, column_map):
+    """Rename a non-Awin feed's columns to the Awin names the rest of this script reads.
+
+    column_map is {"<awin column>": "<column in this feed>"} from the retailer's config
+    entry. Values are copied unchanged; a column missing from the feed stays empty."""
+    if not column_map:
+        return rows
+    return [{**r, **{awin: r.get(src, "") for awin, src in column_map.items()}} for r in rows]
 
 
 def apply_history(products, previous, today):
@@ -179,7 +189,7 @@ def main():
             print(f"skip {retailer['name']}: {retailer['feed_env']} not set")
             continue
         with urllib.request.urlopen(url, timeout=120) as resp:
-            rows = parse_feed(resp.read())
+            rows = map_columns(parse_feed(resp.read(), retailer.get("delimiter", ",")), retailer.get("column_map"))
         kept = [p for p in (normalise_row(r, retailer, cfg) for r in rows) if p]
         print(f"{retailer['name']}: {len(rows)} rows, {len(kept)} kept")
         products += kept
