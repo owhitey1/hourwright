@@ -60,7 +60,10 @@
   function pageType() {
     var seg = location.pathname.split("/").filter(Boolean);
     if (!seg.length || seg[0] === "index.html") return "home";
-    if (seg[0] === "watches") return (seg[1] && seg[1] !== "index.html") ? "product" : "catalogue";
+    if (seg[0] === "watches") {
+      if (!seg[1] || seg[1] === "index.html") return "catalogue";
+      return /-\d{8,}\.html$/.test(seg[1]) ? "product" : "collections";  /* product slugs end in the feed id */
+    }
     return seg[0].replace(/[^a-z-]/g, "").slice(0, 20) || "other";
   }
   document.addEventListener("click", function (ev) {
