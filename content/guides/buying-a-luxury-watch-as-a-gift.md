@@ -1,5 +1,5 @@
 title: Buying a luxury watch as a gift
-description: How to choose a watch for someone else, get the size right without asking, and keep your options open if it needs exchanging.
+description: How to choose a luxury watch as a gift in the UK, get the size right without asking, and keep it exchangeable, with Christmas gift picks for him and her.
 order: 8
 ---
 A watch is a generous gift and an easy one to get slightly wrong. These steps reduce the risk.
@@ -45,4 +45,12 @@ The manufacturer's warranty starts on the date of sale, so it will be dated when
 
 ## If you want them to choose
 
-Many buyers show the recipient a shortlist first. Our compare tool lets you put up to three watches side by side on one screen, which makes that conversation easier.
+Many buyers show the recipient a shortlist first. Our [compare tool](../compare/index.html) lets you put up to three watches side by side on one screen, which makes that conversation easier.
+
+## Where to start looking
+
+- [Luxury watches for her this Christmas](../journal/luxury-watches-for-her-christmas.html): five considered picks from Longines, Rado, Chanel and Chopard.
+- [Luxury watches for him this Christmas](../journal/luxury-watches-for-him-christmas.html): five picks from Oris, Hamilton, Raymond Weil, Longines and Norqain.
+- By budget: [under £3,000](../watches/under-3000.html), [£3,000 to £5,000](../watches/3000-to-5000.html) and [£5,000 to £10,000](../watches/5000-to-10000.html).
+- By wearer: [ladies' watches](../watches/ladies-watches.html) and [men's watches](../watches/mens-watches.html).
+- Not sure yet? The [watch finder](../watch-finder/index.html) narrows the current range by budget, size and style.
