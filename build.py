@@ -565,6 +565,16 @@ def build_brands():
 <h2>Key collections</h2><ul>{lines}</ul></aside></div>
 {listing}
 </div></section>"""
+        if not meta and PRODUCTS:
+            # No current listings: say so honestly in search results and point to watches people can buy now.
+            by_slug = {x["slug"]: x for x in all_brands()}
+            alts = [by_slug[s]["name"] for s in (b.get("alternatives") or {}).get("brands", [])
+                    if s in by_slug and any(brand_for(p)["slug"] == s and p.get("in_stock") is not False for p in PRODUCTS)]
+            if alts:
+                alt_names = alts[0] if len(alts) == 1 else ", ".join(alts[:-1]) + " and " + alts[-1]
+                meta = (f"{b['name']} watches UK: brand guide and in-stock alternatives",
+                        f"{b['name']} brand guide: {b['summary']} Our UK retailers do not list new {b['name']} "
+                        f"at the moment; compare similar watches in stock from {alt_names}.")
         page(f"brands/{b['slug']}.html", meta[0] if meta else f"{b['name']} watches: brand guide and UK prices",
              (meta[1] if meta else f"{b['name']} watches from UK authorised retailers. {b['summary']}"),
              body, crumbs=[("brands/index.html", "Brands"), ("", b["name"])])

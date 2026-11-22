@@ -1,6 +1,6 @@
 # First-sale campaign task (23–29 Nov 2026)
 
-This is the prompt for the scheduled task "Hourwright first-sale campaign (23-29 Nov)", schedule `CRON_TZ=Europe/London 47 12 23-29 11 *`, with push notifications. The task needs both repositories: owhitey1/hourwright and owhitey1/hourwright-ops (read only). Only a chat that has both repositories attached can create a task with both, so the task has to be created or recreated from such a chat. Keep exactly one campaign task.
+This is the prompt for the scheduled task "Hourwright first-sale campaign (23-29 Nov)", schedule `CRON_TZ=Europe/London 17 13 23-29 11 *` (task trig_01KaT6MvBoAoNce65ixuPshw, created 22 Nov from a chat with both repositories; its prompt adds a duplicate guard on issue #26), with push notifications. The task needs both repositories: owhitey1/hourwright and owhitey1/hourwright-ops (read only). Only a chat that has both repositories attached can create a task with both, so the task has to be created or recreated from such a chat. Keep exactly one campaign task.
 
 ---
 
