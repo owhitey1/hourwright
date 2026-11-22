@@ -322,6 +322,32 @@ def home_journal():
     return f'<section><div class="wrap"><h2>Buying advice from the Journal</h2><ul class="links">{items}</ul><p><a class="more" href="journal/index.html">All Journal articles</a></p></div></section>'
 
 
+GIFT_ARTICLES = ("luxury-watches-for-her-christmas", "luxury-watches-for-him-christmas")
+GIFT_COLLECTIONS = ("ladies-watches", "mens-watches", "under-3000", "3000-to-5000")
+
+
+def gift_block(r, here=None, inline=False):
+    """Seasonal links to the Christmas gift pages (1 Nov to 24 Dec); built only from pages that are live."""
+    if not ((TODAY.month == 11) or (TODAY.month == 12 and TODAY.day <= 24)):
+        return ""
+    items = []
+    for a in ARTICLES:
+        if a["slug"] in GIFT_ARTICLES and a["slug"] != here:
+            items.append((f'{r}journal/{a["slug"]}.html', a["title"].split(":")[0], a["description"]))
+    live = {c["slug"]: (c, n) for c, n in ((c, len(i)) for c, i in live_collections())}
+    if "under-3000" in live and here != "under-3000":
+        items.append((f"{r}watches/under-3000.html", "Gifts under £3,000", f"{live['under-3000'][1]} new watches, cheapest first, each with the retailer's own price."))
+    if any(g["slug"] == "buying-a-luxury-watch-as-a-gift" for g in load_guides()) and here != "buying-a-luxury-watch-as-a-gift":
+        items.append((f"{r}guides/buying-a-luxury-watch-as-a-gift.html", "Buying a watch as a gift", "Sizing without knowing the wrist, style, and what to check about returns."))
+    if len(items) < 2:
+        return ""
+    lis = "".join(f'<li><a href="{h}"><strong>{e(t)}</strong><span>{e(d)}</span></a></li>' for h, t, d in items)
+    if inline:
+        return f'<h2>Buying as a Christmas gift?</h2><ul class="links">{lis}</ul>'
+    return (f'<section class="gifts"><div class="wrap"><h2>Christmas watch gifts</h2><ul class="links">{lis}</ul>'
+            f'<p class="fine">Check the retailer\'s own Christmas delivery dates and returns policy before you order.</p></div></section>')
+
+
 def build_home():
     brand_links = "".join(
         f'<li><a href="brands/{b["slug"]}.html"><strong>{e(b["name"])}</strong><span>{e(b["summary"])}</span></a></li>'
@@ -349,6 +375,7 @@ def build_home():
 <div><h2>The retailer's price</h2><p>Prices come straight from retailer product feeds and carry the date we last checked them. We never estimate a price.</p></div>
 <div><h2>Independent guidance</h2><p>Retailers cannot pay to change what we write or how watches are ordered. <a href="how-we-choose.html">How we choose</a></p></div>
 </div></section>
+{gift_block("")}
 {watch_of_the_week_block("")}
 {'<section><div class="wrap">' + shop_by("") + '</div></section>' if PRODUCTS else ''}
 {'<section><div class="wrap"><h2>Newly listed</h2>' + grid(latest, "") + checked_note() + '</div></section>' if latest else ''}
@@ -574,6 +601,7 @@ def build_collections():
 <p class="lede">{e(c['intro'])}</p>
 <p class="meta">{len(items)} new watches from {gbp(lo)} to {gbp(hi)} at UK authorised retailers, cheapest first.</p>
 {guide_link}
+{gift_block("../", here=c["slug"], inline=True) if c["slug"] in GIFT_COLLECTIONS else ""}
 {related_articles([p["id"] for p in items], "../", heading="Buying advice for these watches")}
 {grid(items, "../")}
 {checked_note()}
