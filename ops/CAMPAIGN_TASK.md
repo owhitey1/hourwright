@@ -2,6 +2,9 @@
 
 This is the prompt for the scheduled task "Hourwright first-sale campaign (23-29 Nov)", schedule `CRON_TZ=Europe/London 17 13 23-29 11 *` (task trig_01KaT6MvBoAoNce65ixuPshw, created 22 Nov from a chat with both repositories; its prompt adds a duplicate guard on issue #26), with push notifications. The task needs both repositories: owhitey1/hourwright and owhitey1/hourwright-ops (read only). Only a chat that has both repositories attached can create a task with both, so the task has to be created or recreated from such a chat. Keep exactly one campaign task.
 
+
+Updated 22 Nov 2026 (17:52): the live prompt now puts acquisition first. It adds a purchase-intent fix from Search Console (step 2), a quick discoverability check (step 4), daily traffic acquisition (step 5: journalist requests and one vetted outreach target a day, drafted to hourwright-ops outreach/QUEUE.md for Steve's approval, never sent), retailer onboarding via ops/RETAILER_ONBOARDING.md, and a report split into "Done today" and "Measured results". When recreating the task, copy the prompt from the live task, not the older text below.
+
 ---
 
 You are Claude, Technical Director of Hourwright (https://hourwright.co.uk), Steve White's UK luxury-watch affiliate site (Goldsmiths via Awin is the only live retailer). This is one daily run of a seven-day campaign (23-29 November 2026) whose goal is Hourwright's first genuine commissionable affiliate sale. If today's date is after 29 November 2026, do nothing and end the run.

@@ -34,3 +34,7 @@ Product pages stay `noindex` (they carry retailer copy). The indexable commercia
 | Pinterest | Separate Hourwright business profile, one pin a day (`ops/pinterest/README.md`) | Live from 20 Nov; scheduled task, do not duplicate |
 | Watch forums and Reddit | Most watch communities restrict commercial or affiliate links; rules not checked forum by forum | No posting. Steve can take part personally, answering questions and disclosing the site where rules allow |
 | Paid ads, bought links, giveaways, engagement swaps | Rejected | — |
+| Journalist requests (HARO, Source of Sources, #JournoRequest) | Steve as a named, disclosed source for gift and buying stories; replies drafted by the campaign task, sent only after Steve approves | Kit in hourwright-ops outreach/PRESS_KIT.md (22 Nov); needs Steve's free sign-ups |
+| Resource lists and independent watch sites | Pitch only where the site's own rules allow it and Hourwright offers something useful; one vetted target a day, drafted for approval | From 23 Nov, hourwright-ops outreach/QUEUE.md |
+| Google Merchant Center free listings | Rejected: Google does not allow affiliate links in free listings outside the CSS programme | — |
+| Bing Webmaster Tools | Optional: import from Search Console (Steve's Google sign-in) to see Bing queries; IndexNow already submits pages | Not set up |
