@@ -5,7 +5,9 @@
 - Website: hourwright.co.uk **claimed and verified** (meta tag `p:domain_verify`, set in `config.json`).
 - Automation: Composio Pinterest connection `pinterest_hele-phrase` (alias `hourwright`). **Always pass this account explicitly.** `pinterest_jared-unvest` is Chrome & Coast Prints and must never be used for Hourwright.
 - Board: Watch gift ideas (id 230739249598077527).
-- Published: christmas-for-her (pin 230739180905793140), christmas-for-him (pin 230739180905793144), 20 Nov 2026.
+- Boards: Watch gift ideas (id 230739249598077527), Watches by budget (id 230739249598080223).
+- Published: christmas-for-her (pin 230739180905793140), christmas-for-him (pin 230739180905793144), 20 Nov 2026; watches-under-3000 (pin 230739180905836823), 22 Nov 2026.
+- Fix 22 Nov 2026: the 21 and 22 Nov scheduled runs published nothing because the destination check fetched hourwright.co.uk, which stops an unattended run at a permission prompt. The task now checks the destination from a local build plus the latest site.yml result, and checks Pinterest for an existing pin before publishing, so it cannot post a duplicate.
 - Schedule: cloud scheduled task "Hourwright Pinterest daily pin" (trig_01Ad7e7DmZ3f8Dw1t4cyNnDK), daily 06:52 UK. Publishes the next `queued` pin in `queue.json` (one a day), then switches to fresh-content mode: Mon/Wed/Fri only, only for a real Hourwright page not pinned in the last 90 days, image made with `scripts/make_pin.py`. Nothing qualifies, nothing is published.
 - Figures: the same task saves Hourwright's Pinterest impressions, outbound clicks and saves to `owhitey1/hourwright-ops/pinterest/stats.json`; the private daily report shows them, plus GA4 sessions and retailer clicks from Pinterest.
 - Audit 20 Nov 2026: no other scheduled task, workflow or script publishes to Pinterest.
