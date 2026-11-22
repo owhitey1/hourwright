@@ -18,7 +18,18 @@
    "Omega traces its history to a workshop opened by Louis Brandt in 1848. Two families of watch define it for most buyers: the Speedmaster chronograph, worn on the Moon in 1969, and the Seamaster, which covers everything from dress pieces to professional dive watches.",
    "Most current Omega movements use the Co-Axial escapement and carry Master Chronometer certification, which adds testing by the Swiss metrology institute METAS, including resistance to strong magnetic fields, on top of the standard chronometer test.",
    "What to compare: case size within a line varies more than you might expect, and the same model is often offered on bracelet, leather and rubber at different prices. Check which you are being quoted for."
-  ]
+  ],
+  "alternatives": {
+   "brands": [
+    "longines",
+    "oris",
+    "zenith"
+   ],
+   "collections": [
+    "dive-watches",
+    "chronographs"
+   ]
+  }
  },
  {
   "slug": "cartier",
@@ -39,7 +50,18 @@
    "Cartier began as a Paris jeweller in 1847 and has made wristwatches since the early twentieth century. The Santos was designed in 1904 for the aviator Alberto Santos-Dumont, and the Tank followed in 1917. Both are still in the catalogue and still recognisable at a glance.",
    "Cartier watches are bought for design first. Many models are offered in both quartz and mechanical versions, and in several sizes, so two watches with the same name can differ a great deal in price and in what is inside.",
    "What to compare: movement type, size (Cartier's size names differ by line) and metal. Steel, two-tone and solid gold versions of one design sit in very different price bands."
-  ]
+  ],
+  "alternatives": {
+   "brands": [
+    "chanel",
+    "chopard",
+    "rado"
+   ],
+   "collections": [
+    "ladies-watches",
+    "gold-watches"
+   ]
+  }
  },
  {
   "slug": "breitling",
@@ -60,7 +82,18 @@
    "Léon Breitling founded the company in 1884 and it has specialised in chronographs ever since. The Navitimer, introduced in 1952 with its circular slide rule bezel, remains the best-known pilot's chronograph made.",
    "Breitling submits its movements for COSC chronometer certification, and its in-house B01 chronograph calibre is used across several lines. The Superocean covers dive watches and the Chronomat is the all-purpose sports model.",
    "What to compare: Breitling cases tend to wear large, so check diameter and thickness. Some models use in-house calibres and others use movements based on supplier designs, and the price reflects that."
-  ]
+  ],
+  "alternatives": {
+   "brands": [
+    "norqain",
+    "longines",
+    "zenith"
+   ],
+   "collections": [
+    "chronographs",
+    "dive-watches"
+   ]
+  }
  },
  {
   "slug": "tag-heuer",
@@ -83,7 +116,18 @@
    "Edouard Heuer founded the business in 1860. The Carrera chronograph arrived in 1963 and the square-cased Monaco in 1969, both closely tied to motor racing. The name TAG Heuer dates from the 1980s.",
    "The range is broad. Quartz Formula 1 and Aquaracer models sit at the entry point, while Carrera and Monaco chronographs with in-house movements reach well into our price range.",
    "What to compare: quartz against automatic versions of the same line, and whether a chronograph uses an in-house calibre. Both change the price substantially."
-  ]
+  ],
+  "alternatives": {
+   "brands": [
+    "longines",
+    "zenith",
+    "norqain"
+   ],
+   "collections": [
+    "chronographs",
+    "dive-watches"
+   ]
+  }
  },
  {
   "slug": "iwc",
@@ -106,7 +150,18 @@
    "IWC was founded in 1868 by the American watchmaker Florentine Ariosto Jones in Schaffhausen, on the Rhine. It is known for legible, restrained design and for pilot's watches in particular.",
    "The Portugieser is the dressier flagship, the Portofino the simplest and most classical line, and the Ingenieur the sports watch with an integrated bracelet.",
    "What to compare: IWC offers many variations on a few designs. Look at case size, power reserve and whether a complication such as a chronograph or perpetual calendar is included."
-  ]
+  ],
+  "alternatives": {
+   "brands": [
+    "zenith",
+    "longines",
+    "montblanc"
+   ],
+   "collections": [
+    "chronographs",
+    "mens-watches"
+   ]
+  }
  },
  {
   "slug": "panerai",
@@ -127,7 +182,18 @@
    "Panerai started as a Florence watch shop in 1860 and later supplied instruments to the Italian Navy. Its watches stayed military for decades before becoming available to the public.",
    "The Luminor is identified by the lever bridge that protects its crown. The Radiomir has a cushion case and wire-style lugs, and the Submersible is the dedicated dive line.",
    "What to compare: these are large watches by design, so check the diameter against your wrist. Hand-wound and automatic versions exist side by side."
-  ]
+  ],
+  "alternatives": {
+   "brands": [
+    "ulysse-nardin",
+    "oris",
+    "norqain"
+   ],
+   "collections": [
+    "dive-watches",
+    "mens-watches"
+   ]
+  }
  },
  {
   "slug": "hublot",
@@ -147,7 +213,18 @@
    "Hublot launched in 1980 with a gold watch on a rubber strap, an unusual pairing at the time. The Big Bang of 2005 established the look the brand is known for today.",
    "Material is the theme: ceramic, titanium, carbon and sapphire appear across the range. The Classic Fusion is the slimmer, quieter alternative to the Big Bang.",
    "What to compare: case material drives price more than anything else here. Check the movement too, since in-house Unico chronographs cost more than models with supplied calibres."
-  ]
+  ],
+  "alternatives": {
+   "brands": [
+    "zenith",
+    "ulysse-nardin",
+    "girard-perregaux"
+   ],
+   "collections": [
+    "chronographs",
+    "skeleton-watches"
+   ]
+  }
  },
  {
   "slug": "oris",
@@ -191,7 +268,18 @@
    "Bell & Ross was founded in Paris in 1992. Its defining design is the square case with a round dial, modelled on aircraft cockpit instruments and introduced with the BR 01 in 2005.",
    "The BR 03 is the everyday version of that idea. The BR 05 adapts it into a sports watch with an integrated bracelet.",
    "What to compare: case size and material, and whether you want the instrument-style BR 03 or the bracelet-led BR 05."
-  ]
+  ],
+  "alternatives": {
+   "brands": [
+    "norqain",
+    "oris",
+    "longines"
+   ],
+   "collections": [
+    "chronographs",
+    "dive-watches"
+   ]
+  }
  },
  {
   "slug": "maurice-lacroix",
@@ -231,7 +319,18 @@
    "Franck Muller established his brand near Geneva in the early 1990s. The curved, barrel-shaped Cintrée Curvex case became its signature, usually paired with large stylised numerals.",
    "The Vanguard is the sportier interpretation. Crazy Hours rearranges the numerals around the dial and uses a jumping hour hand to follow them.",
    "What to compare: sizes are given by reference rather than diameter, so check the case dimensions listed by the retailer."
-  ]
+  ],
+  "alternatives": {
+   "brands": [
+    "girard-perregaux",
+    "czapek",
+    "h-moser-and-cie"
+   ],
+   "collections": [
+    "skeleton-watches",
+    "gold-watches"
+   ]
+  }
  },
  {
   "slug": "longines",

@@ -448,6 +448,37 @@ def build_product(p):
          body, jsonld=[ld], crumbs=crumbs, og_type="product", noindex=True)  # retailer copy: kept out of the index
 
 
+def alternatives_block(b):
+    """For a brand our retailers don't list: in-stock watches from brands we list in the same categories."""
+    alt = b["alternatives"]
+    by_slug = {x["slug"]: x for x in all_brands()}
+    picks, names = [], []
+    cols = {c["slug"]: c for c in COLLECTIONS}
+    wanted = [cols[c] for c in alt.get("collections", []) if c in cols]
+    live = {c["slug"] for c, _ in live_collections()}
+    for s in alt.get("brands", []):
+        mine = sorted((p for p in PRODUCTS if brand_for(p)["slug"] == s and p.get("in_stock") is not False
+                       and (not wanted or any(in_collection(p, c) for c in wanted))),
+                      key=lambda p: p["price"])
+        if not mine:
+            continue
+        names.append(f'<a href="{s}.html">{e(by_slug[s]["name"])}</a>')
+        picks += [mine[0], mine[len(mine) // 2]] if len(mine) > 1 else mine[:1]
+    if not picks:
+        return ""
+    col_links = " or ".join(f'<a href="../watches/{c["slug"]}.html">{e(c["title"])}</a>' for c in wanted if c["slug"] in live)
+    seen, uniq = set(), []
+    for p in picks:
+        if p["id"] not in seen:
+            seen.add(p["id"]); uniq.append(p)
+    and_names = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
+    return (f'<h2>Watches you can buy now in similar categories</h2>'
+            f'<p>If you are looking at {e(b["name"])}, our retailers currently list watches in the same categories from {and_names}. '
+            f'These are different watches, not equivalents: compare size, movement and warranty before you choose.'
+            + (f' Or browse {col_links}.' if col_links else '') + '</p>'
+            + grid(uniq, "../") + checked_note())
+
+
 def build_brands():
     counts, lows = {}, {}
     for p in PRODUCTS:
@@ -484,6 +515,8 @@ def build_brands():
                     f'from {gbp(CFG["price_floor_gbp"])} at the moment. Listings are checked daily.</p></div>') if PRODUCTS else EMPTY
         listing = (related_articles([p["id"] for p in mine], "../", heading=f"{b['name']} in the Journal") +
                    f'<h2>{e(b["name"])} watches at UK retailers</h2>' + ((grid(mine, "../") + checked_note()) if mine else none_now))
+        if not mine and PRODUCTS and b.get("alternatives"):
+            listing += alternatives_block(b)
         if b.get("generated"):
             n = len(mine)
             body = f"""<section><div class="wrap">
