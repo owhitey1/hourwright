@@ -26,11 +26,14 @@ import urllib.request
 
 PUB = "3102076"
 SITE_REPO = "owhitey1/hourwright"
-WATCH_PROGRAMMES = {"2174": "Goldsmiths", "5856": "Beaverbrooks", "16071": "Chisholm Hunter", "24383": "T. H. Baker"}
+WATCH_PROGRAMMES = {"2174": "Goldsmiths", "5856": "Beaverbrooks", "24383": "T. H. Baker", "11017": "Mappin & Webb",
+                    "16071": "Chisholm Hunter"}
+# Applications whose Awin programme id is not recorded: matched by programme name instead.
+WATCH_NAMES = {"burrells": "Burrells"}
 # Awin clicks recorded before the automated link checker was stopped (incident #25).
 KNOWN_AUTOMATED = {"until": "2026-11-18T01:00:00+00:00", "goldsmiths_clicks": 181}
 GSC_SITE = "sc-domain:hourwright.co.uk"
-WORKFLOWS = {"site.yml": ("Build and deploy", 26), "monitor.yml": ("Monitor", 8), "https.yml": ("HTTPS", 26)}
+WORKFLOWS = {"site.yml": ("Build and deploy", 26), "monitor.yml": ("Monitor", 18), "https.yml": ("HTTPS", 26)}
 
 
 def http_json(url, headers=None, data=None, method=None, timeout=60):
@@ -101,7 +104,11 @@ def awin_section(today):
             for p in http_json(f"{base}/programmes?relationship={rel}", h) or []:
                 if str(p.get("id")) in WATCH_PROGRAMMES:
                     status[str(p["id"])] = rel
-        lines.append("- Programmes: " + "; ".join(f"{n} {status.get(i, 'not joined')}" for i, n in WATCH_PROGRAMMES.items()))
+                for key, label in WATCH_NAMES.items():
+                    if key in str(p.get("name", "")).lower():
+                        status[label] = rel
+        names = {**WATCH_PROGRAMMES, **{v: v for v in WATCH_NAMES.values()}}
+        lines.append("- Programmes: " + "; ".join(f"{n} {status.get(i, 'not joined')}" for i, n in names.items()))
         if status.get("2174") != "joined":
             problems.append("Goldsmiths not joined")
     except urllib.error.HTTPError as e:
