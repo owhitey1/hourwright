@@ -478,20 +478,46 @@ def build_product(p):
          body, jsonld=[ld], crumbs=crumbs, og_type="product", noindex=True)  # retailer copy: kept out of the index
 
 
+def size_mm(p):
+    m = re.search(r"(\d{2}(?:\.\d)?)\s?mm", p["name"], re.I)
+    return float(m.group(1)) if m else None
+
+
+def alternative_picks(b):
+    """In-stock watches from the alternative brands, in the brand's categories and (optionally) from a minimum case size.
+    Returns [(brand slug, [products])] for brands with at least one match. Used by both the page and its meta description,
+    so the search snippet never names a brand the page does not show."""
+    alt = b.get("alternatives") or {}
+    by_slug = {x["slug"]: x for x in all_brands()}
+    cols = {c["slug"]: c for c in COLLECTIONS}
+    wanted = [cols[c] for c in alt.get("collections", []) if c in cols]
+    min_mm = alt.get("min_mm")
+    out = []
+    for s in alt.get("brands", []):
+        if s not in by_slug:
+            continue
+        mine = sorted((p for p in PRODUCTS if brand_for(p)["slug"] == s and p.get("in_stock") is not False
+                       and (not wanted or any(in_collection(p, c) for c in wanted))
+                       and (not min_mm or size_mm(p) is None or size_mm(p) >= min_mm)),
+                      key=lambda p: p["price"])
+        if mine:
+            out.append((s, mine))
+    return out
+
+
+def and_list(names):
+    return names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
+
+
 def alternatives_block(b):
     """For a brand our retailers don't list: in-stock watches from brands we list in the same categories."""
     alt = b["alternatives"]
     by_slug = {x["slug"]: x for x in all_brands()}
-    picks, names = [], []
     cols = {c["slug"]: c for c in COLLECTIONS}
     wanted = [cols[c] for c in alt.get("collections", []) if c in cols]
     live = {c["slug"] for c, _ in live_collections()}
-    for s in alt.get("brands", []):
-        mine = sorted((p for p in PRODUCTS if brand_for(p)["slug"] == s and p.get("in_stock") is not False
-                       and (not wanted or any(in_collection(p, c) for c in wanted))),
-                      key=lambda p: p["price"])
-        if not mine:
-            continue
+    picks, names = [], []
+    for s, mine in alternative_picks(b):
         names.append(f'<a href="{s}.html">{e(by_slug[s]["name"])}</a>')
         picks += [mine[0], mine[len(mine) // 2]] if len(mine) > 1 else mine[:1]
     if not picks:
@@ -501,9 +527,8 @@ def alternatives_block(b):
     for p in picks:
         if p["id"] not in seen:
             seen.add(p["id"]); uniq.append(p)
-    and_names = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
     return (f'<h2>Watches you can buy now in similar categories</h2>'
-            f'<p>If you are looking at {e(b["name"])}, our retailers currently list watches in the same categories from {and_names}. '
+            f'<p>If you are looking at {e(b["name"])}, our retailers currently list watches in the same categories from {and_list(names)}. '
             f'These are different watches, not equivalents: compare size, movement and warranty before you choose.'
             + (f' Or browse {col_links}.' if col_links else '') + '</p>'
             + grid(uniq, "../") + checked_note())
@@ -571,10 +596,9 @@ def build_brands():
         if not meta and PRODUCTS:
             # No current listings: say so honestly in search results and point to watches people can buy now.
             by_slug = {x["slug"]: x for x in all_brands()}
-            alts = [by_slug[s]["name"] for s in (b.get("alternatives") or {}).get("brands", [])
-                    if s in by_slug and any(brand_for(p)["slug"] == s and p.get("in_stock") is not False for p in PRODUCTS)]
+            alts = [by_slug[s]["name"] for s, _ in alternative_picks(b)]
             if alts:
-                alt_names = alts[0] if len(alts) == 1 else ", ".join(alts[:-1]) + " and " + alts[-1]
+                alt_names = and_list(alts)
                 meta = (f"{b['name']} watches UK: brand guide and in-stock alternatives",
                         f"{b['name']} brand guide: {b['summary']} Our UK retailers do not list new {b['name']} "
                         f"at the moment; compare similar watches in stock from {alt_names}.")

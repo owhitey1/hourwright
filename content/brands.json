@@ -192,7 +192,8 @@
    "collections": [
     "dive-watches",
     "mens-watches"
-   ]
+   ],
+   "min_mm": 40
   }
  },
  {
