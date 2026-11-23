@@ -5,7 +5,8 @@
   "image_base": "https://raw.githubusercontent.com/owhitey1/hourwright/main/ops/pinterest/",
   "boards": {
     "Watch gift ideas": "230739249598077527",
-    "Watches by budget": "230739249598080223"
+    "Watches by budget": "230739249598080223",
+    "Watch buying guides": "230739249598080902"
   },
   "board_descriptions": {
     "Watch gift ideas": "Luxury watch gift ideas from UK authorised retailers, with plain advice on size, style and movement. From Hourwright (hourwright.co.uk).",
@@ -27,7 +28,7 @@
      "description": "New luxury watches under £3,000 from UK authorised retailers, cheapest first, with each retailer's own price. A practical starting point if you are setting a Christmas gift budget.",
      "alt_text": "Graphic: Luxury watches under £3,000. New watches from UK authorised retailers, cheapest first, with the retailer's own price. Hourwright.",
      "link": "https://hourwright.co.uk/watches/under-3000.html?utm_source=pinterest&utm_medium=social&utm_campaign=watches-under-3000"},
-    {"id": "watch-finder", "image": "watch-finder.png", "board": "Watch buying guides", "status": "queued",
+    {"id": "watch-finder", "image": "watch-finder.png", "board": "Watch buying guides", "status": "published", "published": "2026-11-23", "pin_id": "230739180905849776",
      "title": "Find a luxury watch for your budget",
      "description": "Choose a budget, style and case size and see matching new luxury watches from UK authorised retailers. Useful for narrowing down a watch gift before you compare prices.",
      "alt_text": "Graphic: Find a watch for your budget. Choose a budget, style and case size and see matching new watches from UK authorised retailers. Hourwright.",
