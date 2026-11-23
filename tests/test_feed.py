@@ -31,6 +31,30 @@ class FeedTests(unittest.TestCase):
         self.assertEqual(rows[0]["mpn"] if "mpn" in rows[0] else "", "")
         self.assertIs(ff.map_columns(rows, None), rows)
 
+    def test_rakuten_product_search_rows(self):
+        xml = """<result><TotalMatches>2</TotalMatches><TotalPages>1</TotalPages><PageNumber>1</PageNumber>
+<item><mid>54389</mid><linkid>111</linkid><sku>7076357177397</sku>
+<productname>Maurice Lacroix Aikon Automatic 39mm Watch</productname>
+<category><primary>Watches</primary><secondary>Mens</secondary></category>
+<price currency="GBP">2600.00</price><saleprice currency="GBP">2600.00</saleprice><upccode>7630016712345</upccode>
+<description><short>s</short><long>Maurice Lacroix Watch Aikon Automatic 39mm AI6007-SP012-130-1. The Legend keeps growing.</long></description>
+<linkurl>https://click.linksynergy.com/link?id=abc&amp;offerid=2128802.111&amp;type=15&amp;murl=https%3A%2F%2Fwww.cwsellors.co.uk%2Fproducts%2Fx</linkurl>
+<imageurl>https://cdn.example/x.jpg</imageurl></item>
+<item><mid>54389</mid><linkid>112</linkid><sku>9</sku><productname>Unknownbrand Thing Watch</productname>
+<price currency="GBP">3000.00</price><linkurl>https://click.linksynergy.com/link?id=abc</linkurl></item></result>"""
+        rows, pages = ff.rakuten_items_to_rows(xml, {"maurice lacroix": "Maurice Lacroix"})
+        self.assertEqual(pages, 1)
+        self.assertEqual(rows[0]["brand_name"], "Maurice Lacroix")
+        self.assertEqual(rows[0]["search_price"], "2600.00")
+        self.assertEqual(rows[0]["currency"], "GBP")
+        self.assertEqual(rows[0]["mpn"], "AI6007-SP012-130-1")
+        self.assertEqual(rows[1]["brand_name"], "")  # unknown brand is never guessed
+        retailer = {"id": "cwsellors", "name": "C.W. Sellors", "network": "rakuten"}
+        products = [p for p in (ff.normalise_row(r, retailer, CFG) for r in rows) if p]
+        self.assertEqual([p["id"] for p in products], ["cwsellors-7076357177397"])
+        self.assertIsNone(products[0]["in_stock"])
+        self.assertNotIn("clickref", products[0]["link"])
+
     def test_parses_plain_and_gzip(self):
         self.assertEqual(len(ff.parse_feed(RAW)), 8)
         self.assertEqual(len(ff.parse_feed(gzip.compress(RAW))), 8)

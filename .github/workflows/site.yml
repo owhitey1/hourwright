@@ -28,6 +28,7 @@ jobs:
           AWIN_FEED_URL_JURA: ${{ secrets.AWIN_FEED_URL_JURA }}
           AWIN_FEED_URL_GOLDSMITHS: ${{ secrets.AWIN_FEED_URL_GOLDSMITHS }}
           AWIN_FEED_URL_BEAVERBROOKS: ${{ secrets.AWIN_FEED_URL_BEAVERBROOKS }}
+          RAKUTEN_TOKEN_KEY: ${{ secrets.RAKUTEN_TOKEN_KEY }}
         id: feed
         continue-on-error: true
         run: python scripts/fetch_feed.py

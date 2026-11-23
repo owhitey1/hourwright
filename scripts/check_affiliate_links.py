@@ -31,12 +31,31 @@ if not products:
     print("no products yet: nothing to check")
     sys.exit(0)
 
+RETAILERS = {r["id"]: r for r in CFG.get("retailers", [])}
+
+
+def rakuten_ok(p, a, q):
+    """Rakuten product link: HTTPS click.linksynergy.com, Hourwright's Rakuten link id,
+    the advertiser's offer or merchant id, and a destination on the retailer's own site."""
+    r = RETAILERS.get(p.get("retailer"), {})
+    dest = up.urlparse(a.get("murl", ""))
+    home = up.urlparse(r.get("url", "")).netloc.replace("www.", "")
+    return (q.scheme == "https" and q.netloc == "click.linksynergy.com"
+            and a.get("id") and a.get("id") == r.get("rakuten_link_id", a.get("id"))
+            and (a.get("offerid", "").split(".")[0] == str(r.get("rakuten_offer_id")) or a.get("mid") == str(r.get("rakuten_mid")))
+            and dest.scheme == "https" and home and dest.netloc.replace("www.", "") == home)
+
+
 malformed = []
 for p in products:
     q = up.urlparse(p["link"])
     a = dict(up.parse_qsl(q.query))
-    if not (q.scheme == "https" and q.netloc == "www.awin1.com" and a.get("a") == PUBLISHER
-            and a.get("clickref") == "hourwright" and a.get("m") and p["id"].endswith("-" + a.get("p", "?"))):
+    if RETAILERS.get(p.get("retailer"), {}).get("network") == "rakuten":
+        ok = rakuten_ok(p, a, q)
+    else:
+        ok = (q.scheme == "https" and q.netloc == "www.awin1.com" and a.get("a") == PUBLISHER
+              and a.get("clickref") == "hourwright" and a.get("m") and p["id"].endswith("-" + a.get("p", "?")))
+    if not ok:
         malformed.append(p["id"])
 print(f"structure: {len(products)} links, {len(malformed)} malformed (no links were requested)")
 for pid in malformed[:20]:

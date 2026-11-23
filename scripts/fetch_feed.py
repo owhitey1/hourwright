@@ -25,6 +25,7 @@ import json
 import os
 import re
 import sys
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -88,8 +89,10 @@ def normalise_row(row, retailer, cfg):
     currency = str(row.get("currency", "")).strip().upper()
     if not (price and name and brand and pid):
         return None
-    if not link.startswith("https://www.awin1.com/"):
-        return None  # only genuine Awin tracking links are ever published
+    network = retailer.get("network", "awin")
+    prefix = {"awin": "https://www.awin1.com/", "rakuten": "https://click.linksynergy.com/"}[network]
+    if not link.startswith(prefix):
+        return None  # only genuine network tracking links are ever published
     if currency != "GBP":
         return None
     if price < cfg["price_floor_gbp"]:
@@ -104,7 +107,7 @@ def normalise_row(row, retailer, cfg):
         return None
     if re.search(r"pre-?owned|ex-?display|refurbished|second[ -]?hand|vintage", brand + " " + name, re.I):
         return None  # Hourwright lists new watches only
-    if "clickref=" not in link:
+    if network == "awin" and "clickref=" not in link:
         link += "&clickref=hourwright"  # separates Hourwright clicks from other Worth Finding spaces in Awin reports
     was = to_price(row.get("rrp_price")) or to_price(row.get("product_price_old"))
     image = str(row.get("merchant_image_url") or row.get("aw_image_url") or "").strip()
@@ -148,6 +151,95 @@ def map_columns(rows, column_map):
     return [{**r, **{awin: r.get(src, "") for awin, src in column_map.items()}} for r in rows]
 
 
+RAKUTEN_API = "https://api.linksynergy.com"
+
+
+def rakuten_brand(name, brands):
+    """Brand from the start of a Rakuten product name (Product Search has no brand field).
+    Only known brands are accepted; anything else is skipped rather than guessed."""
+    low = name.lower()
+    best = ""
+    for alias in brands:
+        if low.startswith(alias + " ") and len(alias) > len(best):
+            best = alias
+    return brands[best] if best else ""
+
+
+def rakuten_reference(text):
+    """Manufacturer reference from the first sentence of a C.W. Sellors description,
+    e.g. 'Maurice Lacroix Watch Aikon Automatic 39mm AI6007-SP012-130-1.' -> 'AI6007-SP012-130-1'."""
+    first = str(text or "").split(". ")[0].strip().rstrip(".")
+    token = first.split(" ")[-1] if first else ""
+    if len(token) >= 5 and re.search(r"\d", token) and re.search(r"[A-Za-z]|[.\-/]", token) and not re.fullmatch(r"\d+mm", token, re.I):
+        return token
+    return ""
+
+
+def rakuten_items_to_rows(xml_text, brands):
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(xml_text)
+    rows = []
+    for it in root.iter("item"):
+        g = lambda tag: (it.findtext(tag) or "").strip()
+        name = g("productname")
+        price_el, sale_el = it.find("price"), it.find("saleprice")
+        sale = (sale_el.text or "").strip() if sale_el is not None else ""
+        retail = (price_el.text or "").strip() if price_el is not None else ""
+        cur = (sale_el if sale_el is not None and sale else price_el)
+        long_desc = (it.findtext("description/long") or it.findtext("description/short") or "").strip()
+        rows.append({
+            "product_name": name,
+            "brand_name": rakuten_brand(name, brands),
+            "aw_deep_link": g("linkurl"),
+            "search_price": sale or retail,
+            "rrp_price": retail,
+            "currency": (cur.get("currency", "") if cur is not None else ""),
+            "aw_product_id": g("sku") or g("linkid"),
+            "merchant_image_url": g("imageurl"),
+            "description": long_desc,
+            "merchant_category": " / ".join(x for x in ((it.findtext("category/primary") or "").strip(),
+                                                        (it.findtext("category/secondary") or "").strip()) if x),
+            "ean": g("upccode"),
+            "mpn": rakuten_reference(long_desc),
+            "in_stock": "",  # Product Search does not report stock; left unknown, never guessed
+        })
+    return rows, int(root.findtext("TotalPages") or 0)
+
+
+def fetch_rakuten(retailer, brands):
+    """All of one advertiser's catalogue via the Rakuten Product Search API (XML, 100 per page)."""
+    token_key = os.environ.get(retailer["feed_env"], "").strip()
+    body = urllib.parse.urlencode({"scope": retailer["rakuten_sid"]}).encode()
+    req = urllib.request.Request(RAKUTEN_API + "/token", body, method="POST", headers={
+        "Authorization": "Bearer " + token_key, "Content-Type": "application/x-www-form-urlencoded"})
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        access = json.loads(resp.read())["access_token"]
+    rows, page, pages = [], 1, 1
+    while page <= pages and page <= 50:
+        q = urllib.parse.urlencode({"mid": retailer["rakuten_mid"], "keyword": retailer.get("rakuten_keyword", "watch"),
+                                    "max": 100, "pagenumber": page, "sort": "retailprice", "sorttype": "dsc"})
+        req = urllib.request.Request(f"{RAKUTEN_API}/productsearch/1.0?{q}", headers={"Authorization": "Bearer " + access})
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            got, pages = rakuten_items_to_rows(resp.read().decode("utf-8", "replace"), brands)
+        rows += got
+        page += 1
+    return rows
+
+
+def known_brands(cfg):
+    """{lower-case name or alias: display name} for brand matching in Rakuten product names."""
+    names = {n.lower(): n for n in cfg.get("extra_brand_names", [])}
+    try:
+        for b in json.loads((ROOT / "content" / "brands.json").read_text()):
+            names[b["name"].lower()] = b["name"]
+            for a in b.get("aliases", []):
+                if "&amp;" not in a:
+                    names[a.lower()] = b["name"]
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    return names
+
+
 def apply_history(products, previous, today):
     """Carry forward the last price we saw so genuine price changes can be shown."""
     prev = {p["id"]: p for p in previous}
@@ -188,8 +280,15 @@ def main():
         if not url:
             print(f"skip {retailer['name']}: {retailer['feed_env']} not set")
             continue
-        with urllib.request.urlopen(url, timeout=120) as resp:
-            rows = map_columns(parse_feed(resp.read(), retailer.get("delimiter", ",")), retailer.get("column_map"))
+        try:
+            if retailer.get("network") == "rakuten":
+                rows = fetch_rakuten(retailer, known_brands(cfg))
+            else:
+                with urllib.request.urlopen(url, timeout=120) as resp:
+                    rows = map_columns(parse_feed(resp.read(), retailer.get("delimiter", ",")), retailer.get("column_map"))
+        except Exception as exc:  # one retailer failing must not take the others down
+            print(f"{retailer['name']}: fetch failed ({type(exc).__name__}); its listings are left out this run", file=sys.stderr)
+            continue
         kept = [p for p in (normalise_row(r, retailer, cfg) for r in rows) if p]
         print(f"{retailer['name']}: {len(rows)} rows, {len(kept)} kept")
         products += kept

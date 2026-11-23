@@ -93,6 +93,9 @@ RETAILERS = {r["id"]: r for r in CFG["retailers"]}
 
 def retailer_link(r):
     """Tracked link to a retailer's home page, only once a publisher ID is set."""
+    if r.get("network") == "rakuten":
+        # Rakuten: a home-page link made in the Rakuten link generator, saved in config.json.
+        return r.get("home_link") or r["url"]
     pub = CFG.get("awin_publisher_id")
     if not pub:
         return r["url"]
