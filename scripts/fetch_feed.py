@@ -209,6 +209,10 @@ def rakuten_items_to_rows(xml_text, brands):
 def fetch_rakuten(retailer, brands):
     """All of one advertiser's catalogue via the Rakuten Product Search API (XML, 100 per page)."""
     token_key = os.environ.get(retailer["feed_env"], "").strip()
+    if not token_key:  # or build it from the developer-portal Client ID and Secret
+        import base64
+        cid, secret = os.environ.get("RAKUTEN_CLIENT_ID", "").strip(), os.environ.get("RAKUTEN_CLIENT_SECRET", "").strip()
+        token_key = base64.b64encode(f"{cid}:{secret}".encode()).decode()
     body = urllib.parse.urlencode({"scope": retailer["rakuten_sid"]}).encode()
     req = urllib.request.Request(RAKUTEN_API + "/token", body, method="POST", headers={
         "Authorization": "Bearer " + token_key, "Content-Type": "application/x-www-form-urlencoded"})
@@ -277,6 +281,8 @@ def main():
     products, used = [], []
     for retailer in cfg["retailers"]:
         url = os.environ.get(retailer["feed_env"], "").strip()
+        if not url and retailer.get("network") == "rakuten" and os.environ.get("RAKUTEN_CLIENT_ID") and os.environ.get("RAKUTEN_CLIENT_SECRET"):
+            url = "rakuten-api"
         if not url:
             print(f"skip {retailer['name']}: {retailer['feed_env']} not set")
             continue
