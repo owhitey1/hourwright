@@ -43,7 +43,7 @@ def rakuten_ok(p, a, q):
     return (q.scheme == "https" and q.netloc == "click.linksynergy.com"
             and a.get("id") and a.get("id") == r.get("rakuten_link_id", a.get("id"))
             and (a.get("offerid", "").split(".")[0] == str(r.get("rakuten_offer_id")) or a.get("mid") == str(r.get("rakuten_mid")))
-            and dest.scheme == "https" and home and dest.netloc.replace("www.", "") == home)
+            and dest.scheme in ("https", "http") and home and dest.netloc.replace("www.", "") == home)
 
 
 malformed = []
