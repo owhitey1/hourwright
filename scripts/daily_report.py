@@ -20,6 +20,7 @@ import datetime as dt
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -37,9 +38,16 @@ WORKFLOWS = {"site.yml": ("Build and deploy", 26), "monitor.yml": ("Monitor", 18
 
 
 def http_json(url, headers=None, data=None, method=None, timeout=60):
-    req = urllib.request.Request(url, headers=headers or {}, data=data, method=method)
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return json.loads(r.read() or b"null")
+    # One retry with a longer wait: a slow API (e.g. Awin's reporting delays, 23 Nov) should not fail the report.
+    for attempt in (1, 2):
+        req = urllib.request.Request(url, headers=headers or {}, data=data, method=method)
+        try:
+            with urllib.request.urlopen(req, timeout=timeout * attempt) as r:
+                return json.loads(r.read() or b"null")
+        except (TimeoutError, urllib.error.URLError) as exc:
+            if attempt == 2 or (isinstance(exc, urllib.error.HTTPError) and exc.code < 500):
+                raise
+            time.sleep(10)
 
 
 # ---------------------------------------------------------------- site health
