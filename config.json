@@ -67,6 +67,22 @@
       "exclude_brands": []
     },
     {
+      "id": "mappinwebb",
+      "name": "Mappin & Webb",
+      "url": "https://www.mappinandwebb.com/",
+      "awin_advertiser_id": 11017,
+      "feed_env": "AWIN_FEED_URL_MAPPINWEBB",
+      "feed_like": "AWIN_FEED_URL_GOLDSMITHS",
+      "feed_merchant_names": [
+        "Mappin & Webb",
+        "Mappin and Webb"
+      ],
+      "status": "live",
+      "approved": "2026-11-23",
+      "exclude_brands": [],
+      "note": "Awin 11017 joined 23 Nov 2026; commission 2-5% (Awin API); feed built from the Goldsmiths feed key."
+    },
+    {
       "id": "cwsellors",
       "name": "C.W. Sellors",
       "url": "https://www.cwsellors.co.uk/",

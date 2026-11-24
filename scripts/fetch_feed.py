@@ -230,6 +230,30 @@ def fetch_rakuten(retailer, brands):
     return rows
 
 
+def awin_feed_for(retailer, template_url):
+    """Build an Awin feed URL for another joined advertiser from an existing feed URL (same API key
+    and columns), using Awin's feed list to find that advertiser's feed id. Never prints the key."""
+    m = re.search(r"/apikey/([^/]+)/", template_url)
+    if not (m and re.search(r"/fid/[\d,]+/", template_url)):
+        print(f"skip {retailer['name']}: template feed URL has no apikey/fid segments")
+        return ""
+    try:
+        with urllib.request.urlopen(f"https://productdata.awin.com/datafeed/list/apikey/{m.group(1)}", timeout=60) as r:
+            rows = list(csv.DictReader(io.StringIO(r.read().decode("utf-8-sig", "replace"))))
+    except Exception as exc:
+        print(f"skip {retailer['name']}: Awin feed list unavailable ({type(exc).__name__})")
+        return ""
+    adv = str(retailer["awin_advertiser_id"])
+    mine = [x for x in rows if str(x.get("Advertiser ID", "")).strip() == adv
+            and str(x.get("Membership Status", "active")).strip().lower() in ("active", "joined")]
+    if not mine:
+        print(f"skip {retailer['name']}: no active Awin feed listed for advertiser {adv} ({len(rows)} feeds listed)")
+        return ""
+    best = max(mine, key=lambda x: int(re.sub(r"\D", "", str(x.get("No of products", "0"))) or 0))
+    print(f"{retailer['name']}: using Awin feed {best.get('Feed ID')} ({best.get('Feed Name', '')}, {best.get('No of products', '?')} products)")
+    return re.sub(r"/fid/[\d,]+/", f"/fid/{str(best.get('Feed ID')).strip()}/", template_url)
+
+
 def known_brands(cfg):
     """{lower-case name or alias: display name} for brand matching in Rakuten product names."""
     names = {n.lower(): n for n in cfg.get("extra_brand_names", [])}
@@ -283,6 +307,8 @@ def main():
         url = os.environ.get(retailer["feed_env"], "").strip()
         if not url and retailer.get("network") == "rakuten" and os.environ.get("RAKUTEN_CLIENT_ID") and os.environ.get("RAKUTEN_CLIENT_SECRET"):
             url = "rakuten-api"
+        if not url and retailer.get("feed_like"):
+            url = awin_feed_for(retailer, os.environ.get(retailer["feed_like"], "").strip())
         if not url:
             print(f"skip {retailer['name']}: {retailer['feed_env']} not set")
             continue
