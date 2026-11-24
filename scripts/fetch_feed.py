@@ -81,6 +81,14 @@ def group_key(row):
 WATCH_TEXT = re.compile(r"\b(watch|watches|dial|movement|calibre|caliber|chronograph|water[- ]resistan\w*|bezel)\b", re.I)
 
 
+SKIPS = {}
+
+
+def _skip(reason):
+    SKIPS[reason] = SKIPS.get(reason, 0) + 1
+    return None
+
+
 def normalise_row(row, retailer, cfg):
     """Turn one feed row into a product dict, or None if it must be skipped."""
     feed_cfg = cfg["feed"]
@@ -91,28 +99,28 @@ def normalise_row(row, retailer, cfg):
     pid = str(row.get("aw_product_id") or row.get("merchant_product_id") or "").strip()
     currency = str(row.get("currency", "")).strip().upper()
     if not (price and name and brand and pid):
-        return None
+        return _skip("missing field")
     network = retailer.get("network", "awin")
     prefix = {"awin": "https://www.awin1.com/", "rakuten": "https://click.linksynergy.com/"}[network]
     if not link.startswith(prefix):
-        return None  # only genuine network tracking links are ever published
+        return _skip("not a network link")  # only genuine network tracking links are ever published
     if currency != "GBP":
-        return None
+        return _skip("not GBP")
     if price < cfg["price_floor_gbp"]:
-        return None
+        return _skip("below price floor")
     if cfg.get("price_ceiling_gbp") and price > cfg["price_ceiling_gbp"]:
-        return None
+        return _skip("above price ceiling")
     if not is_watch(row, feed_cfg):
-        return None
+        return _skip("not a watch")
     if retailer.get("watch_text_required") and not WATCH_TEXT.search(
             " ".join(str(row.get(k, "")) for k in ("product_name", "description", "specifications"))):
-        return None  # retailer files jewellery and watches in one category; keep only items described as watches
+        return _skip("no watch wording")  # retailer files jewellery and watches in one category; keep only items described as watches
     if brand.lower() in [b.lower() for b in retailer.get("exclude_brands", [])]:
-        return None  # retailer pays no commission on this brand
+        return _skip("excluded brand")  # retailer pays no commission on this brand
     if re.search(r"smart|connected", name, re.I):
-        return None
+        return _skip("smartwatch")
     if re.search(r"pre-?owned|ex-?display|refurbished|second[ -]?hand|vintage", brand + " " + name, re.I):
-        return None  # Hourwright lists new watches only
+        return _skip("pre-owned")  # Hourwright lists new watches only
     if network == "awin" and "clickref=" not in link:
         link += "&clickref=hourwright"  # separates Hourwright clicks from other Worth Finding spaces in Awin reports
     was = to_price(row.get("rrp_price")) or to_price(row.get("product_price_old"))
@@ -327,8 +335,15 @@ def main():
         except Exception as exc:  # one retailer failing must not take the others down
             print(f"{retailer['name']}: fetch failed ({type(exc).__name__}); its listings are left out this run", file=sys.stderr)
             continue
+        SKIPS.clear()
         kept = [p for p in (normalise_row(r, retailer, cfg) for r in rows) if p]
-        print(f"{retailer['name']}: {len(rows)} rows, {len(kept)} kept")
+        print(f"{retailer['name']}: {len(rows)} rows, {len(kept)} kept; skipped: "
+              + ", ".join(f"{k} {v}" for k, v in sorted(SKIPS.items(), key=lambda x: -x[1])))
+        if retailer.get("network") == "rakuten":
+            from collections import Counter
+            nobrand = Counter(" ".join(str(r.get("product_name", "")).split()[:2]) for r in rows if not r.get("brand_name"))
+            print("  names without a recognised brand (top 15):", "; ".join(f"{k} {v}" for k, v in nobrand.most_common(15)))
+            print("  currencies:", dict(Counter(r.get("currency", "") for r in rows)))
         products += kept
         used.append(retailer["id"])
     if not used:
