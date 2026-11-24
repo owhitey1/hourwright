@@ -99,7 +99,8 @@ def normalise_row(row, retailer, cfg):
     pid = str(row.get("aw_product_id") or row.get("merchant_product_id") or "").strip()
     currency = str(row.get("currency", "")).strip().upper()
     if not (price and name and brand and pid):
-        return _skip("missing field")
+        return _skip("missing " + ",".join(k for k, v in (("price", price), ("name", name), ("brand", brand), ("id", pid)) if not v)
+                     + (f" (price text {str(row.get('search_price'))[:12]!r})" if not price else ""))
     network = retailer.get("network", "awin")
     prefix = {"awin": "https://www.awin1.com/", "rakuten": "https://click.linksynergy.com/"}[network]
     if not link.startswith(prefix):
