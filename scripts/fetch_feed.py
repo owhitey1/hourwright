@@ -122,6 +122,8 @@ def normalise_row(row, retailer, cfg):
         return _skip("smartwatch")
     if re.search(r"pre-?owned|ex-?display|refurbished|second[ -]?hand|vintage", brand + " " + name, re.I):
         return _skip("pre-owned")  # Hourwright lists new watches only
+    if network == "rakuten" and "u1=" not in link:
+        link += "&u1=hourwright"  # Rakuten's sub-ID parameter: separates Hourwright clicks in Rakuten reports
     if network == "awin" and "clickref=" not in link:
         link += "&clickref=hourwright"  # separates Hourwright clicks from other Worth Finding spaces in Awin reports
     was = to_price(row.get("rrp_price")) or to_price(row.get("product_price_old"))
@@ -167,6 +169,7 @@ def map_columns(rows, column_map):
 
 
 RAKUTEN_API = "https://api.linksynergy.com"
+HOME_LINKS = {}
 
 
 def rakuten_brand(name, brands):
@@ -235,6 +238,17 @@ def fetch_rakuten(retailer, brands):
         "Authorization": "Bearer " + token_key, "Content-Type": "application/x-www-form-urlencoded"})
     with urllib.request.urlopen(req, timeout=60) as resp:
         access = json.loads(resp.read())["access_token"]
+    try:  # tracked home-page link via the official Deep Links API (u1 marks Hourwright clicks in Rakuten reports)
+        body = json.dumps({"url": retailer["url"], "advertiser_id": int(retailer["rakuten_mid"]),
+                           "u1": "hourwright-home", "name": "Hourwright home"}).encode()
+        req = urllib.request.Request(RAKUTEN_API + "/v1/links/deep_links", body, method="POST", headers={
+            "Authorization": "Bearer " + access, "Content-Type": "application/json", "Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            dl = json.loads(resp.read())["advertiser"]["deep_link"]["deep_link_url"]
+        if dl.startswith("https://click.linksynergy.com/"):
+            HOME_LINKS[retailer["id"]] = dl
+    except Exception as exc:
+        print(f"{retailer['name']}: home deep link not created ({type(exc).__name__})", file=sys.stderr)
     rows, page, pages = [], 1, 1
     while page <= pages and page <= 50:
         q = urllib.parse.urlencode({"mid": retailer["rakuten_mid"], "keyword": retailer.get("rakuten_keyword", "watch"),
@@ -366,6 +380,7 @@ def main():
     OUT.write_text(json.dumps({
         "fetched_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "retailers": used,
+        "home_links": {**(json.loads(OUT.read_text()).get("home_links", {}) if OUT.exists() else {}), **HOME_LINKS},
         "products": unique,
     }, indent=1, ensure_ascii=False))
     print(f"wrote {len(unique)} products")

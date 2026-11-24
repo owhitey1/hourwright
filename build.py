@@ -95,7 +95,7 @@ def retailer_link(r):
     """Tracked link to a retailer's home page, only once a publisher ID is set."""
     if r.get("network") == "rakuten":
         # Rakuten: a home-page link made in the Rakuten link generator, saved in config.json.
-        return r.get("home_link") or r["url"]
+        return (DATA.get("home_links") or {}).get(r["id"]) or r.get("home_link") or r["url"]
     pub = CFG.get("awin_publisher_id")
     if not pub:
         return r["url"]
@@ -434,7 +434,8 @@ def build_product(p):
     same = [x for x in PRODUCTS if p.get("group") and x.get("group") == p["group"] and x["id"] != p["id"]]
     rows = [("Brand", p["brand"]), ("Reference", p.get("reference")), ("Colour", p.get("colour")),
             ("Retailer", p["retailer_name"]),
-            ("Availability", {True: "In stock", False: "Out of stock"}.get(p.get("in_stock")))]
+            ("Availability", {True: "In stock", False: "Out of stock"}.get(
+                p.get("in_stock"), f"Not stated by {p['retailer_name']}: check on their site"))]
     spec = "".join(f"<tr><th scope=\"row\">{e(k)}</th><td>{e(v)}</td></tr>" for k, v in rows if v)
     img = (f'<img src="{e(p["image"])}" alt="{e(p["brand"] + " " + p["name"])}" width="560" height="560" '
            f'referrerpolicy="no-referrer">') if p.get("image") else ""
