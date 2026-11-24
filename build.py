@@ -535,6 +535,35 @@ def alternatives_block(b):
             + grid(uniq, "../") + checked_note())
 
 
+def listings_by_line(b, mine):
+    """For brand guides with "group_listings": split listings into the guide's key collections, cheapest first.
+    A product goes to the longest line name it contains as a whole word; others go to a final "Other" group.
+    Repeat feed rows for the same retailer, reference and price are shown once."""
+    seen, uniq = set(), []
+    for p in mine:
+        ref = (p.get("reference") or "").strip().upper()
+        key = (p["retailer"], ref, p["price"]) if ref else (p["id"],)
+        if key not in seen:
+            seen.add(key)
+            uniq.append(p)
+    groups = {l: [] for l in b["lines"]}
+    other = []
+    by_len = sorted(b["lines"], key=len, reverse=True)
+    for p in uniq:
+        line = next((l for l in by_len if re.search(r"\b" + re.escape(l.lower()) + r"\b", p["name"].lower())), None)
+        (groups[line] if line else other).append(p)
+    out = [(l, sorted(groups[l], key=lambda x: x["price"])) for l in b["lines"] if groups[l]]
+    if other:
+        out.append((f"Other {b['name']}", sorted(other, key=lambda x: x["price"])))
+    return out
+
+
+def case_sizes(products):
+    """Case diameters stated in the retailers' product names (for snippets; not a specification)."""
+    mm = [float(m.group(1)) for p in products for m in [re.search(r"(\d{2}(?:\.\d)?)\s?mm\b", p["name"])] if m]
+    return (min(mm), max(mm)) if mm else None
+
+
 def build_brands():
     counts, lows = {}, {}
     for p in PRODUCTS:
@@ -573,6 +602,30 @@ def build_brands():
                    f'<h2>{e(b["name"])} watches at UK retailers</h2>' + ((grid(mine, "../") + checked_note()) if mine else none_now))
         if not mine and PRODUCTS and b.get("alternatives"):
             listing += alternatives_block(b)
+        grouped = listings_by_line(b, mine) if (mine and b.get("group_listings") and not b.get("generated")) else None
+        intro_links = ""
+        if grouped:
+            shown = [p for _, ps in grouped for p in ps]
+            low = gbp(min(p["price"] for p in shown))
+            rets = sorted({p["retailer_name"] for p in shown})
+            named = [l for l, _ in grouped if not l.startswith("Other ")]
+            sizes = case_sizes(shown)
+            size_txt = (f", case sizes {sizes[0]:g}mm to {sizes[1]:g}mm" if sizes and sizes[0] != sizes[1] else "")
+            meta = (f"{b['name']} watches UK: {and_list(named)} from {low}",
+                    f"{len(shown)} new {b['name']} {and_list(named)} watches from {low} at {and_list(rets)}, "
+                    f"{'a UK authorised retailer' if len(rets) == 1 else 'UK authorised retailers'}{size_txt}. "
+                    f"Sorted by collection and price, checked daily; buy direct from the retailer.")
+            jump = " · ".join(f'<a href="#line-{slug(l)}">{e(l)} ({len(ps)})</a>' for l, ps in grouped)
+            intro_links = (f'<p class="lede">{len(shown)} new {e(b["name"])} watches from {low} at '
+                           f'{e(and_list(rets))}, sorted by collection, cheapest first. Jump to: {jump}.</p>')
+            sections = "".join(
+                f'<h3 id="line-{slug(l)}">{e(l)} <span class="meta">({len(ps)} from {gbp(ps[0]["price"])})</span></h3>' + grid(ps, "../")
+                for l, ps in grouped)
+            listing = (related_articles([p["id"] for p in mine], "../", heading=f"{b['name']} in the Journal") +
+                       f'<h2 id="listings">{e(b["name"])} watches at UK retailers</h2>'
+                       f'<p>Not sure of the size? Our <a href="../guides/watch-size-guide.html">watch size guide</a> explains '
+                       f'diameter and lug-to-lug. Tick Compare on up to three watches to see them <a href="../compare/index.html">side by side</a>.</p>'
+                       + sections + checked_note())
         if b.get("generated"):
             n = len(mine)
             body = f"""<section><div class="wrap">
@@ -589,6 +642,7 @@ def build_brands():
         body = f"""<section><div class="wrap">
 <p class="eyebrow">Brand guide</p><h1>{e(b['name'])}</h1>
 <p class="lede">{e(b['summary'])}</p>
+{intro_links}
 <div class="two"><div class="prose">{paras}</div>
 <aside class="facts"><dl><dt>Founded</dt><dd>{e(b['founded'])}</dd><dt>Based</dt><dd>{e(b['home'])}</dd></dl>
 <h2>Key collections</h2><ul>{lines}</ul></aside></div>
