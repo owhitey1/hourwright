@@ -78,6 +78,9 @@ def group_key(row):
     return None
 
 
+WATCH_TEXT = re.compile(r"\b(watch|watches|dial|movement|calibre|caliber|chronograph|water[- ]resistan\w*|bezel)\b", re.I)
+
+
 def normalise_row(row, retailer, cfg):
     """Turn one feed row into a product dict, or None if it must be skipped."""
     feed_cfg = cfg["feed"]
@@ -101,6 +104,9 @@ def normalise_row(row, retailer, cfg):
         return None
     if not is_watch(row, feed_cfg):
         return None
+    if retailer.get("watch_text_required") and not WATCH_TEXT.search(
+            " ".join(str(row.get(k, "")) for k in ("product_name", "description", "specifications"))):
+        return None  # retailer files jewellery and watches in one category; keep only items described as watches
     if brand.lower() in [b.lower() for b in retailer.get("exclude_brands", [])]:
         return None  # retailer pays no commission on this brand
     if re.search(r"smart|connected", name, re.I):

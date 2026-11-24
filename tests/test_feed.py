@@ -55,6 +55,15 @@ class FeedTests(unittest.TestCase):
         self.assertIsNone(products[0]["in_stock"])
         self.assertNotIn("clickref", products[0]["link"])
 
+    def test_watch_text_required_drops_jewellery_in_shared_category(self):
+        retailer = {"id": "mw", "name": "M", "watch_text_required": True, "exclude_brands": []}
+        base = {"search_price": "2500", "aw_deep_link": "https://www.awin1.com/pclick.php?p=1&a=3102076&m=11017",
+                "brand_name": "Omega", "aw_product_id": "1", "currency": "GBP", "merchant_category": "Jewellery & Watches"}
+        ring = {**base, "product_name": "Platinum Diamond Eternity Band", "description": "Channel set diamonds."}
+        watch = {**base, "aw_product_id": "2", "product_name": "Seamaster 300M 42mm", "description": "Blue dial, automatic movement."}
+        self.assertIsNone(ff.normalise_row(ring, retailer, CFG))
+        self.assertIsNotNone(ff.normalise_row(watch, retailer, CFG))
+
     def test_parses_plain_and_gzip(self):
         self.assertEqual(len(ff.parse_feed(RAW)), 8)
         self.assertEqual(len(ff.parse_feed(gzip.compress(RAW))), 8)

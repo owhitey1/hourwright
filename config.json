@@ -79,8 +79,15 @@
       ],
       "status": "live",
       "approved": "2026-11-23",
-      "exclude_brands": [],
-      "note": "Awin 11017 joined 23 Nov 2026; commission 2-5% (Awin API); feed built from the Goldsmiths feed key."
+      "exclude_brands": [
+        "Mappin & Webb",
+        "Roberto Coin",
+        "Messika",
+        "Suzanne Kalan",
+        "Mikimoto"
+      ],
+      "note": "Awin 11017 joined 23 Nov 2026; commission 2-5% (Awin API); feed built from the Goldsmiths feed key.",
+      "watch_text_required": true
     },
     {
       "id": "cwsellors",
@@ -116,7 +123,13 @@
       "gift card",
       "clock",
       "buckle",
-      "service"
+      "service",
+      "ring size",
+      "necklace",
+      "earring",
+      "pendant",
+      "bangle",
+      " ring "
     ]
   },
   "launch_approved": true,
