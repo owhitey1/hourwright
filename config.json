@@ -99,12 +99,12 @@
       "rakuten_sid": "4780601",
       "feed_env": "RAKUTEN_TOKEN_KEY",
       "rakuten_keyword": "watch",
-      "status": "approved",
+      "status": "live",
       "approved": "2026-11-23",
       "exclude_brands": [
         "garmin"
       ],
-      "note": "Rakuten offer 2128802: 7% of sale, last click; 0% on Garmin, Pre-Owned and Ex-Display (checked 23 Nov 2026). Products via Product Search API."
+      "note": "Rakuten offer 2128802: 7% of sale, last click; 0% on Garmin, Pre-Owned and Ex-Display (checked 23 Nov 2026). Products via Product Search API. Live 24 Nov 2026: 461 watches."
     }
   ],
   "feed": {
