@@ -41,7 +41,7 @@ class FeedTests(unittest.TestCase):
 <linkurl>https://click.linksynergy.com/link?id=abc&amp;offerid=2128802.111&amp;type=15&amp;murl=https%3A%2F%2Fwww.cwsellors.co.uk%2Fproducts%2Fx</linkurl>
 <imageurl>https://cdn.example/x.jpg</imageurl></item>
 <item><mid>54389</mid><linkid>112</linkid><sku>9</sku><productname>Unknownbrand Thing Watch</productname>
-<price currency="GBP">3000.00</price><linkurl>https://click.linksynergy.com/link?id=abc</linkurl></item></result>"""
+<price currency="GBP">3000.00</price><saleprice currency="GBP">0</saleprice><linkurl>https://click.linksynergy.com/link?id=abc</linkurl></item></result>"""
         rows, pages = ff.rakuten_items_to_rows(xml, {"maurice lacroix": "Maurice Lacroix"})
         self.assertEqual(pages, 1)
         self.assertEqual(rows[0]["brand_name"], "Maurice Lacroix")
@@ -49,6 +49,7 @@ class FeedTests(unittest.TestCase):
         self.assertEqual(rows[0]["currency"], "GBP")
         self.assertEqual(rows[0]["mpn"], "AI6007-SP012-130-1")
         self.assertEqual(rows[1]["brand_name"], "")  # unknown brand is never guessed
+        self.assertEqual(rows[1]["search_price"], "3000.00")  # saleprice 0 means no sale
         retailer = {"id": "cwsellors", "name": "C.W. Sellors", "network": "rakuten"}
         products = [p for p in (ff.normalise_row(r, retailer, CFG) for r in rows) if p]
         self.assertEqual([p["id"] for p in products], ["cwsellors-7076357177397"])

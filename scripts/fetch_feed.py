@@ -200,6 +200,8 @@ def rakuten_items_to_rows(xml_text, brands):
         price_el, sale_el = it.find("price"), it.find("saleprice")
         sale = (sale_el.text or "").strip() if sale_el is not None else ""
         retail = (price_el.text or "").strip() if price_el is not None else ""
+        if not to_price(sale):
+            sale = ""  # Rakuten sends saleprice 0 when an item is not on sale
         cur = (sale_el if sale_el is not None and sale else price_el)
         long_desc = (it.findtext("description/long") or it.findtext("description/short") or "").strip()
         rows.append({
