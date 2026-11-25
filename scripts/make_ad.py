@@ -64,13 +64,13 @@ def frame(scene, path):
         ImageDraw.Draw(glow).ellipse((90, 170, W - 90, 1070), fill=110)
         glow = glow.filter(ImageFilter.GaussianBlur(120))
         im.paste(Image.new("RGB", (W, H), "#2a5a4d"), (0, 0), glow)
-        card = Image.new("RGB", (860, 860), "#ffffff")
         ph = product_image(p["image"], 800)
+        card = Image.new("RGB", (860, 860), ph.getpixel((2, 2)))  # match the photo's own backdrop
         card.paste(ph, ((860 - ph.width) // 2, (860 - ph.height) // 2))
         mask = Image.new("L", card.size, 0)
         ImageDraw.Draw(mask).rounded_rectangle((0, 0, 860, 860), 36, fill=255)
         im.paste(card, ((W - 860) // 2, 200), mask)
-        y = 1110
+        y = 1100
         scene.setdefault("eyebrow", p["brand"].replace("Tag Heuer", "TAG Heuer"))
         if scene.get("show_price") and p.get("was_price"):
             scene.setdefault("sub", f"Was £{p['was_price']:,.0f}. Now £{p['price']:,.0f} at {p['retailer_name']}.")
@@ -80,9 +80,9 @@ def frame(scene, path):
     hf = font("fraunces", scene.get("size", 118), 600)
     for line in wrap(d, scene["headline"], hf, W - 2 * x):
         d.text((x, y), line, font=hf, fill=WHITE)
-        y += int(scene.get("size", 118) * 1.12)
+        y += int(scene.get("size", 118) * 1.08)
     if scene.get("sub"):
-        y += 40
+        y += 24
         sf = font("hanken-grotesk", 50, 400)
         for line in wrap(d, scene["sub"], sf, W - 2 * x):
             d.text((x, y), line, font=sf, fill=GREY)
@@ -113,8 +113,19 @@ def main(spec_path, out_path):
                        f"fade=t=in:st=0:d=0.35,fade=t=out:st={dur - 0.35}:d=0.35[v{i}]")
     filters.append("".join(f"[v{i}]" for i in range(n)) + f"concat=n={n}:v=1:a=0[out]")
     pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+    audio = [a for a in spec.get("audio", []) if pathlib.Path(a["file"]).exists()]
+    for a in audio:
+        inputs += ["-i", a["file"]]
+    amap = []
+    if audio:
+        parts = [f"[{n + j}:a]volume={a.get('volume', 1.0)},adelay={int(a.get('start', 0) * 1000)}|{int(a.get('start', 0) * 1000)}[a{j}]"
+                 for j, a in enumerate(audio)]
+        total = sum(s.get("seconds", 3) for s in spec["scenes"])
+        filters += parts + ["".join(f"[a{j}]" for j in range(len(audio))) +
+                            f"amix=inputs={len(audio)}:normalize=0,afade=t=out:st={total - 1.2}:d=1.2,atrim=0:{total}[aout]"]
+        amap = ["-map", "[aout]", "-c:a", "aac", "-b:a", "192k"]
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *inputs, "-filter_complex", ";".join(filters),
-                    "-map", "[out]", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-movflags", "+faststart",
+                    *amap, "-map", "[out]", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-movflags", "+faststart",
                     "-pix_fmt", "yuv420p", out_path], check=True)
     # Thumbnail of the first scene for checking and for platforms that ask for a cover.
     frame(spec["scenes"][0], pathlib.Path(out_path).with_suffix(".png"))
