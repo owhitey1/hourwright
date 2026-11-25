@@ -539,6 +539,15 @@ def alternatives_block(b):
             + grid(uniq, "../") + checked_note())
 
 
+def see_also_links(b):
+    """Optional "see_also" collections on a grouped brand guide: links to the live collection pages."""
+    cols = {c["slug"]: c for c in COLLECTIONS}
+    live = {c["slug"] for c, _ in live_collections()}
+    links = [f'<a href="../watches/{c}.html">{e(cols[c]["title"].lower().replace("luxury ", ""))}</a>'
+             for c in b.get("see_also", []) if c in cols and c in live]
+    return f" Or compare across brands: {and_list(links)}." if links else ""
+
+
 def listings_by_line(b, mine):
     """For brand guides with "group_listings": split listings into the guide's key collections, cheapest first.
     A product goes to the longest line name it contains as a whole word; others go to a final "Other" group.
@@ -612,8 +621,10 @@ def build_brands():
             shown = [p for _, ps in grouped for p in ps]
             low = gbp(min(p["price"] for p in shown))
             rets = sorted({p["retailer_name"] for p in shown})
-            named = [l for l, _ in grouped if not l.startswith("Other ")]
-            sizes = case_sizes(shown)
+            named = b.get("title_lines") or [l for l, _ in grouped if not l.startswith("Other ")]
+            # Only quote a size range when most listing names state a size; otherwise the range would mislead.
+            sized = [p for p in shown if re.search(r"\d{2}(?:\.\d)?\s?mm\b", p["name"])]
+            sizes = case_sizes(shown) if len(sized) * 2 >= len(shown) else None
             size_txt = (f", case sizes {sizes[0]:g}mm to {sizes[1]:g}mm" if sizes and sizes[0] != sizes[1] else "")
             meta = (f"{b['name']} watches UK: {and_list(named)} from {low}",
                     f"{len(shown)} new {b['name']} {and_list(named)} watches from {low} at {and_list(rets)}, "
@@ -628,7 +639,8 @@ def build_brands():
             listing = (related_articles([p["id"] for p in mine], "../", heading=f"{b['name']} in the Journal") +
                        f'<h2 id="listings">{e(b["name"])} watches at UK retailers</h2>'
                        f'<p>Not sure of the size? Our <a href="../guides/watch-size-guide.html">watch size guide</a> explains '
-                       f'diameter and lug-to-lug. Tick Compare on up to three watches to see them <a href="../compare/index.html">side by side</a>.</p>'
+                       f'diameter and lug-to-lug. Tick Compare on up to three watches to see them <a href="../compare/index.html">side by side</a>.'
+                       + see_also_links(b) + '</p>'
                        + sections + checked_note())
         if b.get("generated"):
             n = len(mine)
