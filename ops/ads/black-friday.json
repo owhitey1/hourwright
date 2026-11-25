@@ -5,6 +5,16 @@
   "facts_checked": "25 Nov 2026 from data/products.json (retailers' own feed prices). Re-render before each post: prices come from the catalogue at render time.",
   "scenes": [
     {
+      "video": "assets/macro-movement-1.mp4",
+      "from": 0,
+      "seconds": 3.5,
+      "speed": 0.85,
+      "eyebrow": "Black Friday",
+      "headline": "Precision, reduced.",
+      "size": 120,
+      "note": "Higgsfield Seedance 2.0 Fast, generic movement, no brand; frames after 3.2s source time show pseudo-text, so keep from+seconds*speed <= 3.2"
+    },
+    {
       "product": "mappinwebb-27561992189",
       "headline": "Black Friday.",
       "show_price": true,
@@ -43,8 +53,13 @@
   "audio": [
     {
       "file": "ops/ads/audio/black-friday-vo.mp3",
-      "start": 0.4,
+      "start": 0.6,
       "volume": 1.0
+    },
+    {
+      "file": "assets/music-timeless-seconds.mp3",
+      "start": 0,
+      "volume": 0.3
     }
   ]
 }

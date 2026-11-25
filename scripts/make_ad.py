@@ -98,19 +98,58 @@ def frame(scene, path):
     im.save(path)
 
 
+def overlay(scene, path):
+    """Transparent text layer for a video (b-roll) scene: lower-third headline over a soft shade."""
+    im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    shade = Image.new("L", (1, H), 0)
+    for yy in range(H):
+        shade.putpixel((0, yy), max(0, min(200, int((yy - 950) * 0.35))))
+    im.paste(Image.new("RGBA", (W, H), (8, 20, 17, 255)), (0, 0), shade.resize((W, H)))
+    d = ImageDraw.Draw(im)
+    x, y = 96, scene.get("text_y", 1240)
+    if scene.get("eyebrow"):
+        d.text((x, y), scene["eyebrow"].upper(), font=font("hanken-grotesk", 40, 600), fill=BRASS)
+        y += 90
+    if scene.get("headline"):
+        hf = font("fraunces", scene.get("size", 118), 600)
+        for line in wrap(d, scene["headline"], hf, W - 2 * x):
+            d.text((x, y), line, font=hf, fill=WHITE)
+            y += int(scene.get("size", 118) * 1.08)
+    if scene.get("sub"):
+        y += 24
+        sf = font("hanken-grotesk", 50, 400)
+        for line in wrap(d, scene["sub"], sf, W - 2 * x):
+            d.text((x, y), line, font=sf, fill=GREY)
+            y += 70
+    d.text((x, H - 220), "Hourwright", font=font("fraunces", 56, 600), fill=WHITE)
+    im.save(path)
+
+
 def main(spec_path, out_path):
     spec = json.loads(pathlib.Path(spec_path).read_text())
     tmp = pathlib.Path(tempfile.mkdtemp())
     inputs, filters, n = [], [], len(spec["scenes"])
+    k = 0  # ffmpeg input index
     for i, s in enumerate(spec["scenes"]):
+        dur = s.get("seconds", 3)
+        frames = int(dur * FPS)
+        fades = f"fade=t=in:st=0:d=0.35,fade=t=out:st={dur - 0.35}:d=0.35"
+        if s.get("video"):
+            speed = s.get("speed", 1.0)
+            o = tmp / f"o{i}.png"
+            overlay(s, o)
+            inputs += ["-ss", str(s.get("from", 0)), "-t", str(dur * speed), "-i", s["video"], "-loop", "1", "-t", str(dur), "-i", str(o)]
+            filters.append(f"[{k}:v]setpts=(PTS-STARTPTS)/{speed},scale={W}:{H}:force_original_aspect_ratio=increase,"
+                           f"crop={W}:{H},fps={FPS},trim=duration={dur},setsar=1[b{i}];"
+                           f"[b{i}][{k + 1}:v]overlay=0:0,format=yuv420p,{fades}[v{i}]")
+            k += 2
+            continue
         p = tmp / f"s{i}.png"
         frame(s, p)
         inputs += ["-i", str(p)]
-        dur = s.get("seconds", 3)
-        frames = int(dur * FPS)
-        filters.append(f"[{i}:v]scale={W * 2}:{H * 2},zoompan=z='min(1+0.06*on/{frames},1.06)':x='iw/2-(iw/zoom/2)':"
-                       f"y='ih/2-(ih/zoom/2)':d={frames}:s={W}x{H}:fps={FPS},format=yuv420p,"
-                       f"fade=t=in:st=0:d=0.35,fade=t=out:st={dur - 0.35}:d=0.35[v{i}]")
+        filters.append(f"[{k}:v]scale={W * 2}:{H * 2},zoompan=z='min(1+0.06*on/{frames},1.06)':x='iw/2-(iw/zoom/2)':"
+                       f"y='ih/2-(ih/zoom/2)':d={frames}:s={W}x{H}:fps={FPS},format=yuv420p,setsar=1,{fades}[v{i}]")
+        k += 1
     filters.append("".join(f"[v{i}]" for i in range(n)) + f"concat=n={n}:v=1:a=0[out]")
     pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     audio = [a for a in spec.get("audio", []) if pathlib.Path(a["file"]).exists()]
@@ -118,7 +157,7 @@ def main(spec_path, out_path):
         inputs += ["-i", a["file"]]
     amap = []
     if audio:
-        parts = [f"[{n + j}:a]volume={a.get('volume', 1.0)},adelay={int(a.get('start', 0) * 1000)}|{int(a.get('start', 0) * 1000)}[a{j}]"
+        parts = [f"[{k + j}:a]volume={a.get('volume', 1.0)},adelay={int(a.get('start', 0) * 1000)}|{int(a.get('start', 0) * 1000)}[a{j}]"
                  for j, a in enumerate(audio)]
         total = sum(s.get("seconds", 3) for s in spec["scenes"])
         filters += parts + ["".join(f"[a{j}]" for j in range(len(audio))) +
@@ -128,7 +167,8 @@ def main(spec_path, out_path):
                     *amap, "-map", "[out]", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-movflags", "+faststart",
                     "-pix_fmt", "yuv420p", out_path], check=True)
     # Thumbnail of the first scene for checking and for platforms that ask for a cover.
-    frame(spec["scenes"][0], pathlib.Path(out_path).with_suffix(".png"))
+    first = next(x for x in spec["scenes"] if not x.get("video"))
+    frame(first, pathlib.Path(out_path).with_suffix(".png"))
     print("wrote", out_path)
 
 
