@@ -41,6 +41,60 @@ def product_image(url, box):
 W, H, FPS = 1080, 1920, 30
 
 
+def cutout(url, height=640):
+    """Retailer photo with its plain studio backdrop removed (border-connected flood fill), plus a
+    soft contact shadow. The watch itself is untouched apart from scaling."""
+    from PIL import ImageChops
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Hourwright ad builder)"})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        im = Image.open(io.BytesIO(r.read())).convert("RGB")
+    bg = im.getpixel((2, 2))
+    diff = ImageChops.difference(im, Image.new("RGB", im.size, bg)).split()
+    d = ImageChops.lighter(ImageChops.lighter(diff[0], diff[1]), diff[2])
+    near = d.point(lambda v: 255 if v < 16 else 0)
+    for xy in [(0, 0), (im.width - 1, 0), (0, im.height - 1), (im.width - 1, im.height - 1)]:
+        if near.getpixel(xy) == 255:
+            ImageDraw.floodfill(near, xy, 128)
+    alpha = near.point(lambda v: 0 if v == 128 else 255).filter(ImageFilter.GaussianBlur(1.2))
+    rgba = im.convert("RGBA"); rgba.putalpha(alpha)
+    rgba = rgba.crop(alpha.point(lambda v: 255 if v > 20 else 0).getbbox())
+    rgba = rgba.resize((int(rgba.width * height / rgba.height), height), Image.LANCZOS)
+    canvas = Image.new("RGBA", (rgba.width + 200, height + 60), (0, 0, 0, 0))
+    sh = Image.new("L", canvas.size, 0)
+    ImageDraw.Draw(sh).ellipse((60, height + 5, canvas.width - 60, height + 50), fill=170)
+    canvas.paste((0, 0, 0, 255), (0, 0), sh.filter(ImageFilter.GaussianBlur(14)))
+    canvas.alpha_composite(rgba, (100, 0))
+    return canvas
+
+
+def hero_overlay(scene, p, path):
+    """Text layer for a hero product scene: saving at the top, facts in the lower third."""
+    im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    shade = Image.new("L", (1, H), 0)
+    for yy in range(H):
+        top = max(0, 190 - yy // 2) if yy < 380 else 0
+        bot = max(0, min(215, int((yy - 1100) * 0.4)))
+        shade.putpixel((0, yy), max(top, bot))
+    im.paste(Image.new("RGBA", (W, H), (6, 16, 13, 255)), (0, 0), shade.resize((W, H)))
+    d = ImageDraw.Draw(im)
+    def centre(y, t, f, fill):
+        d.text(((W - d.textlength(t, font=f)) / 2, y), t, font=f, fill=fill)
+    brand = p["brand"].replace("Tag Heuer", "TAG Heuer")
+    centre(110, scene.get("eyebrow", "BLACK FRIDAY").upper(), font("hanken-grotesk", 42, 600), BRASS)
+    saving = p["was_price"] - p["price"]
+    centre(175, scene.get("headline", f"Save £{saving:,.0f}"), font("fraunces", 150, 600), WHITE)
+    y = 1330
+    name = scene.get("name") or f"{brand} {p['name'].split(' Mens')[0].split(' Ladies')[0]}"
+    nf = font("fraunces", 60, 600)
+    for line in wrap(d, name, nf, W - 160)[:2]:
+        centre(y, line, nf, WHITE); y += 72
+    y += 18
+    centre(y, f"Was £{p['was_price']:,.0f}   Now £{p['price']:,.0f}", font("hanken-grotesk", 60, 600), BRASS); y += 84
+    centre(y, f"at {p['retailer_name']}, UK authorised retailer", font("hanken-grotesk", 40, 400), GREY)
+    centre(H - 170, "Hourwright", font("fraunces", 52, 600), WHITE)
+    im.save(path)
+
+
 def wrap(draw, text, f, width):
     words, lines, cur = text.split(), [], ""
     for w in words:
@@ -98,6 +152,16 @@ def frame(scene, path):
     im.save(path)
 
 
+def reductions():
+    product("x") if False else None
+    if not PRODUCTS:
+        try:
+            product("")
+        except KeyError:
+            pass
+    return sum(1 for p in PRODUCTS.values() if p.get("was_price") and p["was_price"] > p["price"])
+
+
 def overlay(scene, path):
     """Transparent text layer for a video (b-roll) scene: lower-third headline over a soft shade."""
     im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -131,9 +195,28 @@ def main(spec_path, out_path):
     inputs, filters, n = [], [], len(spec["scenes"])
     k = 0  # ffmpeg input index
     for i, s in enumerate(spec["scenes"]):
+        for key in ("headline", "sub", "eyebrow"):
+            if "{reductions}" in s.get(key, ""):
+                s[key] = s[key].replace("{reductions}", str(reductions()))
         dur = s.get("seconds", 3)
         frames = int(dur * FPS)
         fades = f"fade=t=in:st=0:d=0.35,fade=t=out:st={dur - 0.35}:d=0.35"
+        if s.get("hero"):
+            p = product(s["hero"])
+            c = tmp / f"c{i}.png"; cutout(p["image"], s.get("watch_height", 640)).save(c)
+            o = tmp / f"o{i}.png"; hero_overlay(s, p, o)
+            speed = s.get("speed", 0.7)
+            base = s.get("base_y", 1060)
+            inputs += ["-ss", str(s.get("from", 0)), "-t", str(dur * speed), "-i", s.get("bg", "assets/studio-plinth-1.mp4"),
+                       "-loop", "1", "-t", str(dur), "-i", str(c), "-loop", "1", "-t", str(dur), "-i", str(o)]
+            filters.append(f"[{k}:v]setpts=(PTS-STARTPTS)/{speed},scale={W}:{H}:force_original_aspect_ratio=increase,"
+                           f"crop={W}:{H},fps={FPS},trim=duration={dur},setsar=1[b{i}];"
+                           f"[{k + 1}:v]format=rgba,scale=w='iw*(0.88+0.12*min(t/{dur},1))':h=-1:eval=frame,"
+                           f"fade=t=in:st=0.1:d=0.7:alpha=1[w{i}];"
+                           f"[b{i}][w{i}]overlay=x=(W-w)/2:y={base}-h:shortest=1[bw{i}];"
+                           f"[bw{i}][{k + 2}:v]overlay=0:0,format=yuv420p,{fades}[v{i}]")
+            k += 3
+            continue
         if s.get("video"):
             speed = s.get("speed", 1.0)
             o = tmp / f"o{i}.png"
@@ -167,8 +250,9 @@ def main(spec_path, out_path):
                     *amap, "-map", "[out]", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-movflags", "+faststart",
                     "-pix_fmt", "yuv420p", out_path], check=True)
     # Thumbnail of the first scene for checking and for platforms that ask for a cover.
-    first = next(x for x in spec["scenes"] if not x.get("video"))
-    frame(first, pathlib.Path(out_path).with_suffix(".png"))
+    first = next((x for x in spec["scenes"] if not x.get("video") and not x.get("hero")), None)
+    if first:
+        frame(first, pathlib.Path(out_path).with_suffix(".png"))
     print("wrote", out_path)
 
 

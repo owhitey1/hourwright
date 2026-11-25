@@ -42,6 +42,15 @@ def main(args):
         if match.startswith("id:"):
             (out / name).write_bytes(call(f"/v1/history/{match[3:]}/audio", raw=True))
             print("saved", name, (out / name).stat().st_size); continue
+        if match.startswith("tts:"):
+            voice = next((h["voice_id"] for h in items if h.get("voice_id")), "JBFqnCBsd6RMkjVDRZzb")
+            body = json.dumps({"text": match[4:], "model_id": "eleven_multilingual_v2",
+                               "voice_settings": {"stability": 0.45, "similarity_boost": 0.8, "style": 0.35}}).encode()
+            req = urllib.request.Request(f"{API}/v1/text-to-speech/{voice}?output_format=mp3_44100_128", data=body,
+                                         method="POST", headers={"xi-api-key": KEY, "content-type": "application/json"})
+            with urllib.request.urlopen(req, timeout=120) as r:
+                (out / name).write_bytes(r.read())
+            print("saved", name, (out / name).stat().st_size, "voice", voice); continue
         if match.startswith("compose:"):
             body = json.dumps({"prompt": match[8:], "music_length_ms": 30000, "force_instrumental": True}).encode()
             req = urllib.request.Request(API + "/v1/music", data=body, method="POST",
