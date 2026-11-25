@@ -11,7 +11,7 @@ Owner steps only: sign-in, password, date of birth, phone/email verification cod
 
 Account email: hello@hourwright.co.uk. No personal name, employer or location in any public field.
 
-Bio (128 chars, fits Instagram/TikTok): Independent luxury watch comparison. UK authorised retailers, side by side. Genuine offers only. We may earn commission from links.
+Bio (131 chars, fits Instagram/TikTok): Independent luxury watch comparison. UK authorised retailers, side by side. Genuine offers only. We may earn commission from links.
 
 About (YouTube/Facebook): Hourwright compares new luxury watches from UK authorised retailers (Goldsmiths, Mappin & Webb, C.W. Sellors) so you can find the right watch and the right price before you buy. Prices and stock are set by each retailer. Hourwright is independent and earns commission from retailers when you buy through our links.
 
