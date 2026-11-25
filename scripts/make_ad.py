@@ -101,7 +101,10 @@ def hero_overlay(scene, p, path):
     saving = p["was_price"] - p["price"]
     centre(175, scene.get("headline", f"Save £{saving:,.0f}"), font("fraunces", 150, 600), WHITE)
     y = 1330
-    name = scene.get("name") or f"{brand} {p['name'].split(' Mens')[0].split(' Ladies')[0]}"
+    model = p['name'].split(' Mens')[0].split(' Ladies')[0]
+    if model.lower().startswith(brand.lower()):
+        model = model[len(brand):].strip()
+    name = scene.get("name") or f"{brand} {model}"
     nf = font("fraunces", 60, 600)
     for line in wrap(d, name, nf, W - 160)[:2]:
         centre(y, line, nf, WHITE); y += 72
@@ -187,7 +190,7 @@ def overlay(scene, path):
         shade.putpixel((0, yy), max(0, min(200, int((yy - 950) * 0.35))))
     im.paste(Image.new("RGBA", (W, H), (8, 20, 17, 255)), (0, 0), shade.resize((W, H)))
     d = ImageDraw.Draw(im)
-    x, y = 96, scene.get("text_y", 1240)
+    x, y = 96, scene.get("text_y", 1120)
     if scene.get("eyebrow"):
         d.text((x, y), scene["eyebrow"].upper(), font=font("hanken-grotesk", 40, 600), fill=BRASS)
         y += 90
@@ -202,7 +205,7 @@ def overlay(scene, path):
         for line in wrap(d, scene["sub"], sf, W - 2 * x):
             d.text((x, y), line, font=sf, fill=GREY)
             y += 70
-    d.text((x, H - 220), "Hourwright", font=font("fraunces", 56, 600), fill=WHITE)
+    d.text((x, H - 150), "Hourwright", font=font("fraunces", 52, 600), fill=WHITE)
     im.save(path)
 
 
