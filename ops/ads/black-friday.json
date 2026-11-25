@@ -16,7 +16,7 @@
     },
     {
       "product": "mappinwebb-27561992189",
-      "headline": "Black Friday.",
+      "headline": "An icon, reduced.",
       "show_price": true,
       "size": 120,
       "seconds": 3.5
@@ -39,7 +39,10 @@
       "eyebrow": "Hourwright",
       "headline": "Luxury is worth paying for. Overpaying isn't.",
       "size": 104,
-      "seconds": 3
+      "seconds": 3,
+      "video": "assets/studio-plinth-1.mp4",
+      "from": 0,
+      "speed": 0.9
     },
     {
       "eyebrow": "Black Friday offers",

@@ -1,0 +1,38 @@
+{
+  "concept": "D: Hourwright brand awareness (evergreen, 10s)",
+  "landing": "https://hourwright.co.uk/?utm_source={platform}&utm_medium=social&utm_campaign=brand-2026",
+  "scenes": [
+    {
+      "video": "assets/macro-movement-1.mp4",
+      "from": 0.2,
+      "seconds": 3.5,
+      "speed": 0.8,
+      "headline": "Fine watches deserve a fair price.",
+      "size": 110
+    },
+    {
+      "video": "assets/studio-plinth-1.mp4",
+      "from": 0,
+      "seconds": 3.5,
+      "speed": 0.9,
+      "eyebrow": "Hourwright",
+      "headline": "Compare before you commit.",
+      "size": 110
+    },
+    {
+      "eyebrow": "hourwright.co.uk",
+      "headline": "The independent way to buy a luxury watch.",
+      "size": 100,
+      "sub": "UK authorised retailers, compared daily.",
+      "seconds": 3.5,
+      "fine": "Prices and stock are set by each retailer and may change. Hourwright earns commission from retailers when you buy. Ad."
+    }
+  ],
+  "audio": [
+    {
+      "file": "assets/music-timeless-seconds.mp3",
+      "start": 0,
+      "volume": 0.55
+    }
+  ]
+}

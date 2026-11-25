@@ -1,12 +1,62 @@
 {
-  "concept": "C: Hourwright value proposition (evergreen)",
+  "concept": "C: Hourwright value proposition (evergreen), real watches + Higgsfield b-roll",
   "landing": "https://hourwright.co.uk/watch-finder/index.html?utm_source={platform}&utm_medium=social&utm_campaign=value-2026",
-  "facts_checked": "25 Nov 2026: about 3,200 new watches from Goldsmiths, Mappin & Webb and C.W. Sellors (data/products.json). Re-check the count before posting.",
+  "facts_checked": "25 Nov 2026: about 3,190 new watches from Goldsmiths, Mappin & Webb and C.W. Sellors (data/products.json). Re-check before posting.",
   "scenes": [
-    {"eyebrow": "Before you spend thousands", "headline": "Spend 60 seconds with Hourwright.", "seconds": 3},
-    {"eyebrow": "One search", "headline": "3,000+ new luxury watches from UK authorised retailers", "size": 92, "sub": "Goldsmiths, Mappin & Webb and C.W. Sellors, side by side.", "seconds": 3.5},
-    {"eyebrow": "Your budget, your style", "headline": "Find the right watch. Then the right price.", "size": 104, "sub": "Omega, Breitling, TAG Heuer, Panerai, Longines and more.", "seconds": 3.5},
-    {"headline": "Don't compromise on the watch. Challenge the price.", "size": 100, "seconds": 3},
-    {"eyebrow": "Free and independent", "headline": "Try the watch finder", "sub": "Tap the link. Compare. Buy from the retailer.", "seconds": 3, "fine": "Prices and stock are set by each retailer and may change. Hourwright earns commission from retailers when you buy. Ad."}
+    {
+      "video": "assets/macro-movement-1.mp4",
+      "from": 0,
+      "seconds": 3.5,
+      "speed": 0.85,
+      "eyebrow": "Before you spend thousands",
+      "headline": "Spend 60 seconds with Hourwright.",
+      "size": 104
+    },
+    {
+      "product": "mappinwebb-34345360993",
+      "headline": "One search.",
+      "sub": "3,000+ new luxury watches from UK authorised retailers.",
+      "seconds": 3.5
+    },
+    {
+      "product": "goldsmiths-36407604064",
+      "headline": "Side by side.",
+      "sub": "Goldsmiths, Mappin & Webb and C.W. Sellors.",
+      "seconds": 3.5
+    },
+    {
+      "product": "mappinwebb-36550571049",
+      "headline": "Your budget. Your style.",
+      "sub": "Find the right watch. Then the right price.",
+      "size": 110,
+      "seconds": 3.5
+    },
+    {
+      "video": "assets/studio-plinth-1.mp4",
+      "from": 0,
+      "seconds": 3,
+      "speed": 0.9,
+      "headline": "Don't compromise on the watch. Challenge the price.",
+      "size": 96
+    },
+    {
+      "eyebrow": "Free and independent",
+      "headline": "Try the watch finder",
+      "sub": "Tap the link. Compare. Buy from the retailer.",
+      "seconds": 3.5,
+      "fine": "Prices and stock are set by each retailer and may change. Hourwright earns commission from retailers when you buy. Ad."
+    }
+  ],
+  "audio": [
+    {
+      "file": "ops/ads/audio/value-vo.mp3",
+      "start": 0.6,
+      "volume": 1.0
+    },
+    {
+      "file": "assets/music-timeless-seconds.mp3",
+      "start": 0,
+      "volume": 0.3
+    }
   ]
 }
