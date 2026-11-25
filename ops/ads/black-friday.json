@@ -1,0 +1,13 @@
+{
+  "concept": "A: genuine Black Friday savings",
+  "landing": "https://hourwright.co.uk/price-drops/index.html?utm_source={platform}&utm_medium=social&utm_campaign=black-friday-2026",
+  "valid_until": "2026-11-30",
+  "facts_checked": "25 Nov 2026 from data/products.json: 53 in-stock watches below the retailer's own stated previous price; largest reduction 50% (Gucci Sync 25H 40mm); most reductions are Breitling and TAG Heuer. Re-check before each post.",
+  "scenes": [
+    {"eyebrow": "Black Friday", "headline": "Luxury watches. Genuinely reduced.", "seconds": 3},
+    {"eyebrow": "UK authorised retailers", "headline": "53 watches below the retailer's own previous price", "size": 96, "sub": "Breitling, TAG Heuer, Bell & Ross and more.", "seconds": 3.5},
+    {"eyebrow": "Real reductions", "headline": "Up to 50% off selected watches", "sub": "From the retailers' own prices. Checked daily. No voucher-code tricks.", "seconds": 3.5},
+    {"headline": "Luxury is worth paying for. Overpaying isn't.", "size": 104, "seconds": 3},
+    {"eyebrow": "Before you buy", "headline": "See every offer in one place", "sub": "Tap the link. Compare. Buy from the retailer.", "seconds": 3, "fine": "Prices, stock and offers are set by each retailer and may change. Hourwright earns commission from retailers when you buy. Ad."}
+  ]
+}

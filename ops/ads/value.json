@@ -1,0 +1,12 @@
+{
+  "concept": "C: Hourwright value proposition (evergreen)",
+  "landing": "https://hourwright.co.uk/watch-finder/index.html?utm_source={platform}&utm_medium=social&utm_campaign=value-2026",
+  "facts_checked": "25 Nov 2026: about 3,200 new watches from Goldsmiths, Mappin & Webb and C.W. Sellors (data/products.json). Re-check the count before posting.",
+  "scenes": [
+    {"eyebrow": "Before you spend thousands", "headline": "Spend 60 seconds with Hourwright.", "seconds": 3},
+    {"eyebrow": "One search", "headline": "3,000+ new luxury watches from UK authorised retailers", "size": 92, "sub": "Goldsmiths, Mappin & Webb and C.W. Sellors, side by side.", "seconds": 3.5},
+    {"eyebrow": "Your budget, your style", "headline": "Find the right watch. Then the right price.", "size": 104, "sub": "Omega, Breitling, TAG Heuer, Panerai, Longines and more.", "seconds": 3.5},
+    {"headline": "Don't compromise on the watch. Challenge the price.", "size": 100, "seconds": 3},
+    {"eyebrow": "Free and independent", "headline": "Try the watch finder", "sub": "Tap the link. Compare. Buy from the retailer.", "seconds": 3, "fine": "Prices and stock are set by each retailer and may change. Hourwright earns commission from retailers when you buy. Ad."}
+  ]
+}
