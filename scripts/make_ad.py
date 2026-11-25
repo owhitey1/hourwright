@@ -41,8 +41,25 @@ def product_image(url, box):
 W, H, FPS = 1080, 1920, 30
 
 
+def framed(url, height=640):
+    """Retailer photo exactly as supplied (scaled only: Awin/Rakuten licences allow publishing
+    Advertiser Materials 'without modification'), mounted in a thin brass frame with a contact shadow."""
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Hourwright ad builder)"})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        im = Image.open(io.BytesIO(r.read())).convert("RGB")
+    im = im.resize((int(im.width * height / im.height), height), Image.LANCZOS)
+    b = 6
+    canvas = Image.new("RGBA", (im.width + 2 * b + 120, height + 2 * b + 50), (0, 0, 0, 0))
+    sh = Image.new("L", canvas.size, 0)
+    ImageDraw.Draw(sh).ellipse((40, height + 2 * b - 8, canvas.width - 40, height + 2 * b + 40), fill=180)
+    canvas.paste((0, 0, 0, 255), (0, 0), sh.filter(ImageFilter.GaussianBlur(16)))
+    ImageDraw.Draw(canvas).rectangle((60, 0, 60 + im.width + 2 * b - 1, height + 2 * b - 1), fill=(198, 160, 92, 255))
+    canvas.paste(im, (60 + b, b))
+    return canvas
+
+
 def cutout(url, height=640):
-    """Retailer photo with its plain studio backdrop removed (border-connected flood fill), plus a
+    """Not used for retailer images unless the programme permits modification. Retailer photo with its plain studio backdrop removed (border-connected flood fill), plus a
     soft contact shadow. The watch itself is untouched apart from scaling."""
     from PIL import ImageChops
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Hourwright ad builder)"})
@@ -203,7 +220,8 @@ def main(spec_path, out_path):
         fades = f"fade=t=in:st=0:d=0.35,fade=t=out:st={dur - 0.35}:d=0.35"
         if s.get("hero"):
             p = product(s["hero"])
-            c = tmp / f"c{i}.png"; cutout(p["image"], s.get("watch_height", 640)).save(c)
+            c = tmp / f"c{i}.png"
+            (cutout if s.get("cutout_permitted") else framed)(p["image"], s.get("watch_height", 600)).save(c)
             o = tmp / f"o{i}.png"; hero_overlay(s, p, o)
             speed = s.get("speed", 0.7)
             base = s.get("base_y", 1060)
