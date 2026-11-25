@@ -39,6 +39,20 @@ def main(args):
         print(h.get("history_item_id"), h.get("source"), h.get("date_unix"), (h.get("text") or "")[:70])
     for a in args:
         match, name = a.rsplit("=", 1)
+        if match.startswith("id:"):
+            (out / name).write_bytes(call(f"/v1/history/{match[3:]}/audio", raw=True))
+            print("saved", name, (out / name).stat().st_size); continue
+        if match.startswith("compose:"):
+            body = json.dumps({"prompt": match[8:], "music_length_ms": 30000, "force_instrumental": True}).encode()
+            req = urllib.request.Request(API + "/v1/music", data=body, method="POST",
+                                         headers={"xi-api-key": KEY, "content-type": "application/json", "accept": "audio/mpeg"})
+            try:
+                with urllib.request.urlopen(req, timeout=300) as r:
+                    (out / name).write_bytes(r.read())
+                print("saved", name, (out / name).stat().st_size)
+            except urllib.error.HTTPError as e:
+                print("compose failed", e.code, e.read()[:300])
+            continue
         if match.startswith("music:"):
             data = music_items()
             print(json.dumps(data)[:3000] if data else "no music listing")
