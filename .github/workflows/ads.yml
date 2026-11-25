@@ -7,7 +7,7 @@ on:
         required: true
         default: "black-friday"
 permissions:
-  contents: read
+  contents: write
 jobs:
   render:
     runs-on: ubuntu-latest
@@ -20,8 +20,12 @@ jobs:
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
       - run: pip install pillow fonttools brotli
       - run: python3 scripts/make_ad.py "ops/ads/${{ inputs.spec }}.json" "out/${{ inputs.spec }}.mp4"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ad-${{ inputs.spec }}
-          path: out/
-          retention-days: 14
+      - name: Save to the ads branch (not deployed)
+        run: |
+          git config user.name "hourwright-ads"; git config user.email "ads@hourwright.co.uk"
+          cp out/* /tmp/
+          git fetch origin ads --depth 1 && git checkout -B ads origin/ads || git checkout --orphan ads
+          git rm -rq --cached . 2>/dev/null || true
+          mkdir -p ads && cp /tmp/${{ inputs.spec }}.* ads/
+          git add ads/${{ inputs.spec }}.*
+          git commit -qm "Render ${{ inputs.spec }} advert" && git push -q origin HEAD:ads
