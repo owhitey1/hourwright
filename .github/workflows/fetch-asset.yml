@@ -1,0 +1,40 @@
+name: Fetch ad asset
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Asset URL (Higgsfield CDN only)"
+        required: true
+      name:
+        description: "File name to save as, e.g. macro-movement-1.mp4"
+        required: true
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download (allow-listed hosts only)
+        env:
+          URL: ${{ inputs.url }}
+          NAME: ${{ inputs.name }}
+        run: |
+          case "$URL" in
+            https://d8j0ntlcm91z4.cloudfront.net/*|https://static.higgsfield.ai/*) ;;
+            *) echo "Host not allowed"; exit 1;;
+          esac
+          case "$NAME" in *[!A-Za-z0-9._-]*) echo "Bad name"; exit 1;; esac
+          curl -fsSL -m 120 -o "/tmp/$NAME" "$URL"
+          ls -l "/tmp/$NAME"
+      - uses: actions/checkout@v7
+        with:
+          ref: ads
+      - name: Save to the ads branch under assets/
+        env:
+          NAME: ${{ inputs.name }}
+        run: |
+          git config user.name "hourwright-ads"; git config user.email "ads@hourwright.co.uk"
+          mkdir -p assets && cp "/tmp/$NAME" assets/
+          git add "assets/$NAME"
+          git commit -qm "Add asset $NAME" && git push -q origin HEAD:ads
