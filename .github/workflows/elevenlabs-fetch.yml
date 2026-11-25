@@ -1,0 +1,29 @@
+name: Fetch ElevenLabs audio
+on:
+  workflow_dispatch:
+    inputs:
+      items:
+        description: 'Space-separated "match text=file.mp3" pairs (quoted); empty lists history'
+        required: false
+        default: ""
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Download from ElevenLabs
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          ITEMS: ${{ inputs.items }}
+        run: eval "python3 scripts/elevenlabs_fetch.py $ITEMS"
+      - name: Save to the ads branch under assets/
+        run: |
+          ls assets/*.mp3 2>/dev/null || exit 0
+          git config user.name "hourwright-ads"; git config user.email "ads@hourwright.co.uk"
+          mkdir -p /tmp/a && cp assets/*.mp3 /tmp/a/
+          git fetch -q origin ads --depth 1 && git checkout -q -B ads FETCH_HEAD
+          mkdir -p assets && cp /tmp/a/*.mp3 assets/ && git add assets/*.mp3
+          git commit -qm "ElevenLabs audio" && git push -q origin HEAD:ads
