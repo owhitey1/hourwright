@@ -138,7 +138,7 @@ def all_brands():
 # ---------------------------------------------------------------- layout
 
 NAV = [("watches/index.html", "Watches"), ("watch-finder/index.html", "Finder"), ("brands/index.html", "Brands"),
-       ("compare/index.html", "Compare"), ("price-drops/index.html", "Price drops"),
+       ("compare/index.html", "Compare"), ("price-drops/index.html", "Offers"),
        ("guides/index.html", "Guides"), ("journal/index.html", "Journal")]
 
 FOOT = [("about.html", "About"), ("how-we-choose.html", "How we choose"),
@@ -363,6 +363,9 @@ def build_home():
     count = (f"{len(PRODUCTS):,} watches from {len({p['brand'] for p in PRODUCTS})} brands, "
              f"priced by {len({p['retailer'] for p in PRODUCTS})} UK {'retailer' if len({p['retailer'] for p in PRODUCTS}) == 1 else 'retailers'}.") if PRODUCTS else ""
     floor = gbp(CFG["price_floor_gbp"])
+    n_off = len(retailer_offers())
+    offers_cta = (f'<p class="fine"><a href="price-drops/index.html"><strong>{n_off} watches currently reduced by the retailer</strong></a>: '
+                  'genuine savings from retailers\' own prices, checked daily.</p>') if n_off else ""
     body = f"""<section class="hero"><div class="wrap">
 <div>
 <p class="eyebrow">UK authorised retailers only</p>
@@ -370,6 +373,7 @@ def build_home():
 <p class="lede">{e(SITE)} compares luxury watches from {floor} across UK authorised retailers, with the retailer's own price beside each one and guides written in plain English.</p>
 <p class="row"><a class="btn" href="watch-finder/index.html">Find a watch for your budget</a><a class="btn ghost" href="watches/index.html">Browse all watches</a></p>
 <p class="fine">{count}</p>
+{offers_cta}
 </div>
 {dial_svg()}
 </div></section>
@@ -828,6 +832,14 @@ def build_compare():
          body, crumbs=[("", "Compare")])
 
 
+def retailer_offers():
+    """Watches the retailer itself lists below a stated previous price (feed was_price), biggest saving first."""
+    if STALE:
+        return []
+    offers = [p for p in PRODUCTS if p.get("was_price") and p["was_price"] > p["price"] * 1.02 and p.get("in_stock") is not False]
+    return sorted(offers, key=lambda p: p["price"] / p["was_price"])
+
+
 def build_drops():
     cutoff = (TODAY - dt.timedelta(days=14)).isoformat()
     drops = [] if STALE else [p for p in PRODUCTS if p.get("prev_price") and p.get("price_changed")
@@ -846,12 +858,31 @@ def build_drops():
         inner = '<div class="empty"><h2>No price drops in the last 14 days</h2><p>We check retailer prices daily and list every fall here.</p></div>'
     else:
         inner = EMPTY
-    body = f"""<section><div class="wrap"><h1>Price drops</h1>
-<p class="lede">Watches whose retailer price has fallen in the last 14 days. "Was" is the price the same retailer listed on our previous check.</p>
+    offers = retailer_offers()
+    season = "Black Friday and Christmas " if TODAY.month in (11, 12) else ""
+    offer_html = ""
+    if offers:
+        rows = "".join(
+            f'<tr><th scope="row"><a href="../watches/{e(p["slug"])}.html">{e(p["brand"])} {e(p["name"])}</a></th>'
+            f'<td>{e(p["retailer_name"])}</td><td class="num"><s>{gbp(p["was_price"])}</s></td>'
+            f'<td class="num"><strong>{gbp(p["price"])}</strong></td>'
+            f'<td class="num">{round(100 - 100 * p["price"] / p["was_price"])}%</td></tr>'
+            for p in offers)
+        offer_html = (f'<h2>Reduced by the retailer ({len(offers)})</h2>'
+                      '<p>The retailer\'s own listing shows a previous price for these watches. "Was" is the retailer\'s stated price, not ours; check the current price and terms on the retailer\'s site.</p>'
+                      '<div class="scroll"><table class="offers"><thead><tr><th>Watch</th><th>Retailer</th>'
+                      '<th class="num">Was</th><th class="num">Now</th><th class="num">Saving</th></tr></thead>'
+                      f"<tbody>{rows}</tbody></table></div>")
+    body = f"""<section><div class="wrap"><h1>{e(season or "Luxury watch ")}{"luxury watch " if season else ""}offers and price drops</h1>
+<p class="lede">Genuine reductions at UK authorised retailers, from the retailers' own product data, checked daily. No voucher codes or invented savings.</p>
+{offer_html}
+<h2>Price drops in the last 14 days</h2>
+<p>"Was" is the price the same retailer listed on our previous check.</p>
 {inner}</div></section>"""
-    page("price-drops/index.html", "Luxury watch price drops",
-         "Luxury watches whose price has fallen at UK authorised retailers in the last 14 days, checked daily.",
-         body, crumbs=[("", "Price drops")])
+    page("price-drops/index.html", (season + "luxury watch offers and price drops UK").strip()[:1].upper() + (season + "luxury watch offers and price drops UK").strip()[1:],
+         f"{len(offers)} luxury watches reduced by UK authorised retailers, plus price drops in the last 14 days, checked daily." if offers
+         else "Luxury watches whose price has fallen at UK authorised retailers in the last 14 days, checked daily.",
+         body, crumbs=[("", "Offers")])
 
 
 def build_static():
