@@ -858,6 +858,13 @@ def build_drops():
         inner = '<div class="empty"><h2>No price drops in the last 14 days</h2><p>We check retailer prices daily and list every fall here.</p></div>'
     else:
         inner = EMPTY
+    today = TODAY.isoformat()
+    promos = [x for x in CFG.get("promotions", []) if x["start"] <= today <= x["end"]]
+    rmap = {r["id"]: r for r in CFG["retailers"]}
+    promo_html = "".join(
+        f'<p class="note"><strong>{e(rmap[x["retailer"]]["name"])}: {e(x["title"])}</strong>, until {nice_date(x["end"])}. '
+        f'<a href="{e(retailer_link(rmap[x["retailer"]]))}" rel="sponsored nofollow noopener" target="_blank">See it at {e(rmap[x["retailer"]]["name"])}</a></p>'
+        for x in promos if x["retailer"] in rmap)
     offers = retailer_offers()
     season = "Black Friday and Christmas " if TODAY.month in (11, 12) else ""
     offer_html = ""
@@ -875,6 +882,7 @@ def build_drops():
                       f"<tbody>{rows}</tbody></table></div>")
     body = f"""<section><div class="wrap"><h1>{e(season or "Luxury watch ")}{"luxury watch " if season else ""}offers and price drops</h1>
 <p class="lede">Genuine reductions at UK authorised retailers, from the retailers' own product data, checked daily. No voucher codes or invented savings.</p>
+{promo_html}
 {offer_html}
 <h2>Price drops in the last 14 days</h2>
 <p>"Was" is the price the same retailer listed on our previous check.</p>
