@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       spec:
-        description: "Advert spec in ops/ads (without .json)"
+        description: "Advert spec(s) in ops/ads, space-separated (without .json)"
         required: true
         default: "black-friday"
 permissions:
@@ -24,13 +24,16 @@ jobs:
       - run: pip install pillow fonttools brotli
       - name: Pull b-roll and music assets from the ads branch
         run: git fetch -q origin ads --depth 1 && git checkout FETCH_HEAD -- assets || echo "no assets yet"
-      - run: python3 scripts/make_ad.py "ops/ads/${{ inputs.spec }}.json" "out/${{ inputs.spec }}.mp4"
+      - env:
+          SPECS: ${{ inputs.spec }}
+        run: for s in $SPECS; do python3 scripts/make_ad.py "ops/ads/$s.json" "out/$s.mp4"; done
       - name: Save to the ads branch (not deployed)
+        env:
+          SPECS: ${{ inputs.spec }}
         run: |
           git config user.name "hourwright-ads"; git config user.email "ads@hourwright.co.uk"
           cp out/* /tmp/
           git fetch origin ads --depth 1 && git checkout -B ads origin/ads || git checkout --orphan ads
           git rm -rq --cached . 2>/dev/null || true
-          mkdir -p ads && cp /tmp/${{ inputs.spec }}.* ads/
-          git add ads/${{ inputs.spec }}.*
-          git commit -qm "Render ${{ inputs.spec }} advert" && git push -q origin HEAD:ads
+          mkdir -p ads && for s in $SPECS; do cp /tmp/$s.* ads/; git add ads/$s.*; done
+          git commit -qm "Render adverts: $SPECS" && git push -q origin HEAD:ads
