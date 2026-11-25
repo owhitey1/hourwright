@@ -49,14 +49,14 @@
   ],
   "audio": [
     {
-      "file": "ops/ads/audio/value-vo.mp3",
+      "file": "assets/value-vo.mp3",
       "start": 0.6,
       "volume": 1.0
     },
     {
       "file": "assets/music-timeless-seconds.mp3",
       "start": 0,
-      "volume": 0.3
+      "volume": 0.22
     }
   ]
 }
