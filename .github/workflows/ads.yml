@@ -33,7 +33,6 @@ jobs:
         run: |
           git config user.name "hourwright-ads"; git config user.email "ads@hourwright.co.uk"
           cp out/* /tmp/
-          git fetch origin ads --depth 1 && git checkout -B ads origin/ads || git checkout --orphan ads
-          git rm -rq --cached . 2>/dev/null || true
+          git fetch origin ads --depth 1 && git checkout -f -B ads origin/ads || { git checkout --orphan ads; git rm -rq --cached .; }
           mkdir -p ads && for s in $SPECS; do cp /tmp/$s.* ads/; git add ads/$s.*; done
           git commit -qm "Render adverts: $SPECS" && git push -q origin HEAD:ads
