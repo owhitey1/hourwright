@@ -21,7 +21,7 @@ jobs:
           NAME: ${{ inputs.name }}
         run: |
           case "$URL" in
-            https://d8j0ntlcm91z4.cloudfront.net/*|https://static.higgsfield.ai/*) ;;
+            https://d8j0ntlcm91z4.cloudfront.net/*|https://static.higgsfield.ai/*|https://www.awin.com/docs.awin.com/*) ;;
             *) echo "Host not allowed"; exit 1;;
           esac
           case "$NAME" in *[!A-Za-z0-9._-]*) echo "Bad name"; exit 1;; esac
