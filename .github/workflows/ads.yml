@@ -8,6 +8,9 @@ on:
         default: "black-friday"
 permissions:
   contents: write
+concurrency:
+  group: ads-branch
+  cancel-in-progress: false
 jobs:
   render:
     runs-on: ubuntu-latest
