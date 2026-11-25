@@ -5,10 +5,11 @@ type: guide
 status: published
 published: 2026-11-19
 publish_after: 2026-11-19
+updated: 2026-11-25
 author: Hourwright
 description: "Six Swiss and Japanese dive watches under £5,000 from Oris, Longines, Rado and Seiko, compared on size, bezel, movement, power reserve and warranty."
 basis: "Researched from each manufacturer's published specifications and the retailer's listings. We have not handled these watches, and this is not a ranking."
-products: [goldsmiths-39630618382, goldsmiths-45720100285, goldsmiths-41297899165, goldsmiths-38283335110, goldsmiths-43306658067, goldsmiths-38342337642]
+products: [goldsmiths-39630618382, goldsmiths-45720100285, goldsmiths-41297899165, goldsmiths-38283335110, goldsmiths-43306658068, goldsmiths-38342337642]
 price_ceiling: 5000
 image_credit: "Product images supplied by Goldsmiths through its Awin product feed."
 sources:
@@ -39,6 +40,9 @@ sources:
   - title: "Seiko Prospex Marinemaster 1968 Heritage Diver's Watch SLA079"
     url: "https://www.seikowatches.com/uk-en/products/prospex/sla079j1"
     publisher: "Seiko"
+  - title: "Seiko Prospex Marinemaster 1968 Heritage Diver's Watch SLA077"
+    url: "https://www.seikowatches.com/us-en/products/prospex/sla077j1"
+    publisher: "Seiko"
   - title: "Seiko warranty"
     url: "https://www.seikowatches.com/global-en/customerservice/warranty"
     publisher: "Seiko"
@@ -54,7 +58,7 @@ sources:
 verified:
   by: Claude
   date: 2026-11-21
-  scope: "Six catalogue ids against model and reference; every specification, warranty and service figure against Oris, Longines (product pages, Swatch Group announcements, warranty page), Rado and Seiko pages; ISO 6425 scope against BSI; sources exist and support the text; brief B1 coverage; originality, no hands-on claims, no current prices, balance. Unverifiable HydroConquest thickness and lug-to-lug and the Aquis quick-adjust clasp removed; Rado strap wording, Legend Diver crown and absolute wording corrected; ISO 6425, bracelet vs rubber and servicing paragraphs added."
+  scope: "Six catalogue ids against model and reference; every specification, warranty and service figure against Oris, Longines (product pages, Swatch Group announcements, warranty page), Rado and Seiko pages; ISO 6425 scope against BSI; sources exist and support the text; brief B1 coverage; originality, no hands-on claims, no current prices, balance. Unverifiable HydroConquest thickness and lug-to-lug and the Aquis quick-adjust clasp removed; Rado strap wording, Legend Diver crown and absolute wording corrected; ISO 6425, bracelet vs rubber and servicing paragraphs added. 2026-11-25: SLA079J1 left the Goldsmiths feed; card switched to SLA077J1 (same model, white dial), whose Seiko page states the same case, movement, power reserve, accuracy, lume, bezel, crystal, crown and clasp as the text."
 ---
 Most luxury dive watches will never go deeper than a hotel pool, but the features that make them work underwater, a readable dial, a timing bezel, a screw-down crown and real water resistance, also make them practical everyday watches. These six span four makers and about £2,000 to £3,500 when we published, all comfortably under £5,000. The cards show today's retailer price.
 
@@ -121,7 +125,7 @@ Seiko describes this as a 300-metre diver’s watch. It has a 42.6mm steel case 
 
 Consider: at 13.4mm it is a thick watch, and Seiko's accuracy tolerance is wider than a chronometer's.
 
-{{product:goldsmiths-43306658067}}
+{{product:goldsmiths-43306658068}}
 
 ## For the longest power reserve and warranty: Oris Aquis Date Calibre 400 43.5mm
 
