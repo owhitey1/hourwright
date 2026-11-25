@@ -1,13 +1,13 @@
 {
-  "concept": "A: genuine Black Friday savings",
+  "concept": "A: genuine Black Friday savings, featuring real reduced watches (retailers' own photos)",
   "landing": "https://hourwright.co.uk/price-drops/index.html?utm_source={platform}&utm_medium=social&utm_campaign=black-friday-2026",
   "valid_until": "2026-11-30",
-  "facts_checked": "25 Nov 2026 from data/products.json: 53 in-stock watches below the retailer's own stated previous price; largest reduction 50% (Gucci Sync 25H 40mm); most reductions are Breitling and TAG Heuer. Re-check before each post.",
+  "facts_checked": "25 Nov 2026 from data/products.json (retailers' own feed prices). Re-render before each post: prices come from the catalogue at render time.",
   "scenes": [
-    {"eyebrow": "Black Friday", "headline": "Luxury watches. Genuinely reduced.", "seconds": 3},
-    {"eyebrow": "UK authorised retailers", "headline": "53 watches below the retailer's own previous price", "size": 96, "sub": "Breitling, TAG Heuer, Bell & Ross and more.", "seconds": 3.5},
-    {"eyebrow": "Real reductions", "headline": "Up to 50% off selected watches", "sub": "From the retailers' own prices. Checked daily. No voucher-code tricks.", "seconds": 3.5},
-    {"headline": "Luxury is worth paying for. Overpaying isn't.", "size": 104, "seconds": 3},
-    {"eyebrow": "Before you buy", "headline": "See every offer in one place", "sub": "Tap the link. Compare. Buy from the retailer.", "seconds": 3, "fine": "Prices, stock and offers are set by each retailer and may change. Hourwright earns commission from retailers when you buy. Ad."}
+    {"product": "mappinwebb-27561992189", "headline": "Black Friday.", "show_price": true, "size": 120, "seconds": 3.5},
+    {"product": "mappinwebb-35852048938", "headline": "Genuinely reduced.", "show_price": true, "size": 120, "seconds": 3.5},
+    {"product": "cwsellors-14925267829113", "headline": "By the retailers themselves.", "show_price": true, "size": 104, "seconds": 3.5},
+    {"eyebrow": "Hourwright", "headline": "Luxury is worth paying for. Overpaying isn't.", "size": 104, "seconds": 3},
+    {"eyebrow": "Black Friday offers", "headline": "Every genuine reduction, in one place.", "size": 100, "sub": "UK authorised retailers. Checked daily. Tap the link.", "seconds": 3.5, "fine": "Prices and stock are set by each retailer and may change. Hourwright earns commission from retailers when you buy. Ad."}
   ]
 }

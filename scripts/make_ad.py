@@ -15,7 +15,28 @@ import textwrap
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from make_pin import BG, BRASS, WHITE, GREY, font  # noqa: E402
-from PIL import Image, ImageDraw  # noqa: E402
+from PIL import Image, ImageDraw, ImageFilter  # noqa: E402
+import io  # noqa: E402
+import urllib.request  # noqa: E402
+
+PRODUCTS = {}
+
+
+def product(pid):
+    """Catalogue entry by id (data/products.json): retailer's own image, name, prices."""
+    if not PRODUCTS:
+        data = json.loads((pathlib.Path(__file__).parent.parent / "data" / "products.json").read_text())
+        PRODUCTS.update({p["id"]: p for p in data["products"]})
+    return PRODUCTS[pid]
+
+
+def product_image(url, box):
+    """Retailer's product photo, unaltered apart from scaling, on a soft studio light."""
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Hourwright ad builder)"})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        im = Image.open(io.BytesIO(r.read())).convert("RGB")
+    im.thumbnail((box, box), Image.LANCZOS)
+    return im
 
 W, H, FPS = 1080, 1920, 30
 
@@ -36,6 +57,23 @@ def frame(scene, path):
     im = Image.new("RGB", (W, H), BG)
     d = ImageDraw.Draw(im)
     x, y = 96, 560
+    if scene.get("product"):
+        p = product(scene["product"])
+        # Studio card: a light panel with a soft glow, the product photo centred on it.
+        glow = Image.new("L", (W, H), 0)
+        ImageDraw.Draw(glow).ellipse((90, 170, W - 90, 1070), fill=110)
+        glow = glow.filter(ImageFilter.GaussianBlur(120))
+        im.paste(Image.new("RGB", (W, H), "#2a5a4d"), (0, 0), glow)
+        card = Image.new("RGB", (860, 860), "#ffffff")
+        ph = product_image(p["image"], 800)
+        card.paste(ph, ((860 - ph.width) // 2, (860 - ph.height) // 2))
+        mask = Image.new("L", card.size, 0)
+        ImageDraw.Draw(mask).rounded_rectangle((0, 0, 860, 860), 36, fill=255)
+        im.paste(card, ((W - 860) // 2, 200), mask)
+        y = 1110
+        scene.setdefault("eyebrow", p["brand"].replace("Tag Heuer", "TAG Heuer"))
+        if scene.get("show_price") and p.get("was_price"):
+            scene.setdefault("sub", f"Was £{p['was_price']:,.0f}. Now £{p['price']:,.0f} at {p['retailer_name']}.")
     if scene.get("eyebrow"):
         d.text((x, y), scene["eyebrow"].upper(), font=font("hanken-grotesk", 40, 600), fill=BRASS)
         y += 90
@@ -67,10 +105,14 @@ def main(spec_path, out_path):
     for i, s in enumerate(spec["scenes"]):
         p = tmp / f"s{i}.png"
         frame(s, p)
-        inputs += ["-loop", "1", "-t", str(s.get("seconds", 3)), "-i", str(p)]
+        inputs += ["-i", str(p)]
         dur = s.get("seconds", 3)
-        filters.append(f"[{i}:v]fps={FPS},format=yuv420p,fade=t=in:st=0:d=0.3,fade=t=out:st={dur - 0.3}:d=0.3[v{i}]")
+        frames = int(dur * FPS)
+        filters.append(f"[{i}:v]scale={W * 2}:{H * 2},zoompan=z='min(1+0.06*on/{frames},1.06)':x='iw/2-(iw/zoom/2)':"
+                       f"y='ih/2-(ih/zoom/2)':d={frames}:s={W}x{H}:fps={FPS},format=yuv420p,"
+                       f"fade=t=in:st=0:d=0.35,fade=t=out:st={dur - 0.35}:d=0.35[v{i}]")
     filters.append("".join(f"[v{i}]" for i in range(n)) + f"concat=n={n}:v=1:a=0[out]")
+    pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *inputs, "-filter_complex", ";".join(filters),
                     "-map", "[out]", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-movflags", "+faststart",
                     "-pix_fmt", "yuv420p", out_path], check=True)

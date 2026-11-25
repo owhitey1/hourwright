@@ -1,0 +1,27 @@
+name: Render adverts
+on:
+  workflow_dispatch:
+    inputs:
+      spec:
+        description: "Advert spec in ops/ads (without .json)"
+        required: true
+        default: "black-friday"
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - run: pip install pillow fonttools brotli
+      - run: python3 scripts/make_ad.py "ops/ads/${{ inputs.spec }}.json" "out/${{ inputs.spec }}.mp4"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ad-${{ inputs.spec }}
+          path: out/
+          retention-days: 14
