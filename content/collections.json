@@ -1,6 +1,7 @@
 [
   {"slug": "dive-watches", "title": "Luxury dive watches", "pattern": "\\b(dive|diver|divers|diving|fathoms|aquis|hydroconquest|superocean|seaq|submersible|aquaracer|captain cook)\\b",
-   "intro": "New dive watches from UK authorised retailers, from everyday swimming watches to professional-grade divers. Check the water-resistance rating and whether the bezel is unidirectional before you buy.",
+   "intro": "New dive watches from UK authorised retailers, grouped by case size so you can go straight to a 40mm or 42mm diver, from everyday swimming watches to professional-grade divers. Check the water-resistance rating and whether the bezel is unidirectional before you buy.",
+   "size_groups": [["Up to 37mm", 0, 37.5], ["38mm to 40mm", 37.5, 40.5], ["41mm to 42mm", 40.5, 42.5], ["43mm and over", 42.5, null]],
    "guide": "water-resistance-explained"},
   {"slug": "chronographs", "title": "Luxury chronographs", "pattern": "chronograph|\\bchrono\\b",
    "intro": "Chronographs add a stopwatch to the time, operated by pushers beside the crown. Mechanical chronographs are among the most complex movements in watchmaking and cost more to service than three-hand watches.",

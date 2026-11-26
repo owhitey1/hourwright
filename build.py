@@ -8,6 +8,7 @@ import os
 import re
 import shutil
 import unicodedata
+from collections import Counter
 import urllib.parse
 from pathlib import Path
 
@@ -696,6 +697,33 @@ def related_watches(guide_slug):
     return f"<h2>Watches this guide applies to</h2><ul class=\"plain\">{links}</ul>"
 
 
+def listed_size(p):
+    """Case diameter stated in the retailer's product name, or None (not a specification)."""
+    m = re.search(r"(\d{2}(?:\.\d)?)\s?mm\b", p["name"])
+    return float(m.group(1)) if m else None
+
+
+def size_groups(c, items):
+    """For collections with "size_groups" ([label, min_mm, max_mm_exclusive_or_null], ...): split listings by the
+    case size stated in the listing name, cheapest first, with a final group for names that state no size.
+    Returns [(anchor, label, products)] or None when the collection has no groups or most names state no size."""
+    spec = c.get("size_groups")
+    if not spec:
+        return None
+    sized = [p for p in items if listed_size(p) is not None]
+    if len(sized) * 2 < len(items):
+        return None
+    out = []
+    for label, lo, hi in spec:
+        ps = [p for p in sized if listed_size(p) >= lo and (hi is None or listed_size(p) < hi)]
+        if ps:
+            out.append((slug(label), label, sorted(ps, key=lambda x: x["price"])))
+    rest = [p for p in items if listed_size(p) is None]
+    if rest:
+        out.append(("unsized", "Size not stated in the listing", sorted(rest, key=lambda x: x["price"])))
+    return out
+
+
 def build_collections():
     guides = {g["slug"]: g for g in load_guides()}
     for c, items in live_collections():
@@ -704,22 +732,45 @@ def build_collections():
         guide_link = f'<p>Before you buy: <a href="../guides/{g["slug"]}.html">{e(g["title"])}</a>.</p>' if g else ""
         lo, hi = items[0]["price"], items[-1]["price"]
         others = "".join(f'<li><a href="{x["slug"]}.html">{e(x["title"])}</a></li>' for x, _ in live_collections() if x is not c)
+        title = f"{c['title']} UK: prices from {gbp(lo)}"
+        desc = f"{len(items)} new {c['title'].lower()} from UK authorised retailers, from {gbp(lo)}. Compare retailer prices and specifications."
+        listing = grid(items, "../")
+        size_nav = ""
+        groups = size_groups(c, items)
+        if groups:
+            # Search-facing title and description built from current listings, so they stay accurate.
+            sized = [p for g, _, ps in groups if g != "unsized" for p in ps]
+            common = [f"{s:g}mm" for s, _ in Counter(listed_size(p) for p in sized).most_common(3)]
+            common.sort(key=lambda x: float(x[:-2]))
+            rets = sorted({p["retailer_name"] for p in items})
+            brands = [b for b, _ in Counter(brand_for(p)["name"] for p in items).most_common(5)]
+            title = f"{c['title']} UK by size: {and_list(common)}, from {gbp(lo)}"
+            desc = (f"{len(items)} new dive watches from {and_list(brands)} at UK authorised retailers ({and_list(rets)}), "
+                    f"grouped by case size, cheapest first. Prices checked daily; buy direct from the retailer.")
+            jump = " · ".join(f'<a href="#size-{g}">{e(label)} ({len(ps)})</a>' for g, label, ps in groups)
+            size_nav = (f'<p><strong>Jump to a case size:</strong> {jump}.</p>'
+                        f'<p>Sizes are as stated in the retailer\'s listing name. Diameter is only half of fit, so check '
+                        f'lug-to-lug in our <a href="../guides/watch-size-guide.html">watch size guide</a>, and tick Compare '
+                        f'on up to three watches to see them <a href="../compare/index.html">side by side</a>.</p>')
+            listing = "".join(
+                f'<h2 id="size-{g}">{e(label)} <span class="meta">({len(ps)} from {gbp(ps[0]["price"])})</span></h2>' + grid(ps, "../")
+                for g, label, ps in groups)
         body = f"""<section><div class="wrap">
 <h1>{e(c['title'])}</h1>
 <p class="lede">{e(c['intro'])}</p>
 <p class="meta">{len(items)} new watches from {gbp(lo)} to {gbp(hi)} at UK authorised retailers, cheapest first.</p>
+{size_nav}
 {guide_link}
 {gift_block("../", here=c["slug"], inline=True) if c["slug"] in GIFT_COLLECTIONS else ""}
 {related_articles([p["id"] for p in items], "../", heading="Buying advice for these watches")}
-{grid(items, "../")}
+{listing}
 {checked_note()}
 <h2>More ways to browse</h2><ul class="plain">{others}</ul>
 </div></section>"""
         ld = {"@context": "https://schema.org", "@type": "ItemList", "name": c["title"], "numberOfItems": len(items),
               "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f"{DOMAIN}/watches/{p['slug']}.html"}
                                   for i, p in enumerate(items[:50])]}
-        page(f"watches/{c['slug']}.html", f"{c['title']} UK: prices from {gbp(lo)}",
-             f"{len(items)} new {c['title'].lower()} from UK authorised retailers, from {gbp(lo)}. Compare retailer prices and specifications.",
+        page(f"watches/{c['slug']}.html", title, desc,
              body, jsonld=[ld], crumbs=[("watches/index.html", "Watches"), ("", c["title"])])
 
 
