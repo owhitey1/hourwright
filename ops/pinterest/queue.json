@@ -6,7 +6,8 @@
   "boards": {
     "Watch gift ideas": "230739249598077527",
     "Watches by budget": "230739249598080223",
-    "Watch buying guides": "230739249598080902"
+    "Watch buying guides": "230739249598080902",
+    "Dive watches": "230739249598084515"
   },
   "board_descriptions": {
     "Watch gift ideas": "Luxury watch gift ideas from UK authorised retailers, with plain advice on size, style and movement. From Hourwright (hourwright.co.uk).",
@@ -43,7 +44,7 @@
      "description": "Luxury watches reduced by UK authorised retailers this Black Friday and Christmas, from the retailers' own prices and checked daily: Breitling, TAG Heuer, Bell & Ross, Gucci and more, with each retailer's was and now price side by side. Genuine savings, no voucher codes.",
      "alt_text": "Text graphic reading Black Friday luxury watch offers, genuine reductions from UK authorised retailers' own prices, checked daily. Hourwright.",
      "link": "https://hourwright.co.uk/price-drops/index.html?utm_source=pinterest&utm_medium=social&utm_campaign=black-friday-offers"},
-    {"id": "dive-watches-uk", "image": "dive-watches-uk.png", "board": "Dive watches", "status": "queued",
+    {"id": "dive-watches-uk", "image": "dive-watches-uk.png", "board": "Dive watches", "status": "published", "published": "2026-11-26", "pin_id": "230739180905907916",
      "title": "Luxury dive watches: UK prices compared",
      "description": "New luxury dive watches from UK authorised retailers, with the retailer's own price beside each one.",
      "alt_text": "Graphic: Luxury dive watches. New dive watches from UK authorised retailers, with the retailer's own price beside each one. Hourwright.",
