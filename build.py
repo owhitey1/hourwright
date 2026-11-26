@@ -275,6 +275,23 @@ def page(path, title, desc, body, *, jsonld=None, noindex=False, crumbs=None, og
 
 # ---------------------------------------------------------------- components
 
+GROUPS = {}  # model group -> products at every retailer (same model sold by more than one retailer)
+for _p in PRODUCTS:
+    if _p.get("group"):
+        GROUPS.setdefault(_p["group"], []).append(_p)
+
+
+def also_at(p, r):
+    """On a card: name the other retailers selling the same model and link to the product page's price comparison."""
+    if STALE or not p.get("group"):
+        return ""
+    names = sorted({x["retailer_name"] for x in GROUPS.get(p["group"], []) if x["retailer"] != p["retailer"]})
+    if not names:
+        return ""
+    return (f'<p class="meta also">Also at {e(and_list(names))}: '
+            f'<a href="{r}watches/{e(p["slug"])}.html#offers">compare prices</a></p>')
+
+
 def card(p, r):
     b = brand_for(p)
     stock = {True: "In stock", False: "Out of stock"}.get(p.get("in_stock"), "")
@@ -286,6 +303,7 @@ def card(p, r):
 <h3><a href="{r}watches/{e(p['slug'])}.html">{e(p['name'])}</a></h3>
 {price_html(p)}
 <p class="meta">{e(p['retailer_name'])}{' · ' + stock if stock else ''} · <a href="{r}affiliate-disclosure.html">Affiliate link</a></p>
+{also_at(p, r)}
 <div class="row"><a class="btn" href="{e(p['link'])}" rel="sponsored nofollow noopener" target="_blank" data-aff="{e(p['retailer'])}" data-pid="{e(p['id'])}">View at {e(p['retailer_name'])}</a>
 <label class="pick"><input type="checkbox" class="compare-pick" value="{e(p['id'])}"> Compare</label></div>
 </article>"""
@@ -447,7 +465,7 @@ def build_product(p):
     others = ""
     if same and not STALE:
         offers = sorted(same + [p], key=lambda x: x["price"])
-        others = "<h2>This model at other retailers</h2><table class=\"offers\"><tbody>" + "".join(
+        others = "<h2 id=\"offers\">This model at other retailers</h2><table class=\"offers\"><tbody>" + "".join(
             f'<tr><th scope="row">{e(x["retailer_name"])}</th><td class="num">{gbp(x["price"])}</td>'
             f'<td><a href="{e(x["link"])}" rel="sponsored nofollow noopener" target="_blank" data-aff="{e(x["retailer"])}" data-pid="{e(x["id"])}">View</a></td></tr>'
             for x in offers) + "</tbody></table>"
