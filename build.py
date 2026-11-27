@@ -742,6 +742,23 @@ def size_groups(c, items):
     return out
 
 
+def metal_groups(c, items):
+    """For collections with "metal_groups" ([label, name_regex], ...): split listings by the first metal named in the
+    retailer's listing name, cheapest first; names matching no group go last. Returns [(anchor, label, products)] or None."""
+    spec = c.get("metal_groups")
+    if not spec:
+        return None
+    out, left = [], list(items)
+    for label, rx in spec:
+        ps = [p for p in left if re.search(rx, p["name"], re.I)]
+        left = [p for p in left if p not in ps]
+        if ps:
+            out.append((slug(label), label, sorted(ps, key=lambda x: x["price"])))
+    if left:
+        out.append(("other", "Metal colour not stated in the listing", sorted(left, key=lambda x: x["price"])))
+    return out
+
+
 def build_collections():
     guides = {g["slug"]: g for g in load_guides()}
     for c, items in live_collections():
@@ -773,6 +790,23 @@ def build_collections():
             listing = "".join(
                 f'<h2 id="size-{g}">{e(label)} <span class="meta">({len(ps)} from {gbp(ps[0]["price"])})</span></h2>' + grid(ps, "../")
                 for g, label, ps in groups)
+        metals = metal_groups(c, items)
+        if metals:
+            rets = sorted({p["retailer_name"] for p in items})
+            brands = [b for b, _ in Counter(brand_for(p)["name"] for p in items).most_common(4)]
+            title = f"18k gold watches UK: yellow and rose gold, two-tone, from {gbp(lo)}"
+            desc = (f"{len(items)} new 18-carat gold and platinum watches from {and_list(brands)} at {and_list(rets)}, "
+                    f"grouped by gold colour, cheapest first. Buy direct from the retailer.")
+            jump = " · ".join(f'<a href="#metal-{g}">{e(label)} ({len(ps)})</a>' for g, label, ps in metals)
+            size_nav = (f'<p><strong>Jump to:</strong> {jump}.</p>'
+                        f'<p>Groups follow the metal named in the retailer\'s listing. Many of these are two-tone, gold '
+                        f'combined with steel or titanium, which usually costs much less than a full gold case, so check the case and '
+                        f'bracelet on the product page. Shopping for someone else? See <a href="../journal/luxury-watches-for-her-christmas.html">'
+                        f'watches for her</a>, <a href="../journal/luxury-watches-for-him-christmas.html">watches for him</a> and '
+                        f'<a href="../guides/buying-a-luxury-watch-as-a-gift.html">buying a watch as a gift</a>.</p>')
+            listing = "".join(
+                f'<h2 id="metal-{g}">{e(label)} <span class="meta">({len(ps)} from {gbp(ps[0]["price"])})</span></h2>' + grid(ps, "../")
+                for g, label, ps in metals)
         body = f"""<section><div class="wrap">
 <h1>{e(c['title'])}</h1>
 <p class="lede">{e(c['intro'])}</p>
