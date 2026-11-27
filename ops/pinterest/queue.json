@@ -49,7 +49,7 @@
      "description": "New luxury dive watches from UK authorised retailers, with the retailer's own price beside each one.",
      "alt_text": "Graphic: Luxury dive watches. New dive watches from UK authorised retailers, with the retailer's own price beside each one. Hourwright.",
      "link": "https://hourwright.co.uk/watches/dive-watches.html?utm_source=pinterest&utm_medium=social&utm_campaign=dive-watches-uk"},
-    {"id": "hydroconquest-vs-aquis", "image": "hydroconquest-vs-aquis.png", "board": "Dive watches", "status": "queued",
+    {"id": "hydroconquest-vs-aquis", "image": "hydroconquest-vs-aquis.png", "board": "Dive watches", "status": "held", "note": "2026-11-27: Pinterest refused CREATE_PIN (429, 'We blocked this link because it may lead to spam'). Nothing created. Not retried; other pins not attempted today in case the domain is flagged.",
      "title": "Longines HydroConquest vs Oris Aquis Date",
      "description": "Two Swiss dive watches around £2,000 compared on size, movement, power reserve, bracelet and warranty, from each maker's own specifications.",
      "alt_text": "Graphic: HydroConquest vs Aquis Date. Size, movement, power reserve and warranty compared, from each maker's own specifications. Hourwright.",
