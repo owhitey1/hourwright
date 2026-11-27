@@ -4,13 +4,17 @@ slug: five-longines-watches-under-3000
 type: guide
 status: published
 published: 2026-11-17
+updated: 2026-11-27
 author: Hourwright
 description: "A dress watch, a pilot's watch, two dive watches and a travel watch from Longines, all under £3,000 and all built around 72-hour automatic movements."
 basis: "Researched from Longines' published specifications and retailer listings. We have not handled these watches, and this is not a ranking."
-products: [goldsmiths-33493429799, goldsmiths-42514029499, goldsmiths-45505230021, goldsmiths-41297899165, goldsmiths-35946181085]
+products: [goldsmiths-21740397833, goldsmiths-42514029499, goldsmiths-45505230021, goldsmiths-41297899165, goldsmiths-35946181085]
 price_ceiling: 3000
 image_credit: "Product images supplied by Goldsmiths through its Awin product feed."
 sources:
+  - title: "Longines Master Collection L2.793.4.92.6"
+    url: "https://www.longines.com/en-gb/p/watch-longines-master-collection-l2-793-4-92-6"
+    publisher: "Longines"
   - title: "Longines Spirit Pilot L3.809.4.53.9"
     url: "https://www.longines.com/en-gb/p/watch-longines-spirit-pilot-l3-809-4-53-9"
     publisher: "Longines"
@@ -37,7 +41,7 @@ Longines is the largest brand in our catalogue, with nearly 100 watches listed f
 
 | Watch | Type | Case | Movement | Water resistance |
 | --- | --- | --- | --- | --- |
-| Master Collection 40mm | Dress and everyday | 40mm steel, bracelet | L888 automatic, 72 hours | Not stated by the retailer |
+| Master Collection 40mm | Dress and everyday | 40mm steel, bracelet | Automatic, 72 hours | 30 metres (3 bar) |
 | Spirit Pilot 39mm | Pilot's watch | 39mm steel, rubber strap | L888.4 automatic, COSC chronometer, 72 hours | 100 metres |
 | HydroConquest 39mm, Glasgow 2026 edition | Dive watch, external bezel | 39mm steel, ceramic bezel | Automatic, 72 hours | 300 metres |
 | Legend Diver 39mm | Dive watch, internal bezel | 39mm steel, rubber strap | L888.6 automatic, 72 hours | 300 metres |
@@ -45,11 +49,11 @@ Longines is the largest brand in our catalogue, with nearly 100 watches listed f
 
 ## For one watch that does everything: Master Collection 40mm
 
-The Master Collection, introduced in 2005, is Longines' classic line. This version pairs a 40mm steel case and bracelet with an olive green sunray dial, applied Roman numerals and a date at 3 o'clock. The L888 automatic movement has a 72-hour power reserve. It is the most formal of the five, and the bracelet makes it easy to wear daily.
+The Master Collection, introduced in 2005, is Longines' classic line. This version has a 40mm steel case, a steel bracelet with a triple-safety folding clasp, a blue sunray dial and a date. Longines states a self-winding movement with up to 72 hours of power reserve. It is the most formal of the five, and the bracelet makes it easy to wear daily.
 
-Consider: the retailer does not state its water resistance, so treat it as a watch to keep out of the pool unless Longines confirms otherwise.
+Consider: Longines rates it to 3 bar (30 metres), so keep it out of the pool.
 
-{{product:goldsmiths-33493429799}}
+{{product:goldsmiths-21740397833}}
 
 ## For legibility and a cleaner dial: Spirit Pilot 39mm
 

@@ -4,16 +4,16 @@ slug: luxury-watches-for-her-christmas
 type: guide
 status: published
 published: 2026-11-18
-updated: 2026-11-18
+updated: 2026-11-27
 author: Hourwright
 description: "Five women's watches from Longines, Rado, Chanel and Chopard for a lasting Christmas gift, with plain advice on size, quartz versus automatic and everyday wear."
 basis: "Researched from each manufacturer's published specifications and the retailer's listings. We have not handled these watches, and this is not a ranking."
-products: [goldsmiths-38090731692, goldsmiths-44929465868, goldsmiths-36007422747, goldsmiths-44692694539, goldsmiths-45724724024]
+products: [goldsmiths-38090731690, goldsmiths-44929465868, goldsmiths-36007422747, goldsmiths-44692694539, goldsmiths-45724724024]
 price_ceiling: 8000
 image_credit: "Product images supplied by Goldsmiths through its Awin product feed."
 sources:
-  - title: "Longines Conquest L3.430.4.92.6"
-    url: "https://www.longines.com/en-gb/p/watch-conquest-l3-430-4-92-6"
+  - title: "Longines Conquest L3.430.4.02.6"
+    url: "https://www.longines.com/en-gb/p/watch-conquest-l3-430-4-02-6"
     publisher: "Longines"
   - title: "Longines Mini DolceVita L5.200.4.87.6"
     url: "https://www.longines.com/en-gb/p/watch-longines-mini-dolcevita-l5-200-4-87-6"
@@ -68,11 +68,11 @@ Water resistance figures are each maker's own. A 30-metre rating means everyday 
 
 ## For a watch she will wear every day: Longines Conquest 34mm
 
-The Conquest is Longines' sports line, and this 34mm version has a sunray blue dial, a steel bracelet with a triple-safety folding clasp, a screw-in crown and 100-metre water resistance, so it can go swimming. Longines states an automatic movement with up to 72 hours of power reserve and a silicon balance spring. Longines gives mechanical watches bought from an official dealer a five-year warranty.
+The Conquest is Longines' sports line, and this 34mm version has a sunray green dial, a steel bracelet with a triple-safety folding clasp, a screw-in crown and 100-metre water resistance, so it can go swimming. Longines states an automatic movement with up to 72 hours of power reserve and a silicon balance spring. Longines gives mechanical watches bought from an official dealer a five-year warranty.
 
 Consider: it is the sportiest watch here, and at 34mm it is also the largest. As an automatic it will stop if left unworn for a few days.
 
-{{product:goldsmiths-38090731692}}
+{{product:goldsmiths-38090731690}}
 
 ## For a classic dress watch: Longines Mini DolceVita
 
