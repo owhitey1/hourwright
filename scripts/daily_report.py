@@ -136,6 +136,7 @@ def awin_section(today):
             tot["declined"] += r.get("declinedComm") or 0
         return tot
 
+    HANDLES["awin_report"] = report
     y = today - dt.timedelta(days=1)
     try:
         d1, mtd = report(y, y), report(today.replace(day=1), today)
@@ -274,6 +275,7 @@ def ga_section(today):
     if not token:
         return ["## Analytics (consenting visitors only)", "- Not connected."], []
     h = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    HANDLES["ga"] = (h, prop)
     lines = ["## Analytics (visitors who accepted cookies only; yesterday's figures can still change)"]
     try:
         for label, rng in (("Yesterday", {"startDate": "yesterday", "endDate": "yesterday"}),
@@ -358,13 +360,48 @@ def pinterest_section(today):
     return lines, problems
 
 
+HANDLES = {}
+TARGET_START = dt.date(2026, 11, 25)
+TARGETS = [("48 hours", 2, {"users": 60, "ga_clicks": 6, "sales": 1}),
+           ("7 days", 7, {"users": 400, "ga_clicks": 40, "sales": 1}),
+           ("30 days", 30, {"users": 3000, "ga_clicks": 300, "sales": 4})]
+
+
+def targets_section(today):
+    """Actual vs target over the SAME window: from TARGET_START to the window end (or yesterday)."""
+    lines = [f"## Targets vs actual (windows start {TARGET_START:%d %b}; ops/TARGETS.md)"]
+    y = today - dt.timedelta(days=1)
+    for label, days, tgt in TARGETS:
+        end = TARGET_START + dt.timedelta(days=days - 1)
+        upto = min(end, y)
+        if upto < TARGET_START:
+            continue
+        users = clicks = "n/a"
+        if "ga" in HANDLES:
+            h, prop = HANDLES["ga"]
+            rng = {"startDate": TARGET_START.isoformat(), "endDate": upto.isoformat()}
+            r = _ga_report(h, prop, {"dateRanges": [rng], "metrics": [{"name": "activeUsers"}]})
+            users = int(r[0]["metricValues"][0]["value"]) if r else 0
+            ev = _ga_report(h, prop, {"dateRanges": [rng], "dimensions": [{"name": "eventName"}], "metrics": [{"name": "eventCount"}],
+                                      "dimensionFilter": {"filter": {"fieldName": "eventName", "stringFilter": {"value": "affiliate_click"}}}})
+            clicks = sum(int(x["metricValues"][0]["value"]) for x in ev)
+        aw = HANDLES["awin_report"](TARGET_START, upto) if "awin_report" in HANDLES else None
+        state = "closed" if upto == end else f"open to {end:%d %b}"
+        lines.append(f"- {label} ({TARGET_START:%d %b}-{upto:%d %b}, {state}): visitors {users}/{tgt['users']}; "
+                     f"retailer clicks (Analytics) {clicks}/{tgt['ga_clicks']}; "
+                     f"Awin clicks {aw['clicks'] if aw else 'n/a'} (all, incl. non-consenting and automated); "
+                     f"sales {aw['sales'] if aw else 'n/a'}/{tgt['sales']}; commission £{(aw['pending'] + aw['approved']) if aw else 0:,.2f}")
+    lines.append("- Analytics counts only visitors who accept cookies; Awin counts every click on a retailer link, including bots.")
+    return lines, []
+
+
 def main():
     out = sys.argv[1]
     strict = "--strict" in sys.argv
     now = dt.datetime.now(dt.timezone.utc)
     today = now.date()
     parts, problems = [f"# Hourwright daily report, {today:%a %d %b %Y}"], []
-    for fn in (lambda: site_section(now), lambda: awin_section(today), lambda: gsc_section(today), lambda: ga_section(today), lambda: pinterest_section(today)):
+    for fn in (lambda: site_section(now), lambda: awin_section(today), lambda: gsc_section(today), lambda: ga_section(today), lambda: pinterest_section(today), lambda: targets_section(today)):
         try:
             lines, probs = fn()
         except Exception as e:  # noqa: BLE001  (one failing source never hides the others)
