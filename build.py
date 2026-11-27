@@ -28,6 +28,8 @@ COLLECTIONS = json.loads((ROOT / "content" / "collections.json").read_text())
 def in_collection(p, c):
     if c.get("pattern") and not re.search(c["pattern"], p["name"], re.I):
         return False
+    if c.get("exclude") and re.search(c["exclude"], p["name"] + " " + (p.get("description") or ""), re.I):
+        return False
     if c.get("min") is not None and p["price"] < c["min"]:
         return False
     if c.get("max") is not None and p["price"] >= c["max"]:
@@ -796,7 +798,7 @@ def build_collections():
             brands = [b for b, _ in Counter(brand_for(p)["name"] for p in items).most_common(4)]
             title = f"18k gold watches UK: yellow and rose gold, two-tone, from {gbp(lo)}"
             desc = (f"{len(items)} new 18-carat gold and platinum watches from {and_list(brands)} at {and_list(rets)}, "
-                    f"grouped by gold colour, cheapest first. Buy direct from the retailer.")
+                    f"grouped by gold colour, cheapest first. Gold-plated watches left out; buy direct from the retailer.")
             jump = " · ".join(f'<a href="#metal-{g}">{e(label)} ({len(ps)})</a>' for g, label, ps in metals)
             size_nav = (f'<p><strong>Jump to:</strong> {jump}.</p>'
                         f'<p>Groups follow the metal named in the retailer\'s listing. Many of these are two-tone, gold '
