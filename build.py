@@ -592,6 +592,11 @@ def listings_by_line(b, mine):
     return out
 
 
+def model_count(products):
+    """Distinct models (by reference, else by name) among listings; one model at two retailers counts once."""
+    return len({(p.get("reference") or "").strip().upper() or p["name"].strip().lower() for p in products})
+
+
 def case_sizes(products):
     """Case diameters stated in the retailers' product names (for snippets; not a specification)."""
     mm = [float(m.group(1)) for p in products for m in [re.search(r"(\d{2}(?:\.\d)?)\s?mm\b", p["name"])] if m]
@@ -617,15 +622,16 @@ def build_brands():
          crumbs=[("", "Brands")])
     def brand_meta(b, mine):
         """Search-facing title and description built from current listings (accurate by construction)."""
-        n = len(mine)
+        n = model_count(mine)
         if not n:
             return None
         rets = sorted({x["retailer_name"] for x in mine})
         who = rets[0] if len(rets) == 1 else ", ".join(rets[:-1]) + " and " + rets[-1]
         noun = b['name'] if b['name'].lower().endswith("watches") else f"{b['name']} watches"
         title = f"{noun} UK: {n} {'model' if n == 1 else 'models'} from {gbp(min(x['price'] for x in mine))}"
-        desc = (f"The new {b['name']} watch at {gbp(mine[0]['price'])} from a UK authorised retailer ({who}). Price checked daily; buy direct from the retailer.") if n == 1 else (f"Compare {n} new {b['name']} {'watch' if n == 1 else 'watches'} from {gbp(min(x['price'] for x in mine))} "
-                f"at UK authorised retailers ({who}). Prices checked daily; buy direct from the retailer.")
+        one = f"from a UK authorised retailer ({who})" if len(rets) == 1 else f"at {who}, with each retailer's price side by side"
+        desc = (f"The new {b['name']} watch at {gbp(min(x['price'] for x in mine))} {one}. Price checked daily; buy direct from the retailer.") if n == 1 else (f"Compare {n} new {b['name']} watches from {gbp(min(x['price'] for x in mine))} "
+                f"at {'a UK authorised retailer' if len(rets) == 1 else 'UK authorised retailers'} ({who}). Prices checked daily; buy direct from the retailer.")
         return title, desc
     for b in all_brands():
         mine = [p for p in PRODUCTS if brand_for(p) is b]
@@ -647,15 +653,21 @@ def build_brands():
             sized = [p for p in shown if re.search(r"\d{2}(?:\.\d)?\s?mm\b", p["name"])]
             sizes = case_sizes(shown) if len(sized) * 2 >= len(shown) else None
             size_txt = (f", case sizes {sizes[0]:g}mm to {sizes[1]:g}mm" if sizes and sizes[0] != sizes[1] else "")
+            models = model_count(shown)
+            side = ", with prices side by side" if models < len(shown) and len(rets) > 1 else ""
             meta = (f"{b['name']} watches UK: {and_list(named)} from {low}",
-                    f"{len(shown)} new {b['name']} {and_list(named)} watches from {low} at {and_list(rets)}, "
-                    f"{'a UK authorised retailer' if len(rets) == 1 else 'UK authorised retailers'}{size_txt}. "
+                    f"{models} new {b['name']} {and_list(named)} {'watch' if models == 1 else 'watches'} from {low} at {and_list(rets)}, "
+                    f"{'a UK authorised retailer' if len(rets) == 1 else 'UK authorised retailers'}{side}{size_txt}. "
                     f"Sorted by collection and price, checked daily; buy direct from the retailer.")
-            jump = " · ".join(f'<a href="#line-{slug(l)}">{e(l)} ({len(ps)})</a>' for l, ps in grouped)
-            intro_links = (f'<p class="lede">{len(shown)} new {e(b["name"])} watches from {low} at '
-                           f'{e(and_list(rets))}, sorted by collection, cheapest first. Jump to: {jump}.</p>')
+            jump = " · ".join(f'<a href="#line-{slug(l)}">{e(l)} ({model_count(ps)})</a>' for l, ps in grouped)
+            listed = (f"{models} new {e(b['name'])} {'watch' if models == 1 else 'watches'}"
+                      + (f" ({len(shown)} retailer listings)" if models < len(shown) else ""))
+            compare = (" Where more than one retailer lists a model, each card links to the price comparison."
+                       if models < len(shown) and len(rets) > 1 else "")
+            intro_links = (f'<p class="lede">{listed} from {low} at '
+                           f'{e(and_list(rets))}, sorted by collection, cheapest first.{compare} Jump to: {jump}.</p>')
             sections = "".join(
-                f'<h3 id="line-{slug(l)}">{e(l)} <span class="meta">({len(ps)} from {gbp(ps[0]["price"])})</span></h3>' + grid(ps, "../")
+                f'<h3 id="line-{slug(l)}">{e(l)} <span class="meta">({model_count(ps)} {"model" if model_count(ps) == 1 else "models"} from {gbp(ps[0]["price"])})</span></h3>' + grid(ps, "../")
                 for l, ps in grouped)
             listing = (related_articles([p["id"] for p in mine], "../", heading=f"{b['name']} in the Journal") +
                        f'<h2 id="listings">{e(b["name"])} watches at UK retailers</h2>'
@@ -664,7 +676,7 @@ def build_brands():
                        + see_also_links(b) + '</p>'
                        + sections + checked_note())
         if b.get("generated"):
-            n = len(mine)
+            n = model_count(mine)
             body = f"""<section><div class="wrap">
 <p class="eyebrow">Brand</p><h1>{e(b['name'])}</h1>
 <p class="lede">{n} new {e(b['name'])} {'watch' if n == 1 else 'watches'} from {gbp(lows[b['slug']])} at UK authorised retailers, with each retailer's own price.</p>
